@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>FlowDBEditor</title>
+     <!-- Bootstrap CSS -->
+     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+     <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Work+Sans:200,400');
+        * {
+            font-family: "Work Sans";   
+            font-size: 1rem;                     
+        }
+        label {
+            font-size: 0.6rem;
+            height:0.6rem;
+            width:100%;
+        }
+        .display-5 {
+            font-size: 2.7rem;
+            font-weight: 300;
+            line-height: 1.4;
+        }
+        .display-6 {
+            font-size: 1.5rem;
+            font-weight: 300;
+            line-height: 1;
+        }
+        #flowdbeditor {
+            width:1600px;
+            height:1600px;            
+            padding: 0; margin: 0;
+        }
+        .flow_flowmode{
+            color: black;
+        }
+        .flow_constraintmode{
+            color:rgb(32, 0, 173);
+        }
+
+        .modeContraint {
+            background-color: blue;
+        }
+        .green {
+            background-color: greenyellow;
+        }
+        .s100{
+            width:100%;
+        }
+        .flow_edit{
+            position: absolute;
+            padding:16px;
+            top:100px;
+            left:100px;
+            background-color: rgba(233, 233, 233, 0.89);
+            border: 1px rgb(88, 88, 88) dotted;
+        }
+        .flow_tables {
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor:pointer;            
+        }
+        .flow_tables_color1 {
+            background-color: rgb(192, 192, 192);
+            
+        }
+        .flow_tables_color2 {
+            background-color: rgb(175, 175, 175);
+        }
+        .flow_fields {
+            font-size: 1rem;
+            cursor:pointer;
+        }
+        .flow_fields_noevent {
+            font-size: 1rem;            
+        }
+        .flow_fields_color1 {
+            background-color:rgb(160, 160, 160);
+            fill:rgb(156, 156, 156);
+        }
+        .flow_fields_color2 {
+            background-color:rgb(207, 207, 207);
+            fill:rgb(192, 192, 192);
+        }
+        .flow_fields_color3 {
+            fill:rgba(127, 127, 127,0.3);
+        }
+        .flow_fields_color4 {
+            fill:rgba(127, 127, 127,0.0);
+        }
+        .flow_constraints{
+            font-size: 0.7rem;
+        }
+        .flow_constraints_color1{
+            background-color:rgb(161, 161, 161);                        
+        }
+        .flow_constraints_color2{
+            background-color:rgb(204, 204, 204);                      
+        }
+
+        .flow_line {
+            stroke: rgb(59, 60, 68);
+            stroke-width: 2;
+        }
+        .flow_line_start {
+            stroke: rgb(29, 40, 126);
+            stroke-width: 4;
+        }
+        .flow_line_end {
+            stroke: rgb(255, 174, 0);
+            stroke-width: 2;
+        }
+        .flow_rec_header{
+            font-weight: 900;
+        }
+    </style>
+    
+</head>
+<body>   
+    <div class="container-fluid">
+        <span class="display-5">FlowDBEditor</span><span>v0.68</span>
+        <div id="area" class="row">    
+            <div class="col-2">   
+                <div class="flex-column p-2"> 
+                    <button onclick="Save()">Save</button>
+                    <button onclick="Load()">Load</button>
+                    <button onclick="savetosvgfile('print','flowdbeditor')">Download</button>
+                    <button onclick="mySQL('print')">mySQL</button>
+
+
+                    <a target="_blank" style="visibility:hidden;" id="print" href="">RightClickforDownload</a>                    
+                </div>
+                <div class="flex-column p-2"> 
+                    <span class="s100 display-6">Tables</span>
+                    <button  onclick="sortTables()" style="font-size:16px" class="fa">&#xf036;</button>
+                    <button class="s100" onclick="newTable()">New</button>
+                    <div id="tables" class="s100">
+
+                    </div>
+                </div>
+                <div class="flex-column p-2"> 
+                        <span class="s100 display-6">Fields</span>
+                    <button class="s100" onclick="newField()">New</button>
+                    <div id="fields" class="s100">
+                        
+                    </div>
+                </div>
+                <div class="flex-column p-2"> 
+                        <span class="s100 display-6">Constraints</span>
+                        <button id="newconstraint" class="s100 flow_flowmode" onclick="newConstraint(this)">Start link</button>
+                        <div id="constraints" class="s100">
+                            
+                        </div>
+                    </div>
+                </div>
+            <div class="col-10">
+                <svg id="flowdbeditor" style="background-color: white" width="1600" height="1600">
+                    <defs>
+                        <linearGradient id="e" x1="40" y1="210" x2="460" y2="210" gradientUnits="objectBoundingBox">
+                            <stop stop-color="steelblue" offset="0" />
+                            <stop stop-color="red" offset="1" />
+                        </linearGradient>
+                    </defs>
+                    
+                </svg>  
+            </div>
+        </div>    
+    </div>
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>    
+    
+    <script src="./flowdbeditor2.js"></script>
+</body>
+</html>
