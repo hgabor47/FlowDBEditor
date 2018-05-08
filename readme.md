@@ -20,6 +20,6 @@ Filling the table takes into account the relationships (contraints links).
 So you can try a database without any preparation.
 
 
-![ConfigPatternImage](http://babylonms.com/babylonms/en/img/patterns.png "BMS Design pattern")
+![Preview image](https://github.com/hgabor47/FlowDBEditor/blob/master/flowdbeditor1.jpg?raw=true "Preview")
 
 
