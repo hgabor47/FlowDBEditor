@@ -9,13 +9,14 @@ Usage
 -----
 Download and run or try it https://codepen.io/hgabor47/pen/XqezrX
 
-If you use a button on FlowDBEditor that button display a help only once.
+If you use a button on FlowDBEditor that button displays a help only once.
 
 You can create a database to the browsers' localstorage.
 You can create tables
 You can create fields of tables with any kind of type.
-You can FILL the tables on air (stored to browsers' localstorage)
-Filling the table takes into account the relationships (contraints links).
+You can add records to the tables on air (stored to browsers' localstorage)
+Filling the records of table takes into account the relationships (contraints links).
+Write records with right click on created tables :)
 
 So you can try a database without any preparation.
 

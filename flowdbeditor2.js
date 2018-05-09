@@ -181,6 +181,14 @@ var TTable = function(name){
     }
   }
 
+  this.refreshRecordFields=function(){ //if the fields are change
+    if (this.Records.length<2) return;
+    var table = this;
+    table.AFields.forEach(function(o,i){
+      table.Records[0][i]=o.name;
+    })
+  }
+
   this.Selected=function(){
     SelectedTable=this;
     this.DOMrect.setAttribute("style",selectedStyle);
@@ -358,6 +366,8 @@ var TField = function(table,name){
   this.DOMLink=null;  //Line to another field
   this.name=name;
   this.autoinc=1;
+
+
   this.edit=function(parent){
     if (stateEdit) return;
     stateEdit=true;
@@ -747,6 +757,7 @@ function editTableDelete(div){
   } 
 }
 
+
 //FIELD
 function editFieldOK(div){
   var panel = div.parentElement;
@@ -756,9 +767,8 @@ function editFieldOK(div){
   panel.field.name = ename.value;
   panel.field.type=Number(etype.value);
   panel.field.length = Number(elength.value);
-
   removePanel(div);
-
+  panel.field.table.refreshRecordFields();
   panel.field.table.refreshFields();
   refreshFieldsList();
 }
