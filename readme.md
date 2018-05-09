@@ -7,7 +7,7 @@ Working copy on Codepen.io (https://codepen.io/hgabor47/pen/XqezrX)
 
 Usage
 -----
-Download and run or try it https://codepen.io/hgabor47/pen/XqezrX
+Download and run. Or USE it https://codepen.io/hgabor47/full/XqezrX/
 
 If you use a button on FlowDBEditor that button displays a help only once.
 
