@@ -119,22 +119,38 @@
         .flow_rec_header{
             font-weight: 900;
         }
+
+        .commandbutton {
+            width:"100%";
+            cursor:pointer;
+        }
     </style>
-    
+    <script>
+        function cmdin(a){
+            a.style.height="auto";
+        }
+        function cmdout(a){
+            a.style.height="30px";
+        }
+    </script>
 </head>
 <body>   
     <div class="container-fluid">
-        <span class="display-5">FlowDBEditor</span><b>v0.72</b><i> Click any button and help will appear once per session. Write records with right click on created tables :)</i>
+        <span class="display-5">FlowDBEditor</span><b>v0.73</b><i> Click any button and help will appear once per session. Write records with right click on created tables :)</i>
         <div id="area" class="row">    
             <div class="col-2">   
-                <div class="flex-column p-2"> 
-                    <button onclick="Save()">Save</button>
-                    <button onclick="Load()">Load</button>
-                    <button onclick="savetosvgfile('print','flowdbeditor')">Download</button>
-                    <button onclick="mySQL('print')">mySQL</button>
-
-
-                    <a target="_blank" style="visibility:hidden;" id="print" href="">RightClickforDownload</a>                    
+                <div class="flex-column p-2" style='overflow:hidden;height:auto;' onmouseover="cmdin(this)" onmouseout="cmdout(this)">
+                    <div class="flow_tables">CommandPanel</div>
+                    <button class="commandbutton" onclick="Save()">Save</button>
+                    <button class="commandbutton" onclick="Load()">Load</button>
+                    <button class="commandbutton" onclick="savetosvgfile('print','flowdbeditor')">Download SVG</button>
+                    <button class="commandbutton" onclick="mySQL('print')">Download MySQL</button>
+                    <button class="commandbutton" onclick="FlowDBSave('print')">SaveToFile</button>
+                    <label for="filename">Load from file:</label>
+                    <input id="filename" class="commandbutton" type='file' accept='text/plain'>
+                    <button class="commandbutton" onclick="FlowDBLoad(this)">LoadFromFile</button>
+                    
+                    <a target="_blank" style="visibility:hidden;" id="print" download="file.txt" href="">RightClickforDownload</a>                    
                 </div>
                 <div class="flex-column p-2"> 
                     <span class="s100 display-6">Tables</span>
@@ -157,8 +173,9 @@
                         <div id="constraints" class="s100">
                             
                         </div>
-                    </div>
                 </div>
+            </div>
+            
             <div class="col-10">
                 <svg id="flowdbeditor" style="background-color: white" width="1600" height="1600">
                     <defs>
@@ -166,8 +183,7 @@
                             <stop stop-color="steelblue" offset="0" />
                             <stop stop-color="red" offset="1" />
                         </linearGradient>
-                    </defs>
-                    
+                    </defs>                    
                 </svg>  
             </div>
         </div>    

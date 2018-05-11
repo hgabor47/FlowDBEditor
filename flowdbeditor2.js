@@ -1061,6 +1061,34 @@ function mySQL(linknode){
   linknode.innerHTML="RightClickforDownloadSQL";
 }
 
+function FlowDBSave(linknode) {
+  Save();
+  var source=localStorage.getItem("flowdbeditor");
+  var url = "data:application/sql;charset=utf-8,"+encodeURIComponent(source);
+  linknode=document.getElementById(linknode);
+  linknode.href = url;
+  linknode.style.visibility="visible";
+  linknode.innerHTML="RightClickforDownloadFlowDB";  
+}
+
+
+function FlowDBLoad(event) {
+  var input = document.getElementById("filename");
+  var reader = new FileReader();
+  reader.onload = function(){
+    var source = reader.result;        
+    //alert(source.substring(0, 200));
+    localStorage.setItem("flowdbeditor",source);
+    Load();
+    console.log(source.substring(0, 200));
+  };    
+  
+  reader.readAsText(input.files[0]);
+  
+  
+}
+
+
 // LIST  
 
 var Divname=null;
