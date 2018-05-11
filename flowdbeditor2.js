@@ -904,6 +904,11 @@ function savetosvgfile(linknode,svgnode){  // print , flowdbeditor
   //get svg source.
   var serializer = new XMLSerializer();
   var source = serializer.serializeToString(svg);
+  source=source.replace(/class="flow_fields_color3"/g,'style="fill:grey;stroke-width:0;opacity:0.5"');
+  source = source.replace(/class="flow_fields_color4"/g,'style="fill:grey;stroke-width:0;opacity:0.3"');
+  source = source.replace(/class="flow_line"/g,'style="stroke:black;stroke-width:2;"');
+  source = source.replace(/class="flow_line_start"/g,'style="stroke:blue;stroke-width:4;"');
+  source = source.replace(/class="flow_line_end"/g,'style="stroke:orange;stroke-width:2;"');
   //add name spaces.
   if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
       source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
@@ -919,6 +924,8 @@ function savetosvgfile(linknode,svgnode){  // print , flowdbeditor
   //set url value to a element's href attribute.
   linknode.href = url;
   linknode.style.visibility="visible";
+
+  linknode.setAttribute("download","flowdb.svg");
   linknode.innerHTML="RightClickforDownloadSVG";
   //you can download svg file by right click menu.
 }
@@ -1058,6 +1065,7 @@ function mySQL(linknode){
   var url = "data:application/sql;charset=utf-8,"+encodeURIComponent(source);
   linknode.href = url;
   linknode.style.visibility="visible";
+  linknode.setAttribute("download","flowdb.sql");
   linknode.innerHTML="RightClickforDownloadSQL";
 }
 
@@ -1068,6 +1076,7 @@ function FlowDBSave(linknode) {
   linknode=document.getElementById(linknode);
   linknode.href = url;
   linknode.style.visibility="visible";
+  linknode.setAttribute("download","flowdb.txt");
   linknode.innerHTML="RightClickforDownloadFlowDB";  
 }
 
