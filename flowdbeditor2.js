@@ -60,7 +60,16 @@ var TTable = function(name){
   this.addField = function(name,type){
     f = new TField(this,name);    
     f.type=type;
-    this.AFields.push(f);
+    AF= this.AFields;
+    this.AFields.push(f);    
+    this.Records.forEach(function(o,i){
+      if (i==0){
+        o.push(AF[AF.length-1].name);
+      } else {
+        o.push(null);
+      }
+    });
+
   }
   this.setPosXY=function(x,y){
     this.posxy[0]=x;
@@ -255,6 +264,7 @@ var TTable = function(name){
     Records=[];
     if (this !=null && this.DOMGroup!=null)
       flowdbeditor.removeChild(this.DOMGroup);
+
     /*for (let i = 0; i < AFields.length; i++) {
       const f = AFields[i];
       f.Clear();
@@ -529,6 +539,10 @@ var TField = function(table,name){
           fields.deleteLink();      
       });
       this.table.AFields.splice(index, 1);
+      this.table.Records.forEach(function(o,i){
+        o.splice(index, 1);
+      });
+
       this.table.refreshFields();
       refreshFieldsList();
 
@@ -1162,7 +1176,11 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
         {
             var b  = document.createElement("option");
             b.value=i;
-            b.innerHTML=hdr.replace("_s","");
+            if (hdr==null){
+              b.innerHTML="Empty";
+            } else {
+              b.innerHTML=hdr.replace("_s","");
+            }
             //if (i==order){
             //    b.setAttribute("selected","");
             //}
@@ -1214,6 +1232,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
             }
             var c= document.createElement("td");
             r.appendChild(c);
+            if (cell==null) { cell = ""};
             c.innerHTML=cell;
         }          
         if(i>0){
