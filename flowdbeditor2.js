@@ -1,3 +1,9 @@
+var temp="flowdbeditor_temp";        window.onload=function(){
+  var but=document.getElementById("flowdbload");
+  but.activ=false;
+  Load(temp);
+}
+
 var g = document.getElementsByName("table");
 var flowdbeditor = document.getElementById("flowdbeditor");
 
@@ -24,9 +30,10 @@ oncehints.NewLink="Please select first a field name and after click an another f
 oncehints.outside="Reposition missed tables.";
 oncehints.save="Save to browsers' local storage.\nIn the next time you can load this.";
 oncehints.load="Load latest stored database from localstorage.";
+oncehints.loadfromfile="Load database from file.";
 oncehints.hint = function(hint){
   if (oncehints[hint]!=""){
-    alert(oncehints[hint]);
+    document.getElementById("help").innerHTML=oncehints[hint];
     oncehints[hint]="";
   }
 }
@@ -604,6 +611,7 @@ function sortTables(){
         table.refreshDOM();
       }
     });    
+    Save(temp);
   }
 }
 
@@ -739,6 +747,7 @@ function editTableOK(div){
   removePanel(div);
   panel.table.refreshDOM();
   refreshTablesList();  
+  Save(temp);
 }
 function editTableCancel(div){
   removePanel(div);
@@ -752,9 +761,10 @@ function editTableDelete(div){
       panel.table.destroy();
       refreshTablesList();
       removePanel(div);
-
+      Save(temp);
     }
   } 
+  
 }
 
 
@@ -771,6 +781,7 @@ function editFieldOK(div){
   panel.field.table.refreshRecordFields();
   panel.field.table.refreshFields();
   refreshFieldsList();
+  Save(temp);
 }
 function editFieldCancel(div){
   removePanel(div);
@@ -781,6 +792,7 @@ function editFieldDelete(div){
     var panel = div.parentElement;
     panel.field.destroy();
     removePanel(div);
+    Save(temp);
   } 
 }
 function editFieldLink(div){
@@ -878,8 +890,10 @@ function move(e){
 }
 function up(e){
   if (flowMode==FlowModes.Flow){
-  this.table.refreshConstraints();
+    //this.table.refreshConstraints();
+    
   }
+  Save(temp);
 }
 
 //#endregion  MOUSE MOVE TOUCH
@@ -923,16 +937,16 @@ function savetosvgfile(linknode,svgnode){  // print , flowdbeditor
   var url = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(source);
   //set url value to a element's href attribute.
   linknode.href = url;
-  linknode.style.visibility="visible";
-
+  //linknode.style.visibility="visible";
   linknode.setAttribute("download","flowdb.svg");
   linknode.innerHTML="RightClickforDownloadSVG";
+  linknode.click();
   //you can download svg file by right click menu.
 }
 
 //--------LOAD / SAVE -------------------
 var xmlroot="flowdbeditor";
-function Save(){
+function Save(variable){
   oncehints.hint("save");
   var xml= document.implementation.createDocument(null, xmlroot);
   var root = xml.getElementsByTagName(xmlroot)[0];
@@ -945,11 +959,17 @@ function Save(){
     table.getXML(xml,root);
   }
   var xmlText = new XMLSerializer().serializeToString(xml);
-  localStorage.setItem("flowdbeditor",xmlText);
+  if (variable!=null){
+    //alert(variable);
+    localStorage.setItem(variable,xmlText);
+  } else {
+    localStorage.setItem("flowdbeditor",xmlText);
+  }
 }
-function Load(){
+function Load(variable){
   oncehints.hint("load");
   ATables.clear();
+  flowdbeditor=document.getElementById("flowdbeditor");
   flowdbeditor.innerHTML=`
       <defs>
           <linearGradient id="e" x1="40" y1="210" x2="460" y2="210" gradientUnits="objectBoundingBox">
@@ -957,8 +977,11 @@ function Load(){
               <stop stop-color="red" offset="1" />
           </linearGradient>
       </defs>`; 
-
-  xmlText  = localStorage.getItem("flowdbeditor");
+  if (variable!=null){ 
+    xmlText  = localStorage.getItem(variable);
+  } else {
+    xmlText  = localStorage.getItem("flowdbeditor");
+  }
   var oParser = new DOMParser();
   var xml = oParser.parseFromString(xmlText, "text/xml");
   var root = xml.getElementsByTagName(xmlroot)[0];
@@ -1064,9 +1087,10 @@ function mySQL(linknode){
   source += 'COMMIT;'+LF ;
   var url = "data:application/sql;charset=utf-8,"+encodeURIComponent(source);
   linknode.href = url;
-  linknode.style.visibility="visible";
+  //linknode.style.visibility="visible";
   linknode.setAttribute("download","flowdb.sql");
   linknode.innerHTML="RightClickforDownloadSQL";
+  linknode.click();
 }
 
 function FlowDBSave(linknode) {
@@ -1075,25 +1099,36 @@ function FlowDBSave(linknode) {
   var url = "data:application/sql;charset=utf-8,"+encodeURIComponent(source);
   linknode=document.getElementById(linknode);
   linknode.href = url;
-  linknode.style.visibility="visible";
+  //linknode.style.visibility="visible";
   linknode.setAttribute("download","flowdb.txt");
-  linknode.innerHTML="RightClickforDownloadFlowDB";  
+  linknode.innerHTML="RightClickforDownloadFlowDB"; 
+  linknode.click(); 
 }
 
 
-function FlowDBLoad(event) {
+function FlowDBLoad(e) {
+  oncehints.hint("loadfromfile");
   var input = document.getElementById("filename");
-  var reader = new FileReader();
-  reader.onload = function(){
-    var source = reader.result;        
-    //alert(source.substring(0, 200));
-    localStorage.setItem("flowdbeditor",source);
-    Load();
-    console.log(source.substring(0, 200));
-  };    
-  
-  reader.readAsText(input.files[0]);
-  
+  if (input.file!=null || input.files[0]!=null)
+  {
+      var reader = new FileReader();
+      reader.onload = function(){
+        var source = reader.result;        
+        //alert(source.substring(0, 200));
+        localStorage.setItem("flowdbeditor",source);
+        Load();
+        input.form.reset();        
+        e.activ=false;
+        console.log(source.substring(0, 200));
+      };    
+      
+      reader.readAsText(input.files[0]);
+  } else {
+    //alert("Please choose a file before click loadfromfile button!")
+    var fil=document.getElementById("filename");
+    e.activ=true;
+    fil.click();
+  }
   
 }
 
