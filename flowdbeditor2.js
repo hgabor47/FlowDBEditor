@@ -367,6 +367,119 @@ var TTable = function(name){
     return res;
   }
 
+  this.changeFieldType=function(oldtyp,newtyp,fieldidx){
+    if (oldtyp==newtyp) return;
+    var per=(60000*60*24);
+    //various
+    if (oldtyp ==0 ) {//from string
+      switch (newtyp) {
+        case 1:
+        case 2:
+        case 3:   //numeric        
+          this.Records.forEach(function(o,i){
+            if(i>0)
+              o[fieldidx]=Number(o[fieldidx]);              
+          })            
+          break;
+        case 7: //bool
+          this.Records.forEach(function(o,i){
+            if(i>0)
+              if ((o[fieldidx]!='0') && (o[fieldidx]!='1')){
+                if ((o[fieldidx]==null) || (o[fieldidx]=="")){
+                  o[fieldidx]='0'
+                } else {
+                  o[fieldidx]='1';    
+                }
+              }              
+          })            
+          break;
+        default:
+          break;
+      }
+    }
+    if (oldtyp==2) //from float 
+    {
+      switch (newtyp) {
+        case 1:
+        case 3:
+          this.Records.forEach(function(o,i){
+            if(i>0)
+              o[fieldidx]=Math.round(Number(o[fieldidx]));
+          }) 
+          break;
+        case 7:
+          this.Records.forEach(function(o,i){
+            if(i>0)
+              o[fieldidx]=Math.round(Number(o[fieldidx]));
+              if (o[fieldidx]>1) 
+                o[fieldidx]=1
+              else if (o[fieldidx]<0)
+                o[fieldidx]=0;
+          })    
+        case 4: //date
+          this.Records.forEach(function(o,i){
+            if(i>0) {
+              try {
+                var mydate = new Date(Number(o[fieldidx])*per);
+                o[fieldidx]=mydate.toDateString();                  
+              } catch (error) {
+                o[fieldidx]=(new Date(0)).toDateString();
+              }
+            }
+          });  
+          break;    
+        case 5: //datetime
+          this.Records.forEach(function(o,i){
+            if(i>0) {
+              try {
+                var mydate = new Date(Number(o[fieldidx])*per);
+                o[fieldidx]=mydate.toLocaleString('en-GB', { timeZone: 'UTC' }); //toISOString();                  
+              } catch (error) {
+                o[fieldidx]=(new Date(0)).toLocaleString('en-GB', { timeZone: 'UTC' }); //toISOString();                  
+              }
+            }
+          });
+          break;    
+        case 6: //time
+          this.Records.forEach(function(o,i){
+            if(i>0) {
+              try {
+                var d = Number(o[fieldidx])-Math.floor(Number(o[fieldidx]));
+                var mydate = new Date(  d  );
+                o[fieldidx]=mydate.toLocaleTimeString('en-GB');                  
+              } catch (error) {
+                o[fieldidx]=(new Date(0)).toLocaleTimeString('en-GB');
+              }
+            }
+          });
+          break;    
+        default:
+          break;
+      }
+    }
+    if (oldtyp==4){ //from Date
+      switch (newtyp) {
+        case 1:
+        case 2:   //days from 1970
+        case 3:        
+          
+          this.Records.forEach(function(o,i){
+            if(i>0){
+              try {
+                var mydate = new Date(o[fieldidx]);
+                o[fieldidx]=Math.floor(mydate.getTime()/per);                                
+              } catch (error) {
+                o[fieldidx]=0;
+              }
+            }
+          }) 
+          break;
+      
+        default:
+          break;
+      }
+    }
+  };
 
   this.AFields.SearchFieldByName=this.SearchFieldByName;
 }
@@ -789,7 +902,11 @@ function editFieldOK(div){
   var etype = document.getElementById('edit_type');
   var elength = document.getElementById('edit_length');
   panel.field.name = ename.value;
-  panel.field.type=Number(etype.value);
+  //change type than records
+  if (panel.field.type!=Number(etype.value)){
+    panel.field.table.changeFieldType(panel.field.type,Number(etype.value),panel.field.posrow);
+    panel.field.type=Number(etype.value);
+  }
   panel.field.length = Number(elength.value);
   removePanel(div);
   panel.field.table.refreshRecordFields();
