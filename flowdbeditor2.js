@@ -496,6 +496,7 @@ var TField = function(table,name){
   this.DOMLink=null;  //Line to another field
   this.name=name;
   this.autoinc=1;
+  this.display=false; //if true then if the table is linked then this field is display 
 
 
   this.edit=function(parent){
@@ -518,7 +519,13 @@ var TField = function(table,name){
     div.innerHTML+=opt+`</select><br>
      <label>Length</label>
      <input type="number" id="edit_length" value="`+this.length+`">
-     <hr>
+     <label>Display this field when table is linked:</label>`;
+     if (this.display) {
+      div.innerHTML+=`<input type="checkbox" id="edit_display" checked>`;
+     }else {
+      div.innerHTML+=`<input type="checkbox" id="edit_display">`;
+     }
+     div.innerHTML+=`<hr>
      <button onclick="editFieldDelete(this)">Delete Field</button>
      <hr><label>Data from another table:</label>
      <button onclick="editFieldLink(this)">LinkTo</button>
@@ -901,12 +908,14 @@ function editFieldOK(div){
   var ename = document.getElementById('edit_name');
   var etype = document.getElementById('edit_type');
   var elength = document.getElementById('edit_length');
+  var edisplay = document.getElementById('edit_display');
   panel.field.name = ename.value;
   //change type than records
   if (panel.field.type!=Number(etype.value)){
     panel.field.table.changeFieldType(panel.field.type,Number(etype.value),panel.field.posrow);
     panel.field.type=Number(etype.value);
-  }
+  }  
+  panel.field.display = edisplay.checked;
   panel.field.length = Number(elength.value);
   removePanel(div);
   panel.field.table.refreshRecordFields();
@@ -1343,6 +1352,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
               //comboj !=null
               var t2=combo[j];
               try {
+                //lookup
                 cell = t2.find( fi => fi[0] == cell )[1];  
               } catch (error) {
               }                                
@@ -1361,21 +1371,38 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
   }                  
 }
 
-
+  //lookup table with concatenated names 
   function getTable(table) {
     var records=[];    
-    Array.prototype.forEach.call(table.Records,function(o,i){
-    //
-      var sor=Array(2);
-      sor[0]=o[0];
-      sor[1]="";
-      o.forEach(function(o2,i2){
-        if (i2>0){
-          sor[1]+=o2;
-        }
+    var displayidx=[]; //displayfield if was set
+    for (let i = 0; i < table.AFields.length; i++) {
+      if (table.AFields[i].display==true){
+        displayidx.push(i);
+      }
+    }    
+    if (displayidx.length>0){      
+      Array.prototype.forEach.call(table.Records,function(o,i){
+          var sor=Array(2);
+          sor[0]=o[0];
+          sor[1]="";
+          displayidx.forEach(function(oi){
+            sor[1]+=o[oi]+" ";
+          }); 
+          records.push(sor);
+        });
+    }else {
+      Array.prototype.forEach.call(table.Records,function(o,i){
+        var sor=Array(2);
+        sor[0]=o[0];
+        sor[1]="";
+        o.forEach(function(o2,i2){
+          if (i2>0){
+            sor[1]+=o2+" ";
+          }
+        });
+        records.push(sor);
       });
-      records.push(sor);
-    });
+    }
     return records;
   }
 
@@ -1493,20 +1520,24 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
     return (opt+=`value="1">Igen</option></select><br>`);
   }
 
+  //lookup
   function ComboBox(value,field1,field2){
     var opt = `<label>`+field1.name+`</label><select id="`+field1.table.name+field1.name+`">`;
     if (field2.table.Records.length>0){
-      var displayidx=-1; //displayfield if was set
+      var displayidx=[]; //displayfield if was set
       for (let i = 0; i < field2.table.AFields.length; i++) {
         if (field2.table.AFields[i].display==true){
-          displayidx=i;
+          displayidx.push(i);
         }
       }    
       for (let i = 1; i < field2.table.Records.length; i++) {
         const rec = field2.table.Records[i];
         var id=rec[0];
-        if (displayidx>-1) {
-          displayText = rec[displayidx];
+        if (displayidx.length>0) {
+          displayText="";
+          displayidx.forEach(function(oi){
+            displayText+=rec[oi]+" ";
+          })          
         } else {
           displayText="";
           rec.forEach(function(o){
