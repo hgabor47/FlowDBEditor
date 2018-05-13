@@ -621,6 +621,10 @@ var TField = function(table,name){
     f.setAttribute("name",this.name);
     f.setAttribute("type",this.type);
     f.setAttribute("length",this.length);
+    if (this.display)
+      f.setAttribute("display",1)
+    else
+    f.setAttribute("display",0);
     if (this.link!=null){
       f.setAttribute("link",[this.link.table.name,this.link.name]);
     }    
@@ -631,6 +635,11 @@ var TField = function(table,name){
     this.type=Number(node.getAttribute("type"));
     this.length=Number(node.getAttribute("length")); 
     this.linktext = node.getAttribute("link");
+    this.display = node.getAttribute("display");
+    if (this.display=='0') 
+      this.display = false;
+    else
+      this.display = true;
     this.autoinc = node.getAttribute("autoinc");
     if (this.linktext!=null){
       this.linktext=this.linktext.split(",");
@@ -1371,36 +1380,68 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
   }                  
 }
 
+//0,1,......  [idx,name]
   //lookup table with concatenated names 
   function getTable(table) {
     var records=[];    
     var displayidx=[]; //displayfield if was set
     for (let i = 0; i < table.AFields.length; i++) {
       if (table.AFields[i].display==true){
-        displayidx.push(i);
+        if (table.AFields[i].link==null){
+          displayidx.push([i,null]);
+        } else {
+          displayidx.push([i,
+            getTable(table.AFields[i].link.table)
+          ]);
+        }
       }
     }    
     if (displayidx.length>0){      
       Array.prototype.forEach.call(table.Records,function(o,i){
-          var sor=Array(2);
-          sor[0]=o[0];
-          sor[1]="";
-          displayidx.forEach(function(oi){
-            sor[1]+=o[oi]+" ";
-          }); 
-          records.push(sor);
+          if (i>0){
+            var sor=Array(2);
+            sor[0]=o[0];
+            sor[1]="";
+            displayidx.forEach(function(oi){
+              if (oi[1]==null){
+                sor[1]+=o[oi[0]]+" ";
+              } else {
+                //linked oi[1]
+                var res=null;
+                var t = oi[1]; //tablerecs from getTables [idx,name]
+                for (let i = 0; i < t.length; i++) {
+                  var fi=t[i];
+                  if (o[oi[0]]==fi[0]){
+                    res = fi; 
+                    break;
+                  }
+                }
+                if (res==null){
+                  sor[1]+=o[oi[0]]+" ";
+                } else {
+                  sor[1]+=res[1];
+                }
+                
+
+                //sor[1]+=oi[1].find( fi => fi[0] == oi[0] )[1];
+              }
+            }); 
+            records.push(sor);
+          }
         });
     }else {
       Array.prototype.forEach.call(table.Records,function(o,i){
-        var sor=Array(2);
-        sor[0]=o[0];
-        sor[1]="";
-        o.forEach(function(o2,i2){
-          if (i2>0){
-            sor[1]+=o2+" ";
-          }
-        });
-        records.push(sor);
+        if (i>0){
+          var sor=Array(2);
+          sor[0]=o[0];
+          sor[1]="";
+          o.forEach(function(o2,i2){
+            if (i2>0){
+              sor[1]+=o2+" ";
+            }
+          });
+          records.push(sor);
+        }
       });
     }
     return records;
