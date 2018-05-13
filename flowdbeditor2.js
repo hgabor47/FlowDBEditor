@@ -1561,10 +1561,38 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
     return (opt+=`value="1">Igen</option></select><br>`);
   }
 
-  //lookup
-  function ComboBox(value,field1,field2){
+  table.AFields.forEach(function(o,i){
+    if (o.link!=null){
+      combo.push( getTable(o.link.table) ) //0,1  idx,name
+    } else {
+      combo.push(null);
+    }
+  });
+
+
+  function ComboBox(value,field1,field2){    
+    var opt = `<label>`+field1.name+`</label><select id="`+field1.table.name+field1.name+`">`;
+    var t = getTable(field2.table);
+    for (let i = 0; i < t.length; i++) {
+      const e = t[i];
+      id = e[0];
+      if (value==id){        
+        opt+=`<option selected `;  
+      }else {
+        opt+=`<option `;  
+      }
+      opt+=`value="`+id+`">`+e[1]+`</option>`;
+    }
+    return (opt+`</select><br>`);
+  }
+
+  //lookup  id value,field1 , linkedfield2
+  //return HTML select
+  function ComboBox2(value,field1,field2){
+    
     var opt = `<label>`+field1.name+`</label><select id="`+field1.table.name+field1.name+`">`;
     if (field2.table.Records.length>0){
+      
       var displayidx=[]; //displayfield if was set
       for (let i = 0; i < field2.table.AFields.length; i++) {
         if (field2.table.AFields[i].display==true){
