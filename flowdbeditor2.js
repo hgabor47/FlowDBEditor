@@ -1,7 +1,10 @@
-var temp="flowdbeditor_temp";        window.onload=function(){
+var temp="flowdbeditor_temp";        
+var AUTOINCTSTART=1;
+window.onload=function(){
   var but=document.getElementById("flowdbload");
   but.activ=false;
   Load(temp);
+  document.body.addEventListener("paste", PastePanel);
 }
 
 var g = document.getElementsByName("table");
@@ -17,6 +20,7 @@ for (let i = 0; i < g.length; i++) {
 
 
 var noSelectedStyle = "fill:grey;stroke:black;stroke-width:1;opacity:0.5";
+var noSelectedStyle_readonly = "fill:yellow;stroke:black;stroke-width:1;opacity:0.5";
 var selectedStyle = "fill:blue;stroke:#000099;stroke-width:3;opacity:0.4";
 var fieldRowHeight = convertRemToPixels(1);//rem
 var fieldRowPadding = fieldRowHeight/2;
@@ -47,10 +51,25 @@ var TTable = function(name){
   this.height=200;
   this.AFields = []; //Tfield  
   this.Records = [];  //realtime upfill
+  this.readonly = false;
   this.DOMGroup=null; //teljese Table
     this.DOMtitle=null;
     this.DOMrect=null;
     this.DOMFieldsGroup=null; //fields    
+
+  this.setReadOnly = function(value){
+    this.readonly=value;
+    if (this.DOMrect){
+      if (SelectedTable!=this){
+        if (this.readonly)
+          this.DOMrect.setAttribute("style",noSelectedStyle_readonly)
+        else 
+          this.DOMrect.setAttribute("style",noSelectedStyle);
+      } else {
+        this.DOMrect.setAttribute("style",selectedStyle);
+      }
+    }
+  }  
   this.setName=function(name){
     this.name=name;
     if (this.DOMtitle!=null) 
@@ -86,7 +105,7 @@ var TTable = function(name){
     this.DOMrect.setAttribute("ry",7);
     this.DOMrect.setAttribute("width",this.width);
     this.DOMrect.setAttribute("height",this.height);
-    this.DOMrect.setAttribute("style",noSelectedStyle);    
+    this.setReadOnly(this.readonly);
     this.DOMGroup.addEventListener("contextmenu",contextmenu);
     this.DOMGroup.addEventListener("mousedown",down);
     this.DOMGroup.addEventListener("touchstart",down);
@@ -202,17 +221,40 @@ var TTable = function(name){
     var table = this;
     table.AFields.forEach(function(o,i){
       table.Records[0][i]=o.name;
-    })
+    })    
+  }
+
+  this.recalcAutoincFields=function(){
+    var table = this;
+    table.AFields.forEach(function(o,i){
+      if (o.type==3){
+        // refresh autoinc fields
+        o.autoinc=AUTOINCTSTART;
+        for (let j = 1; j < table.Records.length; j++) {
+          const r = table.Records[j];
+          try {
+            if (Number(r[i])>=o.autoinc) 
+              o.autoinc=Number(r[i])+1;            
+          } catch (error) {            
+          }
+        }
+      }
+    })    
   }
 
   this.Selected=function(){
+    if (SelectedTable!=null) {
+      SelectedTable.noSelected();  //table  
+    }
     SelectedTable=this;
-    this.DOMrect.setAttribute("style",selectedStyle);
+    this.setReadOnly(this.readonly);
+    //this.DOMrect.setAttribute("style",selectedStyle);
     refreshFieldsList();
   }
   this.noSelected=function(){
-    SelectedTable=this;
-    this.DOMrect.setAttribute("style",noSelectedStyle);
+    SelectedTable=null;
+    this.setReadOnly(this.readonly);
+    //this.DOMrect.setAttribute("style",noSelectedStyle);
     refreshFieldsList();
   }
 
@@ -225,10 +267,16 @@ var TTable = function(name){
     `<label>Tablename</label><input type="text" id="edit_name" value="`+this.name+`"><br>
      <label>Width</label><input type="number" id="edit_width" value="`+this.width+`"><br>
      <label>Height</label><input type="number" id="edit_height" value="`+this.height+`"><br>
+     <label>Readonly mean will no export to SQL file</label>`;
+    if (this.readonly)
+      div.innerHTML+=`<input type="checkbox" id="edit_readonly" checked >`
+    else  
+      div.innerHTML+=`<input type="checkbox" id="edit_readonly" >`;
+    div.innerHTML+=`<br>
      <button onclick="editTableOK(this)">OK</button>
      <button onclick="editTableCancel(this)">Cancel</button>
      <button onclick="editTableDelete(this)">Delete</button>
-     `;
+    `;
     div.table=this;
     parent.appendChild(div);
     return div;
@@ -238,10 +286,10 @@ var TTable = function(name){
     if (stateEdit) return;
     stateEdit=true;
     var div = document.createElement("div");
-    div.className="flow_edit";
+    div.className="flow_browse";
     div.setAttribute("id","list")
     parent.appendChild(div);
-
+    this.Selected();
     list( ATables.indexOf(this),"list");
 
     div.table=this;
@@ -263,7 +311,7 @@ var TTable = function(name){
     AFields=[];
     Records=[];
     if (this !=null && this.DOMGroup!=null)
-      flowdbeditor.removeChild(this.DOMGroup);
+      flowdbeditor.removeChild(this.DOMGroup); 
 
     /*for (let i = 0; i < AFields.length; i++) {
       const f = AFields[i];
@@ -277,6 +325,7 @@ var TTable = function(name){
     t.setAttribute("posxy",this.posxy);
     t.setAttribute("width",this.width);
     t.setAttribute("height",this.height);
+    t.setAttribute("readonly",this.readonly);
     for (let i = 0; i < this.AFields.length; i++) {
       const f = this.AFields[i];
       f.getXML(xml,t);
@@ -286,10 +335,15 @@ var TTable = function(name){
       var row = xml.createElement("row");rec.appendChild(row);
       item.forEach(function(cols,idx){
         var col = xml.createElement("col");row.appendChild(col);
-        col.innerHTML=cols;
+        try {
+          //col.innerText=cols;
+          //col.innerHTML=encodeStr(col.innerText);  
+          col.innerHTML=encodeStr(cols);  
+        } catch (error) {
+          console.log(error);          
+        }        
       })
     });
-
   }
   this.setFromXML = function(node){
     this.name=node.getAttribute("name");
@@ -300,6 +354,7 @@ var TTable = function(name){
     }
     this.width=Number(node.getAttribute("width"));
     this.height=Number(node.getAttribute("height"));
+    this.setReadOnly(node.getAttribute("readonly")=="true");  
     var xmlfields = node.getElementsByTagName("field");
     for (let i = 0; i < xmlfields.length; i++) {
       const xmlfield = xmlfields[i];
@@ -320,7 +375,7 @@ var TTable = function(name){
       var bc=[];
       Array.prototype.forEach.call(col,function(c,cidx){
         //cols
-        bc.push(c.innerHTML);
+        bc.push(decodeStr(c.innerHTML));
       });
       Rec.push(bc);
     });
@@ -495,7 +550,7 @@ var TField = function(table,name){
   this.DOMElement=null;  //to svg text
   this.DOMLink=null;  //Line to another field
   this.name=name;
-  this.autoinc=1;
+  this.autoinc=AUTOINCTSTART;
   this.display=false; //if true then if the table is linked then this field is display 
 
 
@@ -649,7 +704,7 @@ var TField = function(table,name){
     if (this.linktext!=null){
       tablename=this.linktext[0];
       fieldname=this.linktext[1];
-      //TODO: search table and field and create constraints
+      
       var t = ATables.SearchTableByName(tablename);
       var f = t.AFields.SearchFieldByName(fieldname);
       //this.link=f;
@@ -773,7 +828,7 @@ function refreshTablesList(){
     const e = ATables[i];
     var obj = document.createElement("div");
     if (i%2==0)
-      obj.className="flow_tables flow_tables_color1";
+      obj.className="flow_tables flow_tables_color1"
     else
       obj.className="flow_tables flow_tables_color2";
     
@@ -883,9 +938,11 @@ function editTableOK(div){
   var ename = document.getElementById('edit_name');
   var ewidth = document.getElementById('edit_width');
   var eheight = document.getElementById('edit_height');
+  var ereadonly = document.getElementById('edit_readonly');
   panel.table.setName(ename.value);
   panel.table.width=Number(ewidth.value);
   panel.table.height=Number(eheight.value);
+  panel.table.setReadOnly(ereadonly.checked);
 
   removePanel(div);
   panel.table.refreshDOM();
@@ -906,9 +963,89 @@ function editTableDelete(div){
       removePanel(div);
       Save(temp);
     }
-  } 
-  
+  }  
 }
+
+
+function PastePanel(e){
+  e.preventDefault();
+  var content="";
+  if( (e.originalEvent || e).clipboardData ){
+    content = (e.originalEvent || e).clipboardData.getData('text/plain');
+  }
+  else if( window.clipboardData ){
+    content = window.clipboardData.getData('Text');    
+  }
+  if ((content!="") && (content!=null)){
+    var div=document.createElement("div");
+    div.className="flow_clipboard";
+    document.body.appendChild(div);
+    div.clipboard=content;
+    div.innerHTML=`<input id="pasteheader" type="checkbox">The clipboard data has header in first row<br>`;
+    div.innerHTML+=`<input id="pastenewtable" type="checkbox" >Create new table instead of fill selected table<br>`;
+    div.innerHTML+=`<button onclick="onPaste(this.parentElement,null)">Rendben</button><button onclick="this.parentElement.parentElement.removeChild(this.parentElement)">Mégsem</button>`
+  }
+}
+
+
+function onPaste(div,startidx){        
+    content = div.clipboard;
+    
+    if (startidx==null){
+      idx=document.getElementById("pasteheader");
+      if (idx.checked)
+        startidx = 1
+      else 
+        startidx = 0;
+    }
+
+    newtable = document.getElementById("pastenewtable");
+    if (newtable.checked) {
+      
+      var t = new TTable("Unknown");      
+      ATables.push(t);
+      flowdbeditor.appendChild(t.getDOM());      
+      t.Selected();
+    }
+    
+    if (content!=""){
+      console.log( typeof content );
+      if (SelectedTable){      
+        const cvs = content.split("\n");
+        for (let i = startidx; i < cvs.length; i++) {
+          cvs[i]=cvs[i].replace("\r","");        
+          const row = cvs[i].split("\t");
+
+          if (newtable.checked) {
+            if (i==startidx){ //first data and if new table then create AFields
+              for (let k = 0; k < row.length; k++) {
+                SelectedTable.addField("Field"+(idField++),0);
+              }
+            }
+            if (idx.checked){ //has header 
+              if (i==1){ //first data
+                cvs[0]=cvs[0].replace("\r","");        
+                const hrow = cvs[0].split("\t");
+                for (let k = 0; k < hrow.length; k++) {
+                  SelectedTable.AFields[k].name=hrow[k];
+                }                  
+              }
+            }
+          }
+
+          list_addrecordheader(SelectedTable);                                
+          SelectedTable.Records.push(row);        
+        }
+        SelectedTable.refreshFields();
+        SelectedTable.recalcAutoincFields();
+        refreshTablesList();
+      }
+      //document.execCommand('insertText', false, content);      
+    }
+
+    div.parentElement.removeChild(div);
+}
+
 
 
 //FIELD
@@ -979,9 +1116,6 @@ function down(e){
     if (b==1){
       cX = event.clientX-grab;  
       cY = event.clientY-grab; 
-      if (SelectedTable!=null) {
-        SelectedTable.noSelected();  //table  
-      }
       this.table.Selected();  //table
     }
   } 
@@ -1022,7 +1156,7 @@ function touchmove(e){
 function move(e){
   var b = event.buttons;
   if (flowMode==FlowModes.Flow){
-    if (b==1){
+    if ((b & 1)==1){
       this.parentElement.appendChild(this);
       dX = event.clientX -cX;  
       dY = event.clientY -cY;  
@@ -1285,15 +1419,25 @@ function FlowDBLoad(e) {
 // LIST  
 
 var Divname=null;
+
 function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
   if (tableidx<0 || tableidx>=ATables.length) return ;
   if (divname==null)
     divname=Divname;
   Divname=divname;    
-
   var div = document.getElementById(divname);
-  div.innerHTML=`<button onclick="list_new(`+tableidx+`)">NewRecord</button>    
-  <button onclick="editTableCancel(this)">Exit</button>`;
+  div.innerHTML=``;
+  div.addEventListener('scroll', function(e) {
+    var hdr = document.getElementById("list_header");
+    hdr.style.top=(e.target.scrollTop)+'px';
+  });
+
+  div2=document.createElement("div");
+  div2.setAttribute("id","list_header");
+  div2.className="flow_browse_header";
+
+  div2.innerHTML=`<button onclick="list_new(`+tableidx+`)">NewRecord</button>    
+  <button onclick="editTableCancel(this.parentElement)">Exit</button><button onclick="editTableClear(`+tableidx+`)">ClearRecords</button>`;
   table = ATables[tableidx];
   tomb=table.Records;
 
@@ -1301,7 +1445,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
     //fejlec
     var fej = document.createElement("div");
     fej.innerHTML="Sorrendezés:";
-    div.appendChild(fej);
+    div2.appendChild(fej);
     var opt = document.createElement("select");
     var hasOrder = false;   
     opt.setAttribute("onchange","list("+tableidx+")");
@@ -1327,8 +1471,8 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
         fej.appendChild(opt); 
     }
 
+    div.appendChild(div2);
     //tartalom
-
     var t = document.createElement("table");
     t.className="table";
     div.appendChild(t);
@@ -1377,7 +1521,9 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
             c.innerHTML='<button onclick="list_edit(this,'+tableidx+','+sor[0]+')">Edit</button><button onclick="list_del(this,'+tableidx+','+sor[0]+')">Delete</button>';      
         }
     }
-  }                  
+  }  
+  var hdr = document.getElementById("list_header");    
+  hdr.style.top=(div.scrollTop)+'px';            
 }
 
 //0,1,......  [idx,name]
@@ -1447,19 +1593,25 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
     return records;
   }
 
+  function list_addrecordheader(table)
+  {
+    if (table.Records.length<1)
+    {
+      sor=[];
+      for (let i = 0; i < table.AFields.length; i++) {
+        const fi = table.AFields[i];
+        fi.autoinc=AUTOINCTSTART;
+        sor.push(fi.name);  
+      }
+      table.Records.push(sor);  
+    }
+  }
 
   function list_new(tableidx) {
     if ((tableidx<0) || (tableidx>=ATables.length)) 
       return ;
     var t = ATables[tableidx];
-    if (t.Records.length<1){
-      sor=[];
-      for (let i = 0; i < t.AFields.length; i++) {
-        const fi = t.AFields[i];
-        sor.push(fi.name);  
-      }
-      t.Records.push(sor);
-    }
+    list_addrecordheader(t);
     sor=[];
     for (let i = 0; i < t.AFields.length; i++) {
       const fi = t.AFields[i];
@@ -1506,7 +1658,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
      `;
     div.table=t;
     div.rec=rec;
-    r.appendChild(div);
+    document.body.appendChild(div);
   }
   function listEditOK(e){
     var div = e.parentElement;
@@ -1518,12 +1670,12 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
         div.rec[i]=o.value;
       }
     }
-    removePanel(div);
+    removePanel(e);
     list(ATables.indexOf(t),null);
   }
   function listEditCancel(e){
-    var div = e.parentElement;
-    removePanel(div);
+    //var div = e.parentElement;
+    removePanel(e);
     list(ATables.indexOf(div.table),null);
   }
 
@@ -1541,10 +1693,16 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
         }
       }
     })
-
-
     const rec = t.Records.find( fi => fi[0] == id );
+  }
 
+  function editTableClear(tableidx){
+    var t = ATables[tableidx];
+    if (t){
+      t.Records=[];
+      list_addrecordheader(t);
+      list(tableidx,null);
+    }
   }
 
   function ComboBoxYesNo(value,field1) {
@@ -1560,7 +1718,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
     }
     return (opt+=`value="1">Igen</option></select><br>`);
   }
-
+/*
   table.AFields.forEach(function(o,i){
     if (o.link!=null){
       combo.push( getTable(o.link.table) ) //0,1  idx,name
@@ -1568,7 +1726,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
       combo.push(null);
     }
   });
-
+*/
 
   function ComboBox(value,field1,field2){    
     var opt = `<label>`+field1.name+`</label><select id="`+field1.table.name+field1.name+`">`;
@@ -1624,6 +1782,19 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
       }   
     }  
     return (opt+`</select><br>`);    
+  }
+
+  function encodeStr(rawStr){
+    var encodedStr = rawStr.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
+      return '&#'+i.charCodeAt(0)+';';
+    });
+    return encodedStr;
+  }
+
+  function decodeStr(str) {
+			return str.replace(/&#(\d+);/g, function(match, dec) {
+				return String.fromCharCode(dec);
+			});
   }
 
 //#endregion TOOLS
