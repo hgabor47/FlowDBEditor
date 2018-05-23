@@ -1,10 +1,44 @@
+let params = (new URL(document.location)).searchParams;
+let flowdbget = params.get("flowdb");
+
 var temp="flowdbeditor_temp";        
 var AUTOINCTSTART=1;
 window.onload=function(){
   var but=document.getElementById("flowdbload");
   but.activ=false;
-  Load(temp);
+  if (flowdbget!=null){
+    LoadString(flowdbget);
+  } else {  
+    Load(temp);
+  }
   document.body.addEventListener("paste", PastePanel);
+  newsdialog();
+}
+
+
+function newsdialog(show){
+  if (show){
+    localStorage.setItem("flowdbeditornews","");
+  }
+  var newsul = document.getElementById("newsul");
+  var news1 = localStorage.getItem("flowdbeditornews");
+  var shownews=false;        
+  for(i=0;i<news.length;i++){ 
+      if (news1!=null)
+        var p=news1.indexOf(news[i][0]);
+      if (news1==null ||  (p<0)) {
+        var d = document.createElement("li");
+        d.innerHTML=news[i][1];
+        newsul.appendChild(d);
+        shownews=true;        
+        news1+=""+news[i][0];
+      }
+  }  
+  if (shownews){
+    localStorage.setItem("flowdbeditornews",news1);
+    var newsdom = document.getElementById("news");
+    newsdom.style.visibility="visible";
+  }
 }
 
 var g = document.getElementsByName("table");
@@ -743,29 +777,31 @@ TLink = function() { //aka constraint
 }
 
 var idTtype=0;
-var TType = function(name,sql,inputtype){
+var TType = function(name,sql,inputtype,mssql){
   this.id=idTtype++;
   this.name=name;
   this.sql=sql;
   this.inputtype=inputtype;
+  this.mssql = mssql;
 }
 
 
 //#region Arrays -----------------------------
 var FlowModes = Object.freeze({"Flow":1, "Constraint":2})
-
-var AType = [new TType("String","varchar(%)","text"),
-       new TType("Integer","int(11)","number"),
-       new TType("Float","Float","number"),
-       new TType("Autoinc","int(11) not null","number"),
-       new TType("Date","date","date"),
-       new TType("DateTime","datetime","datetime-local"),
-       new TType("Time","time","time"),
-       new TType("Bool","tinyint","checkbox"),
-       new TType("Text","text","text"),
-       new TType("Image","mediumblob",'<img src="%0">'),
-       new TType("URL","varchar(200)",'<a href="%0">%1</a>'),
-       new TType("VideoLink","varchar(200)",'<a href="%0">%1</a>')];
+//AType struct: displaytext,mysqltype,htmltype,| mssqltype,,,,
+//                     0        1         2         3  
+var AType = [new TType("String","varchar(%)","text","[nvarchar(%)]"),
+       new TType("Integer","int(11)","number","[int]"),
+       new TType("Float","Float","number","[float]"),
+       new TType("Autoinc","int(11) not null","number","[int]"),
+       new TType("Date","date","date","[date]"),
+       new TType("DateTime","datetime","datetime-local","[datetime2]"),
+       new TType("Time","time","time","[time]"),
+       new TType("Bool","tinyint","checkbox","[tinyint]"),
+       new TType("Text","text","text","[nvarchar(max)]"),
+       new TType("Image","mediumblob",'<img src="%0">',"[image]"),
+       new TType("URL","varchar(400)",'<a href="%0">%1</a>',"[nvarchar(400)]"),
+       new TType("VideoLink","varchar(400)",'<a href="%0">%1</a>',"[nvarchar(400)]")];
 SearchTypeById = function(id){
   const result = AType.find( tab => tab.id === id );
   return result;
@@ -1231,6 +1267,26 @@ function savetosvgfile(linknode,svgnode){  // print , flowdbeditor
 var xmlroot="flowdbeditor";
 function Save(variable){
   oncehints.hint("save");
+  var xmlText = SavetoString();
+  if (variable!=null){
+    //alert(variable);
+    localStorage.setItem(variable,xmlText);
+  } else {
+    localStorage.setItem("flowdbeditor",xmlText);
+  }
+}
+function Load(variable){
+  var xmlText="";
+  if (variable!=null){ 
+    xmlText  = localStorage.getItem(variable);
+  } else {
+    xmlText  = localStorage.getItem("flowdbeditor");
+  }
+  oncehints.hint("load");
+  LoadString(xmlText);
+}
+
+function SavetoString(){  
   var xml= document.implementation.createDocument(null, xmlroot);
   var root = xml.getElementsByTagName(xmlroot)[0];
   var setup = xml.createElement("setup");
@@ -1241,16 +1297,10 @@ function Save(variable){
     const table = ATables[i];
     table.getXML(xml,root);
   }
-  var xmlText = new XMLSerializer().serializeToString(xml);
-  if (variable!=null){
-    //alert(variable);
-    localStorage.setItem(variable,xmlText);
-  } else {
-    localStorage.setItem("flowdbeditor",xmlText);
-  }
+  return new XMLSerializer().serializeToString(xml);    
 }
-function Load(variable){
-  oncehints.hint("load");
+
+function LoadString(xmlText){
   ATables.clear();
   flowdbeditor=document.getElementById("flowdbeditor");
   flowdbeditor.innerHTML=`
@@ -1260,11 +1310,7 @@ function Load(variable){
               <stop stop-color="red" offset="1" />
           </linearGradient>
       </defs>`; 
-  if (variable!=null){ 
-    xmlText  = localStorage.getItem(variable);
-  } else {
-    xmlText  = localStorage.getItem("flowdbeditor");
-  }
+  
   var oParser = new DOMParser();
   var xml = oParser.parseFromString(xmlText, "text/xml");
   var root = xml.getElementsByTagName(xmlroot)[0];
@@ -1376,6 +1422,90 @@ function mySQL(linknode){
   linknode.click();
 }
 
+//**************************MSSQL */
+var LFGO='\r\nGO\r\n';
+var mscollate = 'HUNGARIAN_CI_AS';
+function MSSQL(linknode){
+  if (ATables==null) return;
+  linknode=document.getElementById(linknode);
+  source=`BEGIN TRAN`+LFGO;
+  source+=`drop database if exists `+SQLdb+LFGO+`  
+  CREATE DATABASE IF NOT EXISTS `+SQLdb+` COLLATE `+mscollate+LFGO+`
+  USE `+SQLdb+LFGO;
+
+  ATables.forEach(function(table,index){
+    source+=`DROP TABLE IF EXISTS [dbo].[`+table.name+`]`+LFGO+` 
+    CREATE TABLE [dbo].[`+table.name+`] (`+LF;
+    var fields="";
+    table.AFields.forEach(function(field,index2){      
+      tip= AType.SearchTypeById(field.type);
+      source+='['+field.name+'] '+tip.mssql.replace("%",field.length)+','+LF ;
+      fields+='['+field.name+'],';
+    });
+    fields=fields.substring(0,fields.length-1);
+    source=source.substring(0,source.length-3)+LF; //utolso vesszo
+    source+=`) `+LFGO ;
+
+    
+    if (table.Records!=null && table.Records.length>1){
+      source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] ON `+LF;
+      source+=`INSERT INTO [dbo].[`+table.name+`] (`+fields+`) VALUES `;
+      table.Records.forEach(function(o,i){
+        if (i>0){
+            //content            
+            source+=`(`;
+            value="";
+            o.forEach(function(o2,i2){
+              value+="'"+o2+"',";
+            });
+            source+=value.substring(0,value.length-1);
+            source+=`),`;
+        }
+      });
+      source=source.substring(0,source.length-1)+LF;
+      source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] OFF `+LF;
+    }
+    
+  });
+  //Autoinc primary key
+  ATables.forEach(function(table,index){
+    var one=false;
+    var s="";
+    table.AFields.forEach(function(field,index2){      
+      if (field.type==3) {//autoinc
+        one=true;
+        s += 'MODIFY `'+field.name+'` int(11) NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (`'+field.name+'`);'+LF;
+      }
+    });
+    if (one){
+      source+=`ALTER TABLE `+table.name+LF+s;
+    }
+  });
+  //constraints
+  ATables.forEach(function(table,index){
+    var one=false;
+    var s="";
+    table.AFields.forEach(function(field,index2){ 
+      if ( field.link!=null){
+        one=true;
+        s+='ADD CONSTRAINT `'+table.name+field.link.table.name+'` FOREIGN KEY (`'+field.name+'`) REFERENCES `'+field.link.table.name+'`('+field.link.name+'),'+LF;
+      }
+    });
+    if (one){
+      s=s.substring(0,s.length-3)+";"+LF; //utolso vesszo
+      source+=`ALTER TABLE `+table.name+LF+s;
+    }
+  });
+
+  source += 'COMMIT TRAN;'+LF ;
+  var url = "data:application/sql;charset=utf-8,"+encodeURIComponent(source);
+  linknode.href = url;
+  //linknode.style.visibility="visible";
+  linknode.setAttribute("download","flowdbms.sql");
+  linknode.innerHTML="RightClickforDownloadSQL";
+  linknode.click();
+}
+
 function FlowDBSave(linknode) {
   Save();
   var source=localStorage.getItem("flowdbeditor");
@@ -1415,6 +1545,23 @@ function FlowDBLoad(e) {
   
 }
 
+function FlowDBCopy(e){ 
+  var xmlText=SavetoString();
+  var loc = location.href;
+  if (loc.indexOf("codepen")>0){
+    loc = "https://codepen.io/hgabor47/full/XqezrX/";
+  } 
+  navigator.clipboard.writeText(encodeURI(loc+'?flowdb='+xmlText))
+  .then(() => {
+    new URL(document.location)
+    console.log('Text copied to clipboard');
+  })
+  .catch(err => {
+    // This can happen if the user denies clipboard permissions:
+    console.error('Could not copy text: ', err);
+  });
+}
+
 
 // LIST  
 
@@ -1441,7 +1588,8 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
   table = ATables[tableidx];
   tomb=table.Records;
 
-  if (tomb.length>1) {
+  if (tomb.length>1) 
+  {
     //fejlec
     var fej = document.createElement("div");
     fej.innerHTML="Sorrendezés:";
@@ -1470,7 +1618,8 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
     if (hasOrder){
         fej.appendChild(opt); 
     }
-
+  }
+  {
     div.appendChild(div2);
     //tartalom
     var t = document.createElement("table");
@@ -1523,7 +1672,8 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
     }
   }  
   var hdr = document.getElementById("list_header");    
-  hdr.style.top=(div.scrollTop)+'px';            
+  if (hdr!=null)
+    hdr.style.top=(div.scrollTop)+'px';            
 }
 
 //0,1,......  [idx,name]

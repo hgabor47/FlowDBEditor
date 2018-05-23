@@ -12,10 +12,24 @@
      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
      <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
     <style>
+
         @import url('https://fonts.googleapis.com/css?family=Work+Sans:200,400');
         * {
             font-family: "Work Sans";   
             font-size: 1rem;                     
+        }
+        #news {
+            z-index: 200;
+            position: absolute;
+            padding:16px;
+            top:10%;
+            left:10%;
+            height:50%;
+            width:50%;
+            background-color: rgba(204, 204, 204, 0.897);
+            border:black 1px dotted;
+            color: rgb(0, 29, 29);
+            visibility: hidden;
         }
         button {
             height:1.8rem;
@@ -162,7 +176,14 @@
         }
     </style>
     <script>
-
+        var news = [             
+        [106,"Bug fixes (can't able to insert new record to table content."]
+            ,[104,"Copy from Excel or another source to clipboard. Press CTRL+V on FlowDBEditor and create a new table or fill a table from clipboard."]
+            ,[103,"Press CopyToURL button for copy to clipboard link with data"]
+            ,[102,"You can export to SVG, MySQL"]
+            ,[101,"You can Save to browser memory (and Load from)"]
+            ,[100,"You can Save to file and load from file later"]
+            ];
 
         function cmdin(a){
             a.style.height="auto";
@@ -181,8 +202,17 @@
     </script>
 </head>
 <body>   
+    <div id="news">
+        <div style="height:80%;overflow: auto;">
+            <h1>News</h1>
+            <ul id="newsul">
+            
+            </ul>
+        </div>
+        <button  onclick='{this.parentElement.style.visibility="hidden"}'>OK</button>
+    </div>
     <div class="container-fluid">
-        <span class="display-5" >FlowDBEditor4</span><b>v0.81</b><i> Click any button and help will appear once per session.</i>
+        <span class="display-5" >FlowDBEditor4</span><b>v0.85</b><i> CTRL+V Copy data and struct from clipboard. CopyToURL BUTTON paste actual FlowDB-URL to clipboard.</i>
         <div id="help" onclick="this.innerHTML=''">Write records with right click on created tables :)</div>
         <div id="area" class="row">    
             <div class="col-2">   
@@ -194,8 +224,10 @@
                     <form style="display:none;"><input id="filename" class="commandbutton" type='file' accept='text/plain' ></form>
                     <button class="commandbutton" onclick="FlowDBSave('print')">SaveToFile</button>                                        
                     <button class="commandbutton" id="flowdbload" onclick="FlowDBLoad(this)" onmouseout="blur1()">LoadFromFile</button>
+                    <button class="commandbutton" onclick="FlowDBCopy('print')">CopyToURL</button>                                        
                     <button class="commandbutton" onclick="savetosvgfile('print','flowdbeditor')">Download SVG</button>
                     <button class="commandbutton" onclick="mySQL('print')">Download MySQL</button>
+                    <button class="commandbutton" onclick="newsdialog(true)">News</button>
                     <a target="_blank" style="visibility:hidden;" id="print" download="file.txt" href="">RightClickforDownload</a>                    
                 </div>
                 <div class="flex-column p-2"> 
