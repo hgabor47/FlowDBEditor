@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=0.7">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
@@ -184,7 +184,8 @@
     </style>
     <script>
         var news = [             
-        [107,"7. Touch is working on tablet or mobile"]
+        
+            [108,"7. Touch is working on tablet or mobile and Zoom implemented by a button"]
             ,[106,"6.Bug fixes (can't able to insert new record to table content."]
             ,[104,"5.Copy from Excel or another source to clipboard. Press CTRL+V on FlowDBEditor and create a new table or fill a table from clipboard."]
             ,[103,"4.Press CopyToURL button for copy to clipboard link with data"]
@@ -238,6 +239,7 @@
                     <button class="commandbutton" onclick="savetosvgfile('print','flowdbeditor')">Download SVG</button>
                     <button class="commandbutton" onclick="mySQL('print')">Download MySQL</button>
                     <button class="commandbutton" onclick="newsdialog(true)">News</button>
+                    <button class="commandbutton" onclick="zoom()">Zoom</button>
                     <a target="_blank" style="visibility:hidden;" id="print" download="file.txt" href="">RightClickforDownload</a>                    
                 </div>
                 <div class="flex-column p-2"> 
@@ -265,7 +267,7 @@
             </div>
             
             <div class="col-10">
-                <svg id="flowdbeditor" style="background-color: white" width="1600" height="1600">
+                <svg id="flowdbeditor" style="background-color: white" width="1600" height="1600" viewBox="0 0 1600 1600">
                     <defs>
                         <linearGradient id="e" x1="40" y1="210" x2="460" y2="210" gradientUnits="objectBoundingBox">
                             <stop stop-color="steelblue" offset="0" />

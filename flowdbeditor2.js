@@ -19,6 +19,7 @@ window.onload=function(){
   }
   document.body.addEventListener("paste", PastePanel);
   newsdialog();
+  
 }
 
 var g = document.getElementsByName("table");
@@ -30,6 +31,13 @@ for (let i = 0; i < g.length; i++) {
   obj.addEventListener("mousedown",down);
   obj.addEventListener("mousemove",move);
   obj.addEventListener("mouseup",up);
+}
+
+var zooms=[800,1600,2500];
+var zoomvalue=1;
+function zoom(){
+  if ((zoomvalue++)>2) zoomvalue=0;  
+  flowdbeditor.setAttribute("viewBox","0 0 "+zooms[zoomvalue]+" "+zooms[zoomvalue]);
 }
 
 //#region HINTS, NEWS
