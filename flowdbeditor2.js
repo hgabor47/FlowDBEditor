@@ -1,5 +1,11 @@
 let params = (new URL(document.location)).searchParams;
-let flowdbget = params.get("flowdb");
+let flowdbget = params.get("flowdb");     
+let flowdbplayer = params.get("player");  //USERVIEW if exists
+var ViewModes = Object.freeze({"Developer":1, "User":2})
+VIEWMODE=ViewModes.Developer;
+if (flowdbplayer!=null){
+  VIEWMODE=ViewModes.User;
+}
 
 var temp="flowdbeditor_temp";        
 var AUTOINCTSTART=1;
@@ -15,6 +21,18 @@ window.onload=function(){
   newsdialog();
 }
 
+var g = document.getElementsByName("table");
+var flowdbeditor = document.getElementById("flowdbeditor");
+
+for (let i = 0; i < g.length; i++) {
+  const obj = g[i];
+  obj.setAttribute("transform","translate(100,100)");
+  obj.addEventListener("mousedown",down);
+  obj.addEventListener("mousemove",move);
+  obj.addEventListener("mouseup",up);
+}
+
+//#region HINTS, NEWS
 
 function newsdialog(show){
   if (show){
@@ -41,17 +59,6 @@ function newsdialog(show){
   }
 }
 
-var g = document.getElementsByName("table");
-var flowdbeditor = document.getElementById("flowdbeditor");
-
-for (let i = 0; i < g.length; i++) {
-  const obj = g[i];
-  obj.setAttribute("transform","translate(100,100)");
-  obj.addEventListener("mousedown",down);
-  obj.addEventListener("mousemove",move);
-  obj.addEventListener("mouseup",up);
-}
-
 
 var noSelectedStyle = "fill:grey;stroke:black;stroke-width:1;opacity:0.5";
 var noSelectedStyle_readonly = "fill:yellow;stroke:black;stroke-width:1;opacity:0.5";
@@ -61,7 +68,7 @@ var fieldRowPadding = fieldRowHeight/2;
 var stateEdit = false;
 var constraintList = true; //The list of record contain field values from another linked table
 
-//#region HINTS
+
 var oncehints = [];
 oncehints.NewLinkFromPanel="Please select an another field name.";
 oncehints.NewLink="Please select first a field name and after click an another field name.";
@@ -76,7 +83,7 @@ oncehints.hint = function(hint){
   }
 }
 
-//#endregion HINTS
+//#endregion HINTS, NEWS
 
 var idTable=0;
 var TTable = function(name){  
@@ -88,6 +95,7 @@ var TTable = function(name){
   this.readonly = false;
   this.DOMGroup=null; //teljese Table
     this.DOMtitle=null;
+    this.DOMContextmenu=null;
     this.DOMrect=null;
     this.DOMFieldsGroup=null; //fields    
 
@@ -148,18 +156,25 @@ var TTable = function(name){
     this.DOMGroup.addEventListener("mouseup",up);
     this.DOMGroup.setAttribute("transform","translate("+this.posxy[0]+","+this.posxy[1]+")");
     this.DOMtitle = document.createElementNS("http://www.w3.org/2000/svg","text");      
-    this.DOMtitle.setAttribute("transform","translate(5,"+fieldRowHeight+")");
+    this.DOMtitle.setAttribute("transform","translate(30,"+fieldRowHeight+")");
     this.DOMtitle.table=this; 
     this.DOMtitle.setAttribute("class","flow_tables") ; 
     this.DOMtitle.addEventListener("mousedown",titleClick);
+
+    this.DOMContextmenu = document.createElementNS("http://www.w3.org/2000/svg","text");      
+    this.DOMContextmenu.setAttribute("transform","translate(5,"+fieldRowHeight+")");
+    this.DOMContextmenu.table=this; 
+    this.DOMContextmenu.setAttribute("class","flow_context") ; 
+    this.DOMContextmenu.addEventListener("mousedown",contextmenu);
+    this.DOMContextmenu.innerHTML="&#xf040;";
+
     this.DOMFieldsGroup=document.createElementNS("http://www.w3.org/2000/svg","g");       
     this.DOMFieldsGroup.setAttribute("transform","translate(3,32)"); 
-    
-    
     
     this.DOMGroup.appendChild(this.DOMrect);
     this.DOMGroup.appendChild(this.DOMtitle);
     this.DOMGroup.appendChild(this.DOMFieldsGroup);
+    this.DOMGroup.appendChild(this.DOMContextmenu);
     
     this.refreshDOM();
     return this.DOMGroup;
@@ -283,13 +298,13 @@ var TTable = function(name){
     SelectedTable=this;
     this.setReadOnly(this.readonly);
     //this.DOMrect.setAttribute("style",selectedStyle);
-    refreshFieldsList();
+    refreshFieldsListDOM();
   }
   this.noSelected=function(){
     SelectedTable=null;
     this.setReadOnly(this.readonly);
     //this.DOMrect.setAttribute("style",noSelectedStyle);
-    refreshFieldsList();
+    refreshFieldsListDOM();
   }
 
   this.edit=function(parent){
@@ -762,7 +777,7 @@ var TField = function(table,name){
       });
 
       this.table.refreshFields();
-      refreshFieldsList();
+      refreshFieldsListDOM();
 
     }
   }
@@ -772,9 +787,7 @@ var TField = function(table,name){
   }
 }
 
-TLink = function() { //aka constraint
-
-}
+//#region Arrays, Types -----------------------------
 
 var idTtype=0;
 var TType = function(name,sql,inputtype,mssql){
@@ -785,8 +798,6 @@ var TType = function(name,sql,inputtype,mssql){
   this.mssql = mssql;
 }
 
-
-//#region Arrays -----------------------------
 var FlowModes = Object.freeze({"Flow":1, "Constraint":2})
 //AType struct: displaytext,mysqltype,htmltype,| mssqltype,,,,
 //                     0        1         2         3  
@@ -854,10 +865,10 @@ function newTable(){
   t.addField("id",3); //autoinc
   ATables.push(t);
   flowdbeditor.appendChild(t.getDOM());
-  refreshTablesList();
+  refreshTablesListDOM();
 }
 
-function refreshTablesList(){
+function refreshTablesListDOM(){
   var l=document.getElementById("tables");
   l.innerHTML="";
   for (let i = 0; i < ATables.length; i++) {
@@ -877,14 +888,14 @@ function newField(){
   if (SelectedTable!=null){
     SelectedTable.addField("Field"+(idField++),0);
     SelectedTable.refreshFields();
-    refreshFieldsList();
+    refreshFieldsListDOM();
   } else {
     alert("Please select a table!");
   }
 }
 
 //with contsraints
-function refreshFieldsList(){
+function refreshFieldsListDOM(){
   if (SelectedTable==null) return;
   var l=document.getElementById("fields");
   l.innerHTML="";
@@ -964,11 +975,11 @@ function fieldClick(e){
 
 
 //TABLE FIELD PANEL REMOVE
-function removePanel(div){
+function removePanelDOM(div){
   div.parentElement.parentElement.removeChild(div.parentElement);
   stateEdit=false;
 }
-//TABLE
+//region TABLE Buttons
 function editTableOK(div){
   var panel = div.parentElement;
   var ename = document.getElementById('edit_name');
@@ -980,13 +991,13 @@ function editTableOK(div){
   panel.table.height=Number(eheight.value);
   panel.table.setReadOnly(ereadonly.checked);
 
-  removePanel(div);
+  removePanelDOM(div);
   panel.table.refreshDOM();
-  refreshTablesList();  
+  refreshTablesListDOM();  
   Save(temp);
 }
 function editTableCancel(div){
-  removePanel(div);
+  removePanelDOM(div);
 }
 function editTableDelete(div){
   if (confirm("DELETE TABLE with all fields! Sure?")) {
@@ -995,13 +1006,13 @@ function editTableDelete(div){
     if (index > -1) {
       ATables.splice(index, 1);
       panel.table.destroy();
-      refreshTablesList();
-      removePanel(div);
+      refreshTablesListDOM();
+      removePanelDOM(div);
       Save(temp);
     }
   }  
 }
-
+//endregion
 
 function PastePanel(e){
   e.preventDefault();
@@ -1022,7 +1033,6 @@ function PastePanel(e){
     div.innerHTML+=`<button onclick="onPaste(this.parentElement,null)">Rendben</button><button onclick="this.parentElement.parentElement.removeChild(this.parentElement)">Mégsem</button>`
   }
 }
-
 
 function onPaste(div,startidx){        
     content = div.clipboard;
@@ -1074,7 +1084,7 @@ function onPaste(div,startidx){
         }
         SelectedTable.refreshFields();
         SelectedTable.recalcAutoincFields();
-        refreshTablesList();
+        refreshTablesListDOM();
       }
       //document.execCommand('insertText', false, content);      
     }
@@ -1082,9 +1092,7 @@ function onPaste(div,startidx){
     div.parentElement.removeChild(div);
 }
 
-
-
-//FIELD
+//region FIELD Buttons
 function editFieldOK(div){
   var panel = div.parentElement;
   var ename = document.getElementById('edit_name');
@@ -1099,28 +1107,28 @@ function editFieldOK(div){
   }  
   panel.field.display = edisplay.checked;
   panel.field.length = Number(elength.value);
-  removePanel(div);
+  removePanelDOM(div);
   panel.field.table.refreshRecordFields();
   panel.field.table.refreshFields();
-  refreshFieldsList();
+  refreshFieldsListDOM();
   Save(temp);
 }
 function editFieldCancel(div){
-  removePanel(div);
+  removePanelDOM(div);
 
 }
 function editFieldDelete(div){
   if (confirm("DELETE ONE FIELD! Sure?")) {    
     var panel = div.parentElement;
     panel.field.destroy();
-    removePanel(div);
+    removePanelDOM(div);
     Save(temp);
   } 
 }
 function editFieldLink(div){
     automodeLink=false;
     var panel = div.parentElement;
-    removePanel(div);
+    removePanelDOM(div);
     var b= document.getElementById("newconstraint");
     newConstraint(b,true);
     constraintField  = panel.field;  
@@ -1130,10 +1138,11 @@ function editFieldLinkDelete(div){
   if (confirm("DELETE LINK! Sure?")) {    
     var panel = div.parentElement;
     panel.field.deleteLink();
-    removePanel(div);
+    removePanelDOM(div);
   } 
 }
 
+//endregion
 
 
 //#endregion HIGH
@@ -1150,43 +1159,58 @@ function down(e){
 
   if (flowMode==FlowModes.Flow){
     if (b==1){
+      /*
+      var s = this.getAttribute("transform");
+      var o =tool_getTransformPure(s);
+      var topdistance = event.layerY-o[1];
+      if (topdistance<20)
+        contextmenu(e);
+      */
       cX = event.clientX-grab;  
       cY = event.clientY-grab; 
       this.table.Selected();  //table
+    } else {
+      if (e.touches!=null){
+        if (e.touches.length>0){
+          cX = e.touches[0].clientX-grab;  
+          cY = e.touches[0].clientY-grab; 
+          this.table.Selected();  //table
+        }
+      }
     }
+
   } 
   if (flowMode==FlowModes.Constraint){
    
   }
 }
+//right mouse down
 function contextmenu(e){
     e.preventDefault();
-    this.table.browse(document.getElementById("area"));      
+    e.currentTarget.table.browse(document.getElementById("area"));      
+    //this.table.browse(document.getElementById("area"));      
 }
 
-
-
 function touchmove(e){
-  //TODO:not working ...  
-  
   if (flowMode==FlowModes.Flow){
-    
-      //if(event.preventDefault) event.preventDefault();
-            // perhaps event.targetTouches[0]?
-      var evtt = evt.touches[0];
-
-      this.parentElement.appendChild(this);
-      dX = evtt.clientX -cX;  
-      dY = evtt.clientY -cY;  
-      cX = evtt.clientX-grab;  
-      cY = evtt.clientY-grab;
-      var s = e.getAttribute("transform");
-      var o =tool_getTransform(s);
-      var s = "translate("+o[0]+","+o[1]+")";
-      this.setAttribute("transform",s);
-      this.table.setPosXY(o[0],o[1]);
-      this.table.refreshConstraints();
-    
+    if(event.preventDefault) 
+      event.preventDefault();
+    if (e.touches!=null){
+      if (e.touches.length>0){            
+        var evtt = e.touches[0];
+        this.parentElement.appendChild(this);
+        dX = evtt.clientX -cX;  
+        dY = evtt.clientY -cY;  
+        cX = evtt.clientX-grab;  
+        cY = evtt.clientY-grab;
+        var s = this.getAttribute("transform");
+        var o =tool_getTransform(s);
+        var s = "translate("+o[0]+","+o[1]+")";
+        this.setAttribute("transform",s);
+        this.table.setPosXY(o[0],o[1]);
+        this.table.refreshConstraints();
+      }
+    }    
   }  
 }
 function move(e){
@@ -1229,7 +1253,28 @@ function tool_getTransform(s){
   s =s.split(",");
   return [Number(s[0])-grab+dX,Number(s[1])-grab+dY];  
 }
+function tool_getTransformPure(s){
+  s = s.substring(10,999);
+  s= s.substring(0,s.length-1);
+  s =s.split(",");
+  return [Number(s[0]),Number(s[1])];  
+}
 
+function encodeStr(rawStr){
+  var encodedStr = rawStr.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
+    return '&#'+i.charCodeAt(0)+';';
+  });
+  return encodedStr;
+}
+
+function decodeStr(str) {
+    return str.replace(/&#(\d+);/g, function(match, dec) {
+      return String.fromCharCode(dec);
+    });
+}
+//#endregion TOOLS
+
+//region --------LOAD / SAVE -------------------
 
 function savetosvgfile(linknode,svgnode){  // print , flowdbeditor
   linknode=document.getElementById(linknode);
@@ -1263,7 +1308,6 @@ function savetosvgfile(linknode,svgnode){  // print , flowdbeditor
   //you can download svg file by right click menu.
 }
 
-//--------LOAD / SAVE -------------------
 var xmlroot="flowdbeditor";
 function Save(variable){
   oncehints.hint("save");
@@ -1285,7 +1329,6 @@ function Load(variable){
   oncehints.hint("load");
   LoadString(xmlText);
 }
-
 function SavetoString(){  
   var xml= document.implementation.createDocument(null, xmlroot);
   var root = xml.getElementsByTagName(xmlroot)[0];
@@ -1327,7 +1370,7 @@ function LoadString(xmlText){
     const table = ATables[i];    
     table.setLinksFromTemp();
   }
-  refreshTablesList();
+  refreshTablesListDOM();
   var setup = root.getElementsByTagName("setup");
   if ((setup!=null && setup.length>0)){     
      setup=setup[0];
@@ -1518,7 +1561,6 @@ function FlowDBSave(linknode) {
   linknode.click(); 
 }
 
-
 function FlowDBLoad(e) {
   oncehints.hint("loadfromfile");
   var input = document.getElementById("filename");
@@ -1561,9 +1603,9 @@ function FlowDBCopy(e){
     console.error('Could not copy text: ', err);
   });
 }
+//endregion LOAD/SAVE
 
-
-// LIST  
+//region BROWSE functions (LIST)  
 
 var Divname=null;
 
@@ -1677,274 +1719,213 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
 }
 
 //0,1,......  [idx,name]
-  //lookup table with concatenated names 
-  function getTable(table) {
-    var records=[];    
-    var displayidx=[]; //displayfield if was set
-    for (let i = 0; i < table.AFields.length; i++) {
-      if (table.AFields[i].display==true){
-        if (table.AFields[i].link==null){
-          displayidx.push([i,null]);
-        } else {
-          displayidx.push([i,
-            getTable(table.AFields[i].link.table)
-          ]);
-        }
+//lookup table with concatenated names 
+function getTable(table) {
+  var records=[];    
+  var displayidx=[]; //displayfield if was set
+  for (let i = 0; i < table.AFields.length; i++) {
+    if (table.AFields[i].display==true){
+      if (table.AFields[i].link==null){
+        displayidx.push([i,null]);
+      } else {
+        displayidx.push([i,
+          getTable(table.AFields[i].link.table)
+        ]);
       }
-    }    
-    if (displayidx.length>0){      
-      Array.prototype.forEach.call(table.Records,function(o,i){
-          if (i>0){
-            var sor=Array(2);
-            sor[0]=o[0];
-            sor[1]="";
-            displayidx.forEach(function(oi){
-              if (oi[1]==null){
-                sor[1]+=o[oi[0]]+" ";
-              } else {
-                //linked oi[1]
-                var res=null;
-                var t = oi[1]; //tablerecs from getTables [idx,name]
-                for (let i = 0; i < t.length; i++) {
-                  var fi=t[i];
-                  if (o[oi[0]]==fi[0]){
-                    res = fi; 
-                    break;
-                  }
-                }
-                if (res==null){
-                  sor[1]+=o[oi[0]]+" ";
-                } else {
-                  sor[1]+=res[1];
-                }
-                
-
-                //sor[1]+=oi[1].find( fi => fi[0] == oi[0] )[1];
-              }
-            }); 
-            records.push(sor);
-          }
-        });
-    }else {
-      Array.prototype.forEach.call(table.Records,function(o,i){
+    }
+  }    
+  if (displayidx.length>0){      
+    Array.prototype.forEach.call(table.Records,function(o,i){
         if (i>0){
           var sor=Array(2);
           sor[0]=o[0];
           sor[1]="";
-          o.forEach(function(o2,i2){
-            if (i2>0){
-              sor[1]+=o2+" ";
+          displayidx.forEach(function(oi){
+            if (oi[1]==null){
+              sor[1]+=o[oi[0]]+" ";
+            } else {
+              //linked oi[1]
+              var res=null;
+              var t = oi[1]; //tablerecs from getTables [idx,name]
+              for (let i = 0; i < t.length; i++) {
+                var fi=t[i];
+                if (o[oi[0]]==fi[0]){
+                  res = fi; 
+                  break;
+                }
+              }
+              if (res==null){
+                sor[1]+=o[oi[0]]+" ";
+              } else {
+                sor[1]+=res[1];
+              }
+              
+
+              //sor[1]+=oi[1].find( fi => fi[0] == oi[0] )[1];
             }
-          });
+          }); 
           records.push(sor);
         }
       });
-    }
-    return records;
-  }
-
-  function list_addrecordheader(table)
-  {
-    if (table.Records.length<1)
-    {
-      sor=[];
-      for (let i = 0; i < table.AFields.length; i++) {
-        const fi = table.AFields[i];
-        fi.autoinc=AUTOINCTSTART;
-        sor.push(fi.name);  
-      }
-      table.Records.push(sor);  
-    }
-  }
-
-  function list_new(tableidx) {
-    if ((tableidx<0) || (tableidx>=ATables.length)) 
-      return ;
-    var t = ATables[tableidx];
-    list_addrecordheader(t);
-    sor=[];
-    for (let i = 0; i < t.AFields.length; i++) {
-      const fi = t.AFields[i];
-      if (fi.type==3){        
-        sor.push(fi.autoinc++);  
-      } else {
-        sor.push("Empty");
-      }
-    }
-    t.Records.push(sor);
-    //t.Records.push(new Array(t.AFields.length));
-    list(tableidx,null);
-  }
-  function list_edit(e,tableidx,id) {
-    var r = e.parentElement;
-    if ((tableidx<0) || (tableidx>=ATables.length)) 
-      return ;
-    var t = ATables[tableidx];
-    //var rec = t.Records.find()
-    const rec = t.Records.find( fi => fi[0] == id );
-    
-    var div = document.createElement("div");
-    div.id=t.name+id;
-    div.className="flow_edit";
-    div.innerHTML="";
-
-    var fi = t.AFields;
-    fi.forEach(function(f,idx){
-      if (f.link==null){
-        if (f.type==7){ //bool
-          div.innerHTML+=ComboBoxYesNo(rec[idx],f);
-        } else if (f.type==3){ //autoinc
-          div.innerHTML+=`<label>`+f.name+`</label><div>`+rec[idx]+`</div>`;
-        } else {
-          typ=AType.SearchTypeById(f.type);                
-          div.innerHTML+=`<label>`+f.name+`</label><input type="`+typ.inputtype+`" id="`+t.name+f.name+`" value="`+rec[idx]+`"><br>`;
-        }
-      } else {
-        div.innerHTML+=ComboBox(rec[idx],f,f.link);
+  }else {
+    Array.prototype.forEach.call(table.Records,function(o,i){
+      if (i>0){
+        var sor=Array(2);
+        sor[0]=o[0];
+        sor[1]="";
+        o.forEach(function(o2,i2){
+          if (i2>0){
+            sor[1]+=o2+" ";
+          }
+        });
+        records.push(sor);
       }
     });
-     div.innerHTML+=`<button onclick="listEditOK(this)">OK</button>
-     <button onclick="listEditCancel(this)">Cancel</button>     
-     `;
-    div.table=t;
-    div.rec=rec;
-    document.body.appendChild(div);
   }
-  function listEditOK(e){
-    var div = e.parentElement;
-    var t=div.table;
-    for (let i = 0; i < div.table.AFields.length; i++) { //and div.REC has same element
-      const f = t.AFields[i];      
-      var o=document.getElementById(t.name+f.name);
-      if (o!=null){
-        div.rec[i]=o.value;
-      }
-    }
-    removePanel(e);
-    list(ATables.indexOf(t),null);
-  }
-  function listEditCancel(e){
-    //var div = e.parentElement;
-    removePanel(e);
-    list(ATables.indexOf(div.table),null);
-  }
+  return records;
+}
 
-  function list_del(e,tableidx,id) {
-    var div = e.parentElement;//List
-    if ((tableidx<0) || (tableidx>=ATables.length)) 
-      return ;
-    var t = ATables[tableidx];
-    t.Records.forEach(function(o,i){
-      if ((i>0) && (o[0]==id)){
-        if (confirm("I Will DELETE RECORD! Sure?")) {
-          t.Records.splice(i,1);
-          //removePanel(div);
-          list(ATables.indexOf(t),null);
-        }
-      }
-    })
-    const rec = t.Records.find( fi => fi[0] == id );
+function list_addrecordheader(table) {
+  if (table.Records.length<1)
+  {
+    sor=[];
+    for (let i = 0; i < table.AFields.length; i++) {
+      const fi = table.AFields[i];
+      fi.autoinc=AUTOINCTSTART;
+      sor.push(fi.name);  
+    }
+    table.Records.push(sor);  
   }
+}
 
-  function editTableClear(tableidx){
-    var t = ATables[tableidx];
-    if (t){
-      t.Records=[];
-      list_addrecordheader(t);
-      list(tableidx,null);
-    }
-  }
-
-  function ComboBoxYesNo(value,field1) {
-    var opt = `<label>`+field1.name+`</label><select id="`+field1.table.name+field1.name+`">`;
-    opt+=`<option `;
-    if (value==0) {
-      opt+=`selected `;
-    }
-    opt+=`value="0">Nem</option>`;
-    opt+=`<option `;
-    if (value==1) {
-      opt+=`selected `;
-    }
-    return (opt+=`value="1">Igen</option></select><br>`);
-  }
-/*
-  table.AFields.forEach(function(o,i){
-    if (o.link!=null){
-      combo.push( getTable(o.link.table) ) //0,1  idx,name
+//region BROWSE LIST BUTTONS
+function list_new(tableidx) {
+  if ((tableidx<0) || (tableidx>=ATables.length)) 
+    return ;
+  var t = ATables[tableidx];
+  list_addrecordheader(t);
+  sor=[];
+  for (let i = 0; i < t.AFields.length; i++) {
+    const fi = t.AFields[i];
+    if (fi.type==3){        
+      sor.push(fi.autoinc++);  
     } else {
-      combo.push(null);
+      sor.push("Empty");
+    }
+  }
+  t.Records.push(sor);
+  //t.Records.push(new Array(t.AFields.length));
+  list(tableidx,null);
+}
+function list_edit(e,tableidx,id) {
+  var r = e.parentElement;
+  if ((tableidx<0) || (tableidx>=ATables.length)) 
+    return ;
+  var t = ATables[tableidx];
+  //var rec = t.Records.find()
+  const rec = t.Records.find( fi => fi[0] == id );
+  
+  var div = document.createElement("div");
+  div.id=t.name+id;
+  div.className="flow_edit";
+  div.innerHTML="";
+
+  var fi = t.AFields;
+  fi.forEach(function(f,idx){
+    if (f.link==null){
+      if (f.type==7){ //bool
+        div.innerHTML+=ComboBoxYesNoDOM(rec[idx],f);
+      } else if (f.type==3){ //autoinc
+        div.innerHTML+=`<label>`+f.name+`</label><div>`+rec[idx]+`</div>`;
+      } else {
+        typ=AType.SearchTypeById(f.type);                
+        div.innerHTML+=`<label>`+f.name+`</label><input type="`+typ.inputtype+`" id="`+t.name+f.name+`" value="`+rec[idx]+`"><br>`;
+      }
+    } else {
+      div.innerHTML+=ComboBoxDOM(rec[idx],f,f.link);
     }
   });
-*/
-
-  function ComboBox(value,field1,field2){    
-    var opt = `<label>`+field1.name+`</label><select id="`+field1.table.name+field1.name+`">`;
-    var t = getTable(field2.table);
-    for (let i = 0; i < t.length; i++) {
-      const e = t[i];
-      id = e[0];
-      if (value==id){        
-        opt+=`<option selected `;  
-      }else {
-        opt+=`<option `;  
-      }
-      opt+=`value="`+id+`">`+e[1]+`</option>`;
+    div.innerHTML+=`<button onclick="listEditOK(this)">OK</button>
+    <button onclick="listEditCancel(this)">Cancel</button>     
+    `;
+  div.table=t;
+  div.rec=rec;
+  document.body.appendChild(div);
+}
+function listEditOK(e){
+  var div = e.parentElement;
+  var t=div.table;
+  for (let i = 0; i < div.table.AFields.length; i++) { //and div.REC has same element
+    const f = t.AFields[i];      
+    var o=document.getElementById(t.name+f.name);
+    if (o!=null){
+      div.rec[i]=o.value;
     }
-    return (opt+`</select><br>`);
   }
-
-  //lookup  id value,field1 , linkedfield2
-  //return HTML select
-  function ComboBox2(value,field1,field2){
-    
-    var opt = `<label>`+field1.name+`</label><select id="`+field1.table.name+field1.name+`">`;
-    if (field2.table.Records.length>0){
-      
-      var displayidx=[]; //displayfield if was set
-      for (let i = 0; i < field2.table.AFields.length; i++) {
-        if (field2.table.AFields[i].display==true){
-          displayidx.push(i);
-        }
-      }    
-      for (let i = 1; i < field2.table.Records.length; i++) {
-        const rec = field2.table.Records[i];
-        var id=rec[0];
-        if (displayidx.length>0) {
-          displayText="";
-          displayidx.forEach(function(oi){
-            displayText+=rec[oi]+" ";
-          })          
-        } else {
-          displayText="";
-          rec.forEach(function(o){
-            displayText+=o+" ";
-          })
-        }
-        displayText=displayText.trim();
-
-        if (id==value){
-          opt+=`<option selected `;  
-        }else {
-          opt+=`<option `;  
-        }
-        opt+=`value="`+id+`">`+displayText+`</option>`
-      }   
-    }  
-    return (opt+`</select><br>`);    
+  removePanelDOM(e);
+  list(ATables.indexOf(t),null);
+}
+function listEditCancel(e){
+  //var div = e.parentElement;
+  removePanelDOM(e);
+  list(ATables.indexOf(div.table),null);
+}
+function list_del(e,tableidx,id) {
+  var div = e.parentElement;//List
+  if ((tableidx<0) || (tableidx>=ATables.length)) 
+    return ;
+  var t = ATables[tableidx];
+  t.Records.forEach(function(o,i){
+    if ((i>0) && (o[0]==id)){
+      if (confirm("I Will DELETE RECORD! Sure?")) {
+        t.Records.splice(i,1);
+        //removePanelDOM(div);
+        list(ATables.indexOf(t),null);
+      }
+    }
+  })
+  const rec = t.Records.find( fi => fi[0] == id );
+}
+function editTableClear(tableidx){
+  var t = ATables[tableidx];
+  if (t){
+    t.Records=[];
+    list_addrecordheader(t);
+    list(tableidx,null);
   }
+}
+//endregion BROWSE LIST BUTTONS
 
-  function encodeStr(rawStr){
-    var encodedStr = rawStr.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
-      return '&#'+i.charCodeAt(0)+';';
-    });
-    return encodedStr;
+function ComboBoxYesNoDOM(value,field1) {
+  var opt = `<label>`+field1.name+`</label><select id="`+field1.table.name+field1.name+`">`;
+  opt+=`<option `;
+  if (value==0) {
+    opt+=`selected `;
   }
-
-  function decodeStr(str) {
-			return str.replace(/&#(\d+);/g, function(match, dec) {
-				return String.fromCharCode(dec);
-			});
+  opt+=`value="0">Nem</option>`;
+  opt+=`<option `;
+  if (value==1) {
+    opt+=`selected `;
   }
+  return (opt+=`value="1">Igen</option></select><br>`);
+}
 
-//#endregion TOOLS
+function ComboBoxDOM(value,field1,field2){    
+  var opt = `<label>`+field1.name+`</label><select id="`+field1.table.name+field1.name+`">`;
+  var t = getTable(field2.table);
+  for (let i = 0; i < t.length; i++) {
+    const e = t[i];
+    id = e[0];
+    if (value==id){        
+      opt+=`<option selected `;  
+    }else {
+      opt+=`<option `;  
+    }
+    opt+=`value="`+id+`">`+e[1]+`</option>`;
+  }
+  return (opt+`</select><br>`);
+}
+
+
+
+//#endregion BROWSE functions (LIST) 

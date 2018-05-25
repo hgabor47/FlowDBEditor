@@ -91,6 +91,13 @@
             background-color: rgba(233, 233, 233, 0.89);
             border: 1px rgb(88, 88, 88) dotted;
         }
+        .flow_context {
+            font-size: 1rem;
+            font-family: FontAwesome;
+            font-weight: 0;
+            cursor:pointer;   
+            height:1.5rem;                  
+        }
         .flow_tables {
             font-size: 1.1rem;
             font-weight: 800;
@@ -177,12 +184,13 @@
     </style>
     <script>
         var news = [             
-        [106,"Bug fixes (can't able to insert new record to table content."]
-            ,[104,"Copy from Excel or another source to clipboard. Press CTRL+V on FlowDBEditor and create a new table or fill a table from clipboard."]
-            ,[103,"Press CopyToURL button for copy to clipboard link with data"]
-            ,[102,"You can export to SVG, MySQL"]
-            ,[101,"You can Save to browser memory (and Load from)"]
-            ,[100,"You can Save to file and load from file later"]
+        [107,"7. Touch is working on tablet or mobile"]
+            ,[106,"6.Bug fixes (can't able to insert new record to table content."]
+            ,[104,"5.Copy from Excel or another source to clipboard. Press CTRL+V on FlowDBEditor and create a new table or fill a table from clipboard."]
+            ,[103,"4.Press CopyToURL button for copy to clipboard link with data"]
+            ,[102,"3.You can export to SVG, MySQL"]
+            ,[101,"2.You can Save to browser memory (and Load from)"]
+            ,[100,"1.You can Save to file and load from file later"]
             ];
 
         function cmdin(a){
@@ -212,12 +220,14 @@
         <button  onclick='{this.parentElement.style.visibility="hidden"}'>OK</button>
     </div>
     <div class="container-fluid">
-        <span class="display-5" >FlowDBEditor4</span><b>v0.85</b><i> CTRL+V Copy data and struct from clipboard. CopyToURL BUTTON paste actual FlowDB-URL to clipboard.</i>
+        <span class="display-5" >FlowDBEditor4</span><b>v0.86</b><i> CTRL+V Copy data and struct from clipboard. CopyToURL BUTTON paste actual FlowDB-URL to clipboard.</i>
         <div id="help" onclick="this.innerHTML=''">Write records with right click on created tables :)</div>
         <div id="area" class="row">    
             <div class="col-2">   
                 <div class="flex-column p-2" style='min-width:200px;overflow:hidden;height:auto;' onmouseover="cmdin(this)" onmouseout="cmdout(this)">
-                    <div class="flow_tables">CommandPanel</div>
+                    <div class="flow_tables">CommandPanel
+                        <i style="font-size:16px" class="fa">&#xf103;</i>
+                    </div>
                     <button class="commandbutton" onclick="Save()">Save</button>
                     <button class="commandbutton" onclick="Load()">Load</button>
                     <button class="commandbutton" onclick="Load('alma')">Clear</button>
