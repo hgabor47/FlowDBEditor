@@ -903,12 +903,12 @@ function newField(){
 }
 
 //with contsraints
-function refreshFieldsListDOM(){
-  if (SelectedTable==null) return;
+function refreshFieldsListDOM(){  
   var l=document.getElementById("fields");
   l.innerHTML="";
   var co=document.getElementById("constraints");
   co.innerHTML="";
+  if (SelectedTable==null) return;
   var coindex=0;
 
   for (let i = 0; i < SelectedTable.AFields.length; i++) {
@@ -1269,10 +1269,14 @@ function tool_getTransformPure(s){
 }
 
 function encodeStr(rawStr){
-  var encodedStr = rawStr.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
-    return '&#'+i.charCodeAt(0)+';';
-  });
-  return encodedStr;
+  if ((typeof rawStr)=="string") {
+    var encodedStr = rawStr.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
+      return '&#'+i.charCodeAt(0)+';';
+    });
+    return encodedStr;
+  } else {
+    return rawStr;
+  }
 }
 
 function decodeStr(str) {
@@ -1361,7 +1365,12 @@ function LoadString(xmlText){
               <stop stop-color="red" offset="1" />
           </linearGradient>
       </defs>`; 
-  
+  if (xmlText==null){
+    SelectedTable=null;
+    refreshTablesListDOM();
+    refreshFieldsListDOM();
+    return;
+  }
   var oParser = new DOMParser();
   var xml = oParser.parseFromString(xmlText, "text/xml");
   var root = xml.getElementsByTagName(xmlroot)[0];
