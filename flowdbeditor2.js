@@ -1023,6 +1023,7 @@ function editTableDelete(div){
 //endregion
 
 function PastePanel(e){
+  if (stateEdit) return;
   e.preventDefault();
   var content="";
   if( (e.originalEvent || e).clipboardData ){
@@ -1697,6 +1698,10 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
         }
       });
     }
+    var start=0;
+    if ((table.AFields.length>0) && (table.AFields[0].type==3)) {
+      start =  1;
+    }; //autoinc
     for (let i = 0; i < tomb.length; i++) {
         const sor = tomb[i];
         var r = document.createElement("tr");
@@ -1705,7 +1710,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
         }
         t.appendChild(r);
         //r.setAttribute("sqlid",sor[0]);
-        for (let j = 1; j < sor.length; j++) {
+        for (let j = start; j < sor.length; j++) {
             var cell=sor[j];
             if ((i==0) || (combo==null) || (combo[j]==null)){
               cell = sor[j];
@@ -1726,7 +1731,8 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
         if(i>0){
             var c= document.createElement("td");
             r.appendChild(c);
-            c.innerHTML='<button onclick="list_edit(this,'+tableidx+','+sor[0]+')">Edit</button><button onclick="list_del(this,'+tableidx+','+sor[0]+')">Delete</button>';      
+            var s3 = "'"+sor[0]+"'";
+            c.innerHTML='<button onclick="list_edit(this,'+tableidx+','+s3+')">Edit</button><button onclick="list_del(this,'+tableidx+','+s3+')">Delete</button>';      
         }
     }
   }  
@@ -1885,7 +1891,7 @@ function listEditOK(e){
 function listEditCancel(e){
   //var div = e.parentElement;
   removePanelDOM(e);
-  list(ATables.indexOf(div.table),null);
+  //list(ATables.indexOf(div.table),null);
 }
 function list_del(e,tableidx,id) {
   var div = e.parentElement;//List
