@@ -52,8 +52,8 @@
             line-height: 1;
         }
         #flowdbeditor {
-            width:1600px;
-            height:1600px;            
+            width:2400px;
+            height:2400px;            
             padding: 0; margin: 0;
         }
         .flow_flowmode{
@@ -118,11 +118,15 @@
         .flow_tables_color2 {
             background-color: rgb(175, 175, 175);
         }
+        .flow_tablegroup {
+            cursor: all-scroll;
+        }
         .flow_fields {
             font-size: 1rem;
             cursor:pointer;
         }
         .flow_fields_noevent {
+            cursor: all-scroll;
             font-size: 1rem;            
         }
         .flow_fields_color1 {
@@ -221,7 +225,7 @@
         <button  onclick='{this.parentElement.style.visibility="hidden"}'>OK</button>
     </div>
     <div class="container-fluid">
-        <span class="display-5" >FlowDBEditor4</span><b>v0.88</b><i> CTRL+V Copy data and struct from clipboard. CopyToURL BUTTON paste actual FlowDB-URL to clipboard.</i>
+        <span class="display-5" >FlowDBEditor4</span><b>v0.89</b><i> CTRL+V Copy data and struct from clipboard. CopyToURL BUTTON paste actual FlowDB-URL to clipboard.</i>
         <div id="help" onclick="this.innerHTML=''">Write records with right click on created tables :)</div>
         <div id="area" class="row">    
             <div class="col-2">   
@@ -267,7 +271,7 @@
             </div>
             
             <div class="col-10">
-                <svg id="flowdbeditor" style="background-color: white" width="1600" height="1600" viewBox="0 0 1600 1600">
+                <svg id="flowdbeditor" style="background-color: white" width="2400" height="2400" viewBox="0 0 2400 2400">
                     <defs>
                         <linearGradient id="e" x1="40" y1="210" x2="460" y2="210" gradientUnits="objectBoundingBox">
                             <stop stop-color="steelblue" offset="0" />

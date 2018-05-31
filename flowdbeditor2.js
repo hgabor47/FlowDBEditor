@@ -6,7 +6,7 @@ VIEWMODE=ViewModes.Developer;
 if (flowdbplayer!=null){
   VIEWMODE=ViewModes.User;
 }
-
+var flowdbinit=null; //if exists please remove this line flowdbinit is a innercdircle start flowdb if you want
 var temp="flowdbeditor_temp";        
 var AUTOINCTSTART=1;
 window.onload=function(){
@@ -15,7 +15,12 @@ window.onload=function(){
   if (flowdbget!=null){
     LoadString(flowdbget);
   } else {  
-    Load(temp);
+    if (flowdbinit==null)
+      Load(temp)
+    else //compact
+    {
+      LoadString(flowdbinit);      
+    }
   }
   document.body.addEventListener("paste", PastePanel);
   newsdialog();
@@ -33,7 +38,7 @@ for (let i = 0; i < g.length; i++) {
   obj.addEventListener("mouseup",up);
 }
 
-var zooms=[800,1600,2500];
+var zooms=[1200,2400,3200];
 var zoomvalue=1;
 function zoom(){
   if ((zoomvalue++)>2) zoomvalue=0;  
@@ -68,9 +73,9 @@ function newsdialog(show){
 }
 
 
-var noSelectedStyle = "fill:grey;stroke:black;stroke-width:1;opacity:0.5";
-var noSelectedStyle_readonly = "fill:yellow;stroke:black;stroke-width:1;opacity:0.5";
-var selectedStyle = "fill:blue;stroke:#000099;stroke-width:3;opacity:0.4";
+var noSelectedStyle = "fill:grey;stroke:black;stroke-width:1;opacity:0.5;cursor: all-scroll;";
+var noSelectedStyle_readonly = "fill:yellow;stroke:black;stroke-width:1;opacity:0.5;cursor: all-scroll;";
+var selectedStyle = "fill:blue;stroke:#000099;stroke-width:3;opacity:0.4;cursor: all-scroll;";
 var fieldRowHeight = convertRemToPixels(1);//rem
 var fieldRowPadding = fieldRowHeight/2;
 var stateEdit = false;
@@ -101,11 +106,16 @@ var TTable = function(name){
   this.AFields = []; //Tfield  
   this.Records = [];  //realtime upfill
   this.readonly = false;
+  this.visible=true;
+  this.description="";
+  this.color="#888888";  
+
   this.DOMGroup=null; //teljese Table
     this.DOMtitle=null;
     this.DOMContextmenu=null;
     this.DOMrect=null;
     this.DOMFieldsGroup=null; //fields    
+  
 
   this.setReadOnly = function(value){
     this.readonly=value;
@@ -113,13 +123,25 @@ var TTable = function(name){
       if (SelectedTable!=this){
         if (this.readonly)
           this.DOMrect.setAttribute("style",noSelectedStyle_readonly)
-        else 
+        else {
           this.DOMrect.setAttribute("style",noSelectedStyle);
+          this.DOMrect.style.fill=this.color;
+        }
       } else {
         this.DOMrect.setAttribute("style",selectedStyle);
       }
     }
   }  
+  this.setColor=function(value){
+    this.color=value;
+  }
+  this.setDescription=function(value){    
+    this.description=nullstring(value);
+  }
+  this.setVisible=function(value){
+    this.visible=value;
+  }
+
   this.setName=function(name){
     this.name=name;
     if (this.DOMtitle!=null) 
@@ -162,6 +184,7 @@ var TTable = function(name){
     this.DOMGroup.addEventListener("mousemove",move);
     this.DOMGroup.addEventListener("touchmove",touchmove);
     this.DOMGroup.addEventListener("mouseup",up);
+    this.DOMGroup.setAttribute("class","flow_tablegroup") ; 
     this.DOMGroup.setAttribute("transform","translate("+this.posxy[0]+","+this.posxy[1]+")");
     this.DOMtitle = document.createElementNS("http://www.w3.org/2000/svg","text");      
     this.DOMtitle.setAttribute("transform","translate(30,"+fieldRowHeight+")");
@@ -322,9 +345,13 @@ var TTable = function(name){
     div.className="flow_edit";
     div.innerHTML=
     `<label>Tablename</label><input type="text" id="edit_name" value="`+this.name+`"><br>
-     <label>Width</label><input type="number" id="edit_width" value="`+this.width+`"><br>
-     <label>Height</label><input type="number" id="edit_height" value="`+this.height+`"><br>
-     <label>Readonly mean will no export to SQL file</label>`;
+     <label>Width</label><input type="number" id="edit_width" step="30" value="`+this.width+`"><br>
+     <label>Height</label><input type="number" id="edit_height" step="30" value="`+this.height+`"><br>
+     <label>Color</label><input type="color" id="edit_color" value="`+this.color+`"><br>
+     <label>Description</label><textarea id="edit_description" cols="40" rows="5">`+nullstring(this.description)+`</textarea>
+     `;
+     
+    div.innerHTML+=`<label>Readonly mean will no export to SQL file</label>`;
     if (this.readonly)
       div.innerHTML+=`<input type="checkbox" id="edit_readonly" checked >`
     else  
@@ -383,6 +410,9 @@ var TTable = function(name){
     t.setAttribute("width",this.width);
     t.setAttribute("height",this.height);
     t.setAttribute("readonly",this.readonly);
+    t.setAttribute("visible",this.visible);
+    t.setAttribute("color",this.color);
+    t.setAttribute("description",this.description);
     for (let i = 0; i < this.AFields.length; i++) {
       const f = this.AFields[i];
       f.getXML(xml,t);
@@ -412,6 +442,9 @@ var TTable = function(name){
     this.width=Number(node.getAttribute("width"));
     this.height=Number(node.getAttribute("height"));
     this.setReadOnly(node.getAttribute("readonly")=="true");  
+    this.setVisible(node.getAttribute("visible")=="true");  
+    this.setDescription(nullstring(node.getAttribute("description")));
+    this.setColor(nullstring(node.getAttribute("color"),"#888888"));
     var xmlfields = node.getElementsByTagName("field");
     for (let i = 0; i < xmlfields.length; i++) {
       const xmlfield = xmlfields[i];
@@ -602,6 +635,7 @@ var TField = function(table,name){
   this.type=0;  //TType
   this.length=0;
   this.link=null; //null or TField constraint
+  this.linkfilter=[false,null,null,null]; //TODOif link attached: enabled, from, to: false,null,null;   true,1,5,idgroup;    true,4,4,idgroup
   this.table=table; //TTable parent
   this.posrow=0;   //row 0,1,2,3...  
   this.DOMElement=null;  //to svg text
@@ -609,8 +643,11 @@ var TField = function(table,name){
   this.name=name;
   this.autoinc=AUTOINCTSTART;
   this.display=false; //if true then if the table is linked then this field is display 
+  this.description="";//TODO
 
-
+  this.setDescription=function(value){    
+    this.description=nullstring(value);
+  }
   this.edit=function(parent){
     if (stateEdit) return;
     stateEdit=true;
@@ -638,18 +675,31 @@ var TField = function(table,name){
       div.innerHTML+=`<input type="checkbox" id="edit_display">`;
      }
      div.innerHTML+=`<hr>
+     <label>Description</label><textarea id="edit_description" cols="40" rows="5">`+nullstring(this.description)+`</textarea><hr>
      <button onclick="editFieldDelete(this)">Delete Field</button>
      <hr><label>Data from another table:</label>
      <button onclick="editFieldLink(this)">LinkTo</button>
-     <button onclick="editFieldLinkDelete(this)">DeleteLink</button>
-     <hr>
-     <button onclick="editFieldOK(this)">OK</button>
-     <button onclick="editFieldCancel(this)">Cancel</button>
-     `;
+     <button onclick="editFieldLinkDelete(this)">DeleteLink</button>`;
+     if (this.link!=null){
+        div.innerHTML+=`<label>Link filtered values range:</label>`;
+        if (this.linkfilter[0]) {
+          div.innerHTML+=`<input type="checkbox" linked="DOMfilterDIV" onchange="changeCHKfilter(this)" id="edit_linkfilter" checked>`;
+        }else {
+          div.innerHTML+=`<input type="checkbox" linked="DOMfilterDIV" onchange="changeCHKfilter(this)" id="edit_linkfilter">`;
+        }
+        div.innerHTML+=`<br><span id="DOMfilterDIV"><input type="number" id="edit_linkfilter1" value="`+this.linkfilter[1]+`">
+        <input type="number" id="edit_linkfilter2" value="`+this.linkfilter[2]+`">
+        <label>Filter by</label><input type="text" id="edit_linkfilterfield" value="`+this.linkfilter[3]+`">
+        </span>`;
+     }
+     div.innerHTML+=`<hr><button onclick="editFieldOK(this)">OK</button>
+     <button onclick="editFieldCancel(this)">Cancel</button>`;
     div.field=this;
     parent.appendChild(div);
     return div;
   }
+
+
   this.addLink=function(field){
     this.link = field;    
     this.DOMLink =document.createElementNS("http://www.w3.org/2000/svg","line");
@@ -733,6 +783,14 @@ var TField = function(table,name){
     f.setAttribute("name",this.name);
     f.setAttribute("type",this.type);
     f.setAttribute("length",this.length);
+    f.setAttribute("description",this.description);
+    if (this.linkfilter[0])
+      f.setAttribute("linkfilter",1);
+    else
+      f.setAttribute("linkfilter",0);    
+    f.setAttribute("linkfiltermin",this.linkfilter[1]);
+    f.setAttribute("linkfiltermax",this.linkfilter[2]);
+    f.setAttribute("linkfilterfield",this.linkfilter[3]);
     if (this.display)
       f.setAttribute("display",1)
     else
@@ -748,10 +806,20 @@ var TField = function(table,name){
     this.length=Number(node.getAttribute("length")); 
     this.linktext = node.getAttribute("link");
     this.display = node.getAttribute("display");
+    linkfilt = node.getAttribute("linkfilter");
+    this.setDescription(nullstring(node.getAttribute("description")));
     if (this.display=='0') 
       this.display = false;
     else
       this.display = true;
+    if (linkfilt=='0') 
+      this.linkfilter[0] = false;
+    else
+      this.linkfilter[0] = true;
+    this.linkfilter[1] = node.getAttribute("linkfiltermin");
+    this.linkfilter[2] = node.getAttribute("linkfiltermax");
+    this.linkfilter[3] = nullstring(node.getAttribute("linkfilterfield"));
+      
     this.autoinc = node.getAttribute("autoinc");
     if (this.linktext!=null){
       this.linktext=this.linktext.split(",");
@@ -994,10 +1062,14 @@ function editTableOK(div){
   var ewidth = document.getElementById('edit_width');
   var eheight = document.getElementById('edit_height');
   var ereadonly = document.getElementById('edit_readonly');
+  var edescription = document.getElementById('edit_description');
+  var ecolor = document.getElementById('edit_color');
   panel.table.setName(ename.value);
   panel.table.width=Number(ewidth.value);
   panel.table.height=Number(eheight.value);
   panel.table.setReadOnly(ereadonly.checked);
+  panel.table.setColor(ecolor.value);
+  panel.table.setDescription(edescription.value);
 
   removePanelDOM(div);
   panel.table.refreshDOM();
@@ -1108,6 +1180,22 @@ function editFieldOK(div){
   var etype = document.getElementById('edit_type');
   var elength = document.getElementById('edit_length');
   var edisplay = document.getElementById('edit_display');
+  var edescription = document.getElementById('edit_description');
+  
+  var elinkfilter = document.getElementById('edit_linkfilter');
+  var elinkfilter1 = document.getElementById('edit_linkfilter1');
+  var elinkfilter2 = document.getElementById('edit_linkfilter2');  
+  var elinkfilterfield = document.getElementById('edit_linkfilterfield');  
+  if (elinkfilter!=null){
+    try {
+      panel.field.linkfilter[0]=elinkfilter.checked;
+      panel.field.linkfilter[1]=elinkfilter1.value;
+      panel.field.linkfilter[2]=elinkfilter2.value;        
+      panel.field.linkfilter[3]=elinkfilterfield.value;
+    } catch (error) {
+      
+    }
+  }
   panel.field.name = ename.value;
   //change type than records
   if (panel.field.type!=Number(etype.value)){
@@ -1116,6 +1204,7 @@ function editFieldOK(div){
   }  
   panel.field.display = edisplay.checked;
   panel.field.length = Number(elength.value);
+  panel.field.setDescription(edescription.value);
   removePanelDOM(div);
   panel.field.table.refreshRecordFields();
   panel.field.table.refreshFields();
@@ -1149,6 +1238,16 @@ function editFieldLinkDelete(div){
     panel.field.deleteLink();
     removePanelDOM(div);
   } 
+}
+function changeCHKfilter(chk){  
+  var DOM = chk.getAttribute("linked");
+  if (DOM==null) return;
+  DOMfilterDIV = document.getElementById(DOM);
+  if ((chk.checked) && (DOMfilterDIV!=null)){
+    DOMfilterDIV.style.visibility="visible";
+  } else {
+    DOMfilterDIV.style.visibility="hidden";
+  }
 }
 
 //endregion
@@ -1251,6 +1350,16 @@ function up(e){
 //#endregion  MOUSE MOVE TOUCH
 
 //#region TOOLS
+function nullstring(value,helyettes){
+  if (value==null)
+  {  if (helyettes==null)
+      return ""
+    else
+      return helyettes;
+  }
+  else  
+     return value;
+}
 
 function convertRemToPixels(rem) {    
   return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -1626,7 +1735,7 @@ function FlowDBCopy(e){
 //region BROWSE functions (LIST)  
 
 var Divname=null;
-
+var browsebuttonleft=true;
 function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
   if (tableidx<0 || tableidx>=ATables.length) return ;
   if (divname==null)
@@ -1709,6 +1818,14 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
             r.setAttribute("class","flow_rec_header");
         }
         t.appendChild(r);
+        
+        if ((browsebuttonleft) && (i>0)){
+          var c= document.createElement("td");
+          r.appendChild(c);
+          var s3 = "'"+sor[0]+"'";
+          c.innerHTML='<button onclick="list_edit(this,'+tableidx+','+s3+')">Edit</button><button onclick="list_del(this,'+tableidx+','+s3+')">Delete</button>';      
+        }
+
         //r.setAttribute("sqlid",sor[0]);
         for (let j = start; j < sor.length; j++) {
             var cell=sor[j];
@@ -1728,7 +1845,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
             if (cell==null) { cell = ""};
             c.innerHTML=cell;
         }          
-        if(i>0){
+        if ((!browsebuttonleft) && (i>0)){
             var c= document.createElement("td");
             r.appendChild(c);
             var s3 = "'"+sor[0]+"'";
@@ -1743,16 +1860,20 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
 
 //0,1,......  [idx,name]
 //lookup table with concatenated names 
-function getTable(table) {
+function getTable(table,filterfieldname) {
+  var filtidx=null;
   var records=[];    
-  var displayidx=[]; //displayfield if was set
-  for (let i = 0; i < table.AFields.length; i++) {
+  var displayidx=[]; //displayfield if was set  [ [1,null],[3.null],.... ]
+  for (let i = 0; i < table.AFields.length; i++) {    
+    if (table.AFields[i].name==filterfieldname){
+      filtidx=i;
+    }
     if (table.AFields[i].display==true){
-      if (table.AFields[i].link==null){
+      if (table.AFields[i].link==null){        
         displayidx.push([i,null]);
       } else {
         displayidx.push([i,
-          getTable(table.AFields[i].link.table)
+          getTable(table.AFields[i].link.table,filterfieldname)
         ]);
       }
     }
@@ -1763,6 +1884,9 @@ function getTable(table) {
           var sor=Array(2);
           sor[0]=o[0];
           sor[1]="";
+          if (filtidx!=null){
+            sor.filtervalue=o[filtidx];
+          }
           displayidx.forEach(function(oi){
             if (oi[1]==null){
               sor[1]+=o[oi[0]]+" ";
@@ -1796,6 +1920,9 @@ function getTable(table) {
         var sor=Array(2);
         sor[0]=o[0];
         sor[1]="";
+        if (filtidx!=null){
+          sor.filtervalue=o[filtidx];
+        }
         o.forEach(function(o2,i2){
           if (i2>0){
             sor[1]+=o2+" ";
@@ -1934,17 +2061,53 @@ function ComboBoxYesNoDOM(value,field1) {
 }
 
 function ComboBoxDOM(value,field1,field2){    
+  var filtered=field1.linkfilter[0];
+  var min=field1.linkfilter[1];
+  var max=field1.linkfilter[2];
+  var filterfield=field1.linkfilter[3];  
+  num =false; // ai intervallum kereséshez szám kell
+  switch (field1.type) {
+    case 1:
+    case 2:
+    case 3:
+      num=true;
+      min=Number(field1.linkfilter[1]);
+      max=Number(field1.linkfilter[2]);      
+      break;
+    default:
+      break;
+  }
   var opt = `<label>`+field1.name+`</label><select id="`+field1.table.name+field1.name+`">`;
-  var t = getTable(field2.table);
-  for (let i = 0; i < t.length; i++) {
+  var t=null;
+  if (filtered){
+    t = getTable(field2.table,filterfield);
+  } else {
+    t = getTable(field2.table);
+  }
+  for (let i = 0; i < t.length; i++) {    
     const e = t[i];
     id = e[0];
-    if (value==id){        
-      opt+=`<option selected `;  
-    }else {
-      opt+=`<option `;  
+    filt=e.filtervalue;
+    if(num){
+      try {
+        filt=Number(filt);
+      } catch (error) {
+      }
     }
-    opt+=`value="`+id+`">`+e[1]+`</option>`;
+    if ((!filtered) ||                          //if no filter = all values
+        ((filtered) && (                        //if filter,
+          (num && (filt<=max) && (filt>=min)) ||      //and numeric = interval
+          (!num && ((filt==min) || (filt==max)))      //and string = val1 or val2
+        ))
+      ) 
+    {
+      if (value==id){        
+        opt+=`<option selected `;  
+      }else {
+        opt+=`<option `;  
+      }
+      opt+=`value="`+id+`">`+e[1]+`</option>`;
+    }
   }
   return (opt+`</select><br>`);
 }
