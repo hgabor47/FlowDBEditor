@@ -52,6 +52,7 @@ function newsdialog(show){
     localStorage.setItem("flowdbeditornews","");
   }
   var newsul = document.getElementById("newsul");
+  newsul.innerHTML="";
   var news1 = localStorage.getItem("flowdbeditornews");
   var shownews=false;        
   for(i=0;i<news.length;i++){ 
@@ -690,12 +691,15 @@ var TField = function(table,name){
         div.innerHTML+=`<br><span id="DOMfilterDIV"><input type="number" id="edit_linkfilter1" value="`+this.linkfilter[1]+`">
         <input type="number" id="edit_linkfilter2" value="`+this.linkfilter[2]+`">
         <label>Filter by</label><input type="text" id="edit_linkfilterfield" value="`+this.linkfilter[3]+`">
-        </span>`;
+        </span>`;        
      }
      div.innerHTML+=`<hr><button onclick="editFieldOK(this)">OK</button>
      <button onclick="editFieldCancel(this)">Cancel</button>`;
     div.field=this;
     parent.appendChild(div);
+    if (this.link!=null) {
+      changeCHKfilter(document.getElementById("edit_linkfilter"));
+    }
     return div;
   }
 
@@ -1245,8 +1249,10 @@ function changeCHKfilter(chk){
   DOMfilterDIV = document.getElementById(DOM);
   if ((chk.checked) && (DOMfilterDIV!=null)){
     DOMfilterDIV.style.visibility="visible";
+    DOMfilterDIV.style.display="block";
   } else {
     DOMfilterDIV.style.visibility="hidden";
+    DOMfilterDIV.style.display="none";
   }
 }
 
