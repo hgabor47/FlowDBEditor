@@ -16,7 +16,11 @@
         @import url('https://fonts.googleapis.com/css?family=Work+Sans:200,400');
         * {
             font-family: "Work Sans";   
-            font-size: 1rem;                     
+            font-size: 1rem;    
+                              
+        }
+        #area {
+            display: flex;
         }
         #news {
             z-index: 200;
@@ -216,7 +220,7 @@
 </head>
 <body>   
     <div id="news">
-        <div style="height:80%;overflow: auto;">
+        <div style="height:80%;overflow:auto;">
             <h1>News</h1>
             <ul id="newsul">
             
@@ -224,12 +228,12 @@
         </div>
         <button  onclick='{this.parentElement.style.visibility="hidden"}'>OK</button>
     </div>
-    <div class="container-fluid">
+    <div id="mainarea" class="container-fluid">
         <span class="display-5" >FlowDBEditor4</span><b>v0.90</b><i> CTRL+V Copy data and struct from clipboard. CopyToURL BUTTON paste actual FlowDB-URL to clipboard.</i>
         <div id="help" onclick="this.innerHTML=''">Write records with right click on created tables :)</div>
         <div id="area" class="row">    
             <div class="col-2">   
-                <div class="flex-column p-2" style='min-width:200px;overflow:hidden;height:auto;' onmouseover="cmdin(this)" onmouseout="cmdout(this)">
+                <div id="menu" class="flex-column p-2" style='min-width:200px;overflow:hidden;height:auto;' onmouseover="cmdin(this)" onmouseout="cmdout(this)">
                     <div class="flow_tables">CommandPanel
                         <i style="font-size:16px" class="fa">&#xf103;</i>
                     </div>
@@ -243,7 +247,8 @@
                     <button class="commandbutton" onclick="savetosvgfile('print','flowdbeditor')">Download SVG</button>
                     <button class="commandbutton" onclick="mySQL('print')">Download MySQL</button>
                     <button class="commandbutton" onclick="newsdialog(true)">News</button>
-                    <button class="commandbutton" onclick="zoom()">Zoom</button>
+                    <button class="commandbutton" onclick="zoom()">Zoom</button>                                        
+                    <div id="modules"></div>
                     <a target="_blank" style="visibility:hidden;" id="print" download="file.txt" href="">RightClickforDownload</a>                    
                 </div>
                 <div class="flex-column p-2"> 

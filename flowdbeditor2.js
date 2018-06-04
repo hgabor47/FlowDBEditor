@@ -24,7 +24,7 @@ window.onload=function(){
   }
   document.body.addEventListener("paste", PastePanel);
   newsdialog();
-  
+  addModules(document.getElementById("modules"));
 }
 
 var g = document.getElementsByName("table");
@@ -1356,6 +1356,39 @@ function up(e){
 //#endregion  MOUSE MOVE TOUCH
 
 //#region TOOLS
+
+function LoadFile(file,fuggveny){ //function(responsetxt) {
+  $.get(file, fuggveny);
+}
+function URLExists(url)
+{
+    var http = new XMLHttpRequest();
+    http.open('HEAD', url, false);
+    http.send();
+    return http.status!=404;
+}
+
+var  hasModules=false;
+function addModules(div){
+  addModule("flowdbeff",div);
+  addModule("flowdbplayer",div);  
+}
+function addModule(jsname,div){
+  if (!URLExists(jsname+".js")) return false;
+  loadModule(jsname,div);
+}
+function loadModule(jsname,div){
+  var script = document.createElement('script');
+  script.onload = function () {
+      var b = document.createElement("button");
+      b.setAttribute('onclick',jsname+"(this)");
+      b.innerHTML=jsname;
+      div.appendChild(b);
+  };
+  script.src = jsname+".js";
+  document.head.appendChild(script); 
+}
+
 function nullstring(value,helyettes){
   if (value==null)
   {  if (helyettes==null)
