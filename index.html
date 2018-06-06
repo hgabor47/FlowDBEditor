@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        var flowdbinit=null;//can use content (XML) or file path on server side. On client side please use GET 
+                                //example: copy tro clipbrd saved flowdb file content and paste to here among `` signs
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=0.7">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <title>FlowDBEditor</title>
+    <title>FlowDBEditor 4.0.91</title>
      <!-- Bootstrap CSS -->
      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
      <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
@@ -34,6 +38,20 @@
             border:black 1px dotted;
             color: rgb(0, 29, 29);
             visibility: hidden;
+        }
+        #defaultcontent {
+            z-index: 200;
+            position: absolute;
+            padding:16px;
+            top:10%;
+            left:10%;
+            
+            width:50%;
+            background-color: rgba(209, 196, 180, 0.897);
+            border:black 2px dotted;
+            color: rgb(0, 29, 29);
+            visibility: hidden;
+            cursor:pointer;
         }
         button {
             height:1.8rem;
@@ -96,11 +114,14 @@
             border: 1px rgb(88, 88, 88) dotted;
         }
         .flow_context {
-            font-size: 1rem;
+            font-size: 1.3rem;
             font-family: FontAwesome;
-            font-weight: 0;
+            font-weight: 400;
             cursor:pointer;   
             height:1.5rem;                  
+        }
+        .red {
+            color: red;
         }
         .flow_tables {
             font-size: 1.1rem;
@@ -156,10 +177,14 @@
         .flow_constraints_color2{
             background-color:rgb(204, 204, 204);                      
         }
-
+        
         .flow_line {
             stroke: rgb(59, 60, 68);
             stroke-width: 2;
+        }
+        .flow_line_hidden {
+            stroke: rgba(59, 60, 68,0);
+            stroke-width: 0;
         }
         .flow_line_start {
             stroke: rgb(29, 40, 126);
@@ -168,6 +193,14 @@
         .flow_line_end {
             stroke: rgb(255, 174, 0);
             stroke-width: 2;
+        }
+        .flow_line_start_hidden {
+            stroke: rgba(29, 40, 126,0);
+            stroke-width: 0;
+        }
+        .flow_line_end_hidden {
+            stroke: rgba(255, 174, 0,0);
+            stroke-width: 0;
         }
         .flow_rec_header{
             font-weight: 900;
@@ -219,6 +252,14 @@
     </script>
 </head>
 <body>   
+    <div id="defaultcontent" onclick="{this.style.visibility='hidden'}">
+        <div class="display-3">Default content changed on server and loaded.</div>
+        <div class="display-5">Your last saved content not modified!</div>
+        <br>
+        <div>Please use LOAD for access your last stored flow or store this with SAVE (and overwrite your last flow).</div>
+        <div>If you MODIFY this default loaded content this will automatically store to TEMP (and didn't overwrite last SAVEd).</div>
+        <div>If you press F5 then reload the latest TEMP flow (and this content will disapear and if you'd like then use LoadDefault button for view it)</div>
+    </div>
     <div id="news">
         <div style="height:80%;overflow:auto;">
             <h1>News</h1>
@@ -229,7 +270,7 @@
         <button  onclick='{this.parentElement.style.visibility="hidden"}'>OK</button>
     </div>
     <div id="mainarea" class="container-fluid">
-        <span class="display-5" >FlowDBEditor4</span><b>v0.90</b><i> CTRL+V Copy data and struct from clipboard. CopyToURL BUTTON paste actual FlowDB-URL to clipboard.</i>
+        <span class="display-5" >FlowDBEditor4</span><b>v0.91</b><i> for CHROME and SVG compatible browsers</i>
         <div id="help" onclick="this.innerHTML=''">Write records with right click on created tables :)</div>
         <div id="area" class="row">    
             <div class="col-2">   
@@ -240,6 +281,7 @@
                     <button class="commandbutton" onclick="Save()">Save</button>
                     <button class="commandbutton" onclick="Load()">Load</button>
                     <button class="commandbutton" onclick="Load('alma')">Clear</button>
+                    <button id="loadserverdefault" class="commandbutton" style="display:none;" onclick="LoadServerDefault(true)">LoadServerDefault</button>
                     <form style="display:none;"><input id="filename" class="commandbutton" type='file' accept='text/plain' ></form>
                     <button class="commandbutton" onclick="FlowDBSave('print')">SaveToFile</button>                                        
                     <button class="commandbutton" id="flowdbload" onclick="FlowDBLoad(this)" onmouseout="blur1()">LoadFromFile</button>

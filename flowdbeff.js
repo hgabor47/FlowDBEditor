@@ -218,7 +218,7 @@ TDesign = function(typeindex,screensarray){
     // 4,[1,4,3]
     this.DesignType=typeindex;
     this.AScreens=screensarray;
-
+    
 }
 
 

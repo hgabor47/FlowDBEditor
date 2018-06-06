@@ -1,3 +1,26 @@
+/* FlowDBEditor content can load from (maybe automatically)
+    GET parameter, 
+    localstorage, 
+    local file, 
+    server file, 
+    inbuilt
+
+  Flowdbeditor start process
+  1. If has flowdbeditor GET (flowdb) then load from     
+    2. If no GET> examine INBUILT string (flowdbinit) and 
+      2a if content: then load it
+      2b if file path: then upload from server side and load it
+      
+        3. If no inbuilt> Load TEMP! localstorage
+
+  With the LOAD button you can load FLOW! localstorage.
+  Difference beetween FLOW vs TEMP localstorage:
+    TEMP localstorage store automatically (all change and) the latest version without press button
+    FLOW localstorage store if you press SAVE button
+
+  so. if the next time you can continue editing where you abandoned. :)
+*/
+
 let params = (new URL(document.location)).searchParams;
 let flowdbget = params.get("flowdb");     
 let flowdbplayer = params.get("player");  //USERVIEW if exists
@@ -6,20 +29,30 @@ VIEWMODE=ViewModes.Developer;
 if (flowdbplayer!=null){
   VIEWMODE=ViewModes.User;
 }
-var flowdbinit=null; //if exists please remove this line flowdbinit is a innercdircle start flowdb if you want
+//var flowdbinit=null; //if exists please remove this line flowdbinit is a innercircle start flowdb if you want
 var temp="flowdbeditor_temp";        
 var AUTOINCTSTART=1;
 window.onload=function(){
   var but=document.getElementById("flowdbload");
-  but.activ=false;
+  but.activ=false; //TODO!!! for prevent to double load in same time
   if (flowdbget!=null){
     LoadString(flowdbget);
+    but.activ=true;
   } else {  
-    if (flowdbinit==null)
-      Load(temp)
+    if (flowdbinit==null){
+      Load(temp);
+      but.activ=true;
+    }
     else //compact
     {
-      LoadString(flowdbinit);      
+      if ( !flowdbinit.startsWith("<flow" )) {
+        //TODO load serverside file to flowdbinit
+        document.getElementById("loadserverdefault").style.display="flex";
+        LoadServerDefault();
+      } else {
+        LoadString(flowdbinit); 
+        but.activ=true;     
+      }
     }
   }
   document.body.addEventListener("paste", PastePanel);
@@ -88,8 +121,9 @@ oncehints.NewLinkFromPanel="Please select an another field name.";
 oncehints.NewLink="Please select first a field name and after click an another field name.";
 oncehints.outside="Reposition missed tables.";
 oncehints.save="Save to browsers' local storage.\nIn the next time you can load this.";
-oncehints.load="Load latest stored database from localstorage.";
-oncehints.loadfromfile="Load database from file.";
+oncehints.load="Loaded latest stored database from localstorage.";
+oncehints.loadfromfile="Loaded database from file.";
+oncehints.loadserverdefault="Default content loaded from server";
 oncehints.hint = function(hint){
   if (oncehints[hint]!=""){
     document.getElementById("help").innerHTML=oncehints[hint];
@@ -141,6 +175,14 @@ var TTable = function(name){
   }
   this.setVisible=function(value){
     this.visible=value;
+    if (this.visible){
+      if (this.DOMGroup!=null)
+        this.DOMGroup.style.visibility="visible";        
+    }else {
+      if (this.DOMGroup!=null)
+        this.DOMGroup.style.visibility="hidden";
+    }
+    this.refreshConstraints();
   }
 
   this.setName=function(name){
@@ -270,9 +312,8 @@ var TTable = function(name){
   this.refreshConstraints=function(){
     var a = this.AFields;
     var tmptables=[];
-
     for (let i = 0; i < a.length; i++) {
-      const e = a[i];
+      const e = a[i];      
       var t=e.refreshLink();
       if (t!=null){
         tmptables.push(t);
@@ -344,6 +385,8 @@ var TTable = function(name){
     stateEdit=true;
     var div = document.createElement("div");
     div.className="flow_edit";
+    div.style.top=Number(this.posxy[1]+20)+"px";
+    div.style.left=Number(this.posxy[0]-30)+"px";
     div.innerHTML=
     `<label>Tablename</label><input type="text" id="edit_name" value="`+this.name+`"><br>
      <label>Width</label><input type="number" id="edit_width" step="30" value="`+this.width+`"><br>
@@ -370,7 +413,7 @@ var TTable = function(name){
   this.browse=function (parent) {
     if (stateEdit) return;
     stateEdit=true;
-    var div = document.createElement("div");
+    var div = document.createElement("div");  //create ID=LIST DIV before AREA
     div.className="flow_browse";
     div.setAttribute("id","list")
     parent.appendChild(div);
@@ -711,21 +754,21 @@ var TField = function(table,name){
     this.DOMLink.setAttribute("y1",100);
     this.DOMLink.setAttribute("x2",300);
     this.DOMLink.setAttribute("y2",200);
-    this.DOMLink.setAttribute("class","flow_line");
+    //this.DOMLink.setAttribute("class","flow_line");
 
     var k =document.createElementNS("http://www.w3.org/2000/svg","line");
     k.setAttribute("x1",100);
     k.setAttribute("y1",100);
     k.setAttribute("x2",300);
     k.setAttribute("y2",200);
-    k.setAttribute("class","flow_line_start");
+    //k.setAttribute("class","flow_line_start");
     this.DOMLink.k=k;
     var v =document.createElementNS("http://www.w3.org/2000/svg","line");
     v.setAttribute("x1",100);
     v.setAttribute("y1",100);
     v.setAttribute("x2",300);
     v.setAttribute("y2",200);
-    v.setAttribute("class","flow_line_end");
+    //v.setAttribute("class","flow_line_end");
     this.DOMLink.v=v;
     flowdbeditor.appendChild(this.DOMLink.v);
     flowdbeditor.appendChild(this.DOMLink.k);
@@ -750,6 +793,16 @@ var TField = function(table,name){
   this.refreshLink=function(){
     if (this.DOMLink!=null){
       if (this.link!=null){
+        if ((!this.table.visible) || (!this.link.table.visible)){
+          //TODO each table is invisible
+          this.DOMLink.setAttribute("class","flow_line_hidden");
+          this.DOMLink.k.setAttribute("class","flow_line_start_hidden");
+          this.DOMLink.v.setAttribute("class","flow_line_end_hidden");
+        }else {
+          this.DOMLink.setAttribute("class","flow_line");
+          this.DOMLink.k.setAttribute("class","flow_line_start");
+          this.DOMLink.v.setAttribute("class","flow_line_end");
+        }
         a=this.getPosXY();
         b=this.link.getPosXY();
         this.DOMLink.setAttribute("x1",a[0]-16);
@@ -878,7 +931,8 @@ var TType = function(name,sql,inputtype,mssql){
   this.mssql = mssql;
 }
 
-var FlowModes = Object.freeze({"Flow":1, "Constraint":2})
+var OpenEye = Object.freeze({"Open":"&#xf06e;&nbsp;","Close":"&#xf070;&nbsp;"});
+var FlowModes = Object.freeze({"Flow":1, "Constraint":2});
 //AType struct: displaytext,mysqltype,htmltype,| mssqltype,,,,
 //                     0        1         2         3  
 var AType = [new TType("String","varchar(%)","text","[nvarchar(%)]"),
@@ -959,8 +1013,36 @@ function refreshTablesListDOM(){
     else
       obj.className="flow_tables flow_tables_color2";
     
-    obj.innerHTML=e.name;
+    bt =  document.createElement("span");
+    bt.table= e;
+    bt.className="flow_context";
+    bt.setAttribute("onclick","hidetable(this)");
+    if (e.visible){
+      bt.innerHTML=OpenEye.Open
+      bt.className="flow_context";
+    }
+    else{
+      bt.innerHTML=OpenEye.Close;
+      bt.className="flow_context red";
+    }
+    bt.style.width="40px;";
+    obj.appendChild(bt);
+    txt = document.createElement("span");
+    txt.innerHTML=e.name;
+    obj.appendChild(txt);
+    //obj.innerHTML=`<button class='flow_context' onclick="hidetable(this)">&#xf06e;&nbsp;</i><span>`+e.name+`</span>`;
     l.appendChild(obj);
+  }
+}
+
+function hidetable(button){
+  button.table.setVisible(!button.table.visible);
+  if (button.table.visible) {
+    button.innerHTML=OpenEye.Open;
+    button.className="flow_context";
+  } else {
+    button.innerHTML=OpenEye.Close;
+    button.className="flow_context red";
   }
 }
 
@@ -985,6 +1067,7 @@ function refreshFieldsListDOM(){
 
   for (let i = 0; i < SelectedTable.AFields.length; i++) {
     const e = SelectedTable.AFields[i];
+
     var obj = document.createElement("div");
     if (i%2==0)
       obj.className="flow_fields flow_fields_color1";
@@ -1360,6 +1443,27 @@ function up(e){
 function LoadFile(file,fuggveny){ //function(responsetxt) {
   $.get(file, fuggveny);
 }
+function LoadContentFromServer(file,fuggveny){
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function(){ 
+      if (this.readyState==2){
+          mtimefile = this.getResponseHeader('Last-Modified')+file;
+          stimefile = localStorage.getItem("flowdbeditor_infileID");
+          if ((stimefile!=null) && (stimefile==mtimefile))
+            this.abort();
+          else 
+            localStorage.setItem("flowdbeditor_infileID",mtimefile);
+      }     
+      if (this.readyState==4){ // && xhttp.status==200){  
+          fuggveny(this.responseText,this.status); //1. sora fejlec  2.adat        
+      }
+  }
+  var s=file+"?id="+Math.random();
+  xhttp.open("GET",s,true);            
+  xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+  xhttp.send();  
+}
+
 function URLExists(url)
 {
     var http = new XMLHttpRequest();
@@ -1502,6 +1606,30 @@ function SavetoString(){
     table.getXML(xml,root);
   }
   return new XMLSerializer().serializeToString(xml);    
+}
+
+function LoadServerDefault(forceload){
+  if (forceload){
+    oncehints.hint("loadserverdefault");
+    localStorage.setItem("flowdbeditor_infileID","");
+  }  
+  LoadContentFromServer(flowdbinit,function(txt,code){
+    if (code==200){
+      LoadString(txt);
+      if (!forceload){
+        var warning=document.getElementById("defaultcontent");
+        warning.style.visibility="visible";
+      }
+    }
+    else {   
+      Load(temp);         
+      //alert("Auto load from server file can't success!");
+      // this is generally when date and filename same than last
+    }
+    var but=document.getElementById("flowdbload");
+    but.activ=true;
+  });
+
 }
 
 function LoadString(xmlText){
@@ -1728,6 +1856,11 @@ function FlowDBSave(linknode) {
 }
 
 function FlowDBLoad(e) {
+  if (!e.activ){
+    alert("Please wait the autoload!");
+    return;
+  }
+
   oncehints.hint("loadfromfile");
   var input = document.getElementById("filename");
   if (input.file!=null || input.files[0]!=null)
@@ -1774,11 +1907,11 @@ function FlowDBCopy(e){
 //region BROWSE functions (LIST)  
 
 var Divname=null;
-var browsebuttonleft=true;
+var browsebuttonleft=true;  //left or right side
 function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
   if (tableidx<0 || tableidx>=ATables.length) return ;
   if (divname==null)
-    divname=Divname;
+    divname=Divname
   Divname=divname;    
   var div = document.getElementById(divname);
   div.innerHTML=``;
@@ -1786,6 +1919,14 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
     var hdr = document.getElementById("list_header");
     hdr.style.top=(e.target.scrollTop)+'px';
   });
+  if (divname!=null) //TODO New position in new table
+  {    
+    div.style.top=Number(window.pageYOffset)+20+"px";
+    div.style.left=Number(window.pageXOffset)+30+"px";
+  }
+
+
+
 
   div2=document.createElement("div");
   div2.setAttribute("id","list_header");
@@ -1857,6 +1998,10 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
             r.setAttribute("class","flow_rec_header");
         }
         t.appendChild(r);
+        if ((browsebuttonleft) && (i==0)){
+          var c= document.createElement("td");
+          r.appendChild(c);
+        }
         
         if ((browsebuttonleft) && (i>0)){
           var c= document.createElement("td");
