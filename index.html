@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <script>
-        var flowdbinit=null;//can use content (XML) or file path on server side. On client side please use GET 
+        var vers="0.92";
+        var flowdbinit=null;    //can use content (XML) or file path on server side. On client side please use GET 
                                 //example: copy tro clipbrd saved flowdb file content and paste to here among `` signs
     </script>
     <meta charset="UTF-8">
@@ -11,7 +12,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <title>FlowDBEditor 4.0.91</title>
+    <title>FlowDBEditor 4</title>
      <!-- Bootstrap CSS -->
      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
      <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
@@ -225,7 +226,8 @@
     </style>
     <script>
         var news = [             
-            [109,"8.Filtered linked combobox able to setup by Field editor window"]
+            [110,"9.Built in default flow option"]
+            ,[109,"8.Filtered linked combobox able to setup by Field editor window"]
             ,[108,"7. Touch is working on tablet or mobile and Zoom implemented by a button"]
             ,[106,"6.Bug fixes (can't able to insert new record to table content."]
             ,[104,"5.Copy from Excel or another source to clipboard. Press CTRL+V on FlowDBEditor and create a new table or fill a table from clipboard."]
@@ -247,6 +249,12 @@
                 //document.getElementById("help").innerHTML="blur";
                 FlowDBLoad(but);
             }
+        }
+        window.onload=function(){            
+            v = document.getElementById("vers");
+            v.innerHTML="v"+vers;
+            document.title+="."+vers;
+            flowdbeditor_onload();
         }
 
     </script>
@@ -270,7 +278,7 @@
         <button  onclick='{this.parentElement.style.visibility="hidden"}'>OK</button>
     </div>
     <div id="mainarea" class="container-fluid">
-        <span class="display-5" >FlowDBEditor4</span><b>v0.91</b><i> for CHROME and SVG compatible browsers</i>
+        <span class="display-5" >FlowDBEditor4</span><b id="vers"></b><i> for CHROME and SVG compatible browsers</i>
         <div id="help" onclick="this.innerHTML=''">Write records with right click on created tables :)</div>
         <div id="area" class="row">    
             <div class="col-2">   
@@ -290,6 +298,7 @@
                     <button class="commandbutton" onclick="mySQL('print')">Download MySQL</button>
                     <button class="commandbutton" onclick="newsdialog(true)">News</button>
                     <button class="commandbutton" onclick="zoom()">Zoom</button>                                        
+                    <button class="commandbutton" onclick="AI()">A.I.</button> 
                     <div id="modules"></div>
                     <a target="_blank" style="visibility:hidden;" id="print" download="file.txt" href="">RightClickforDownload</a>                    
                 </div>

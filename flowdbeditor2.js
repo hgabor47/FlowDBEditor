@@ -32,7 +32,7 @@ if (flowdbplayer!=null){
 //var flowdbinit=null; //if exists please remove this line flowdbinit is a innercircle start flowdb if you want
 var temp="flowdbeditor_temp";        
 var AUTOINCTSTART=1;
-window.onload=function(){
+function flowdbeditor_onload(){
   var but=document.getElementById("flowdbload");
   but.activ=false; //TODO!!! for prevent to double load in same time
   if (flowdbget!=null){
@@ -183,6 +183,15 @@ var TTable = function(name){
         this.DOMGroup.style.visibility="hidden";
     }
     this.refreshConstraints();
+  }
+
+  this.moveToPosition=function(x,y){
+      x = Math.floor(x);
+      y = Math.floor(y);
+      var s = "translate("+x+","+y+")";
+      this.DOMGroup.setAttribute("transform",s);
+      this.setPosXY(x,y);
+      this.refreshConstraints();
   }
 
   this.setName=function(name){
@@ -1000,6 +1009,7 @@ function newTable(){
   ATables.push(t);
   flowdbeditor.appendChild(t.getDOM());
   refreshTablesListDOM();
+  return t;
 }
 
 function refreshTablesListDOM(){
@@ -1468,8 +1478,12 @@ function URLExists(url)
 {
     var http = new XMLHttpRequest();
     http.open('HEAD', url, false);
-    http.send();
-    return http.status!=404;
+    try {
+      http.send();
+      return http.status!=404;        
+    } catch (error) {
+      return false;
+    }    
 }
 
 var  hasModules=false;
@@ -2299,3 +2313,145 @@ function ComboBoxDOM(value,field1,field2){
 
 
 //#endregion BROWSE functions (LIST) 
+
+
+//region SPEECH 
+
+function AI(){
+  window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
+  var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
+	const recognition = new SpeechRecognition();
+  
+  var grammar = '#JSGF V1.0; grammar flowbrick; public <flowbrick> = table | field | create | 1 | 2 | 3 | 4 | 5 | 7 | 8 | 9 | 10 | link | clear ;'  
+  var speechRecognitionList = new SpeechGrammarList();
+  speechRecognitionList.addFromString(grammar, 1);
+  recognition.grammars = speechRecognitionList;
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+	recognition.addEventListener('result', e => {
+		const speechTotext = Array.from(e.results)
+			.map(result => result[0])
+			.map(result => result.transcript)
+			.join('')
+			
+			if (e.results[0].isFinal) {
+        robot(speechTotext);
+			}
+	});
+
+	recognition.addEventListener('end', recognition.start);
+  recognition.start();
+}
+
+var commands = [
+  [1,"create 4 tables"],[1,"create 4 table"],[1,"4 tables create"],
+  [2,"create 4 field"],[2,"create 4 fields"],
+  [3,"link"],
+  [4,"clear tables"],
+  [5,"rename new tables"],
+  [6,"rename last table"],
+  [7,"rename table called"],
+  [8,"select table"],
+];
+var change = [["free","3"],["form","4"],["cleared","create"],["tree","3"],["for","4"],["hive","5"],["one","1"],["two","2"],["too","2"],["six","6"],["sex","6"],
+["84 bus","8 tables"],["timetables","10 tables"],["grade","create"],["turntables","10 tables"],["neighbour","table"],["you","new"]];
+
+var speechlevel=0;
+function robot(command){
+  command=command.toLowerCase();
+  for (let i = 0; i < change.length; i++) {
+    const chg = change[i];
+    command=command.replace(chg[0],chg[1]);
+  }
+  mini=-1;
+  minv=10;
+  for (let i = 0; i < commands.length; i++) {
+    if (command.startsWith(commands[i][1])) {
+      mini=i;
+      minv=-1;
+      break;
+    } else {   
+      var sym=getSimilarity(commands[i][1], command);
+      if (sym<minv){
+        mini=i;
+        minv=sym;
+      }
+    }
+  }  
+  if (minv<0.3){
+    console.log(commands[mini][1],command);
+    processSpeech(mini,command,minv);
+  } else {
+    console.log(minv,command);
+  }
+}
+
+
+function processSpeech(idx,command,minv){
+  switch (commands[mini][0]){
+    case 1: //TODO Tablemaker
+      tablemaker(command.match(/\d/g));
+      break;
+    case 2: //TODO Fieldmaker
+      break;
+    case 3: //TODO link
+      break;
+     case 8: //TODO Clear tables
+    Load('alma');
+    break;
+    default:
+      break;
+  }
+}
+
+
+function tablemaker(num){
+  for (let i = 0; i < num; i++) {
+    var table = newTable();  
+    table.moveToPosition(Number(Math.random()*1000),Number(Math.random()*900));    
+  }
+}
+
+
+function getSimilarity(a,b){  
+  var d=getEditDistance(a,b);
+  return d/Math.max(a.length,b.length);
+}
+
+function getEditDistance(a, b){
+  if(a.length == 0) return b.length; 
+  if(b.length == 0) return a.length; 
+
+  var matrix = [];
+
+  // increment along the first column of each row
+  var i;
+  for(i = 0; i <= b.length; i++){
+    matrix[i] = [i];
+  }
+
+  // increment each column in the first row
+  var j;
+  for(j = 0; j <= a.length; j++){
+    matrix[0][j] = j;
+  }
+
+  // Fill in the rest of the matrix
+  for(i = 1; i <= b.length; i++){
+    for(j = 1; j <= a.length; j++){
+      if(b.charAt(i-1) == a.charAt(j-1)){
+        matrix[i][j] = matrix[i-1][j-1];
+      } else {
+        matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, // substitution
+                                Math.min(matrix[i][j-1] + 1, // insertion
+                                         matrix[i-1][j] + 1)); // deletion
+      }
+    }
+  }
+
+  return matrix[b.length][a.length];
+};
+  
+//endregion SPEECH 
