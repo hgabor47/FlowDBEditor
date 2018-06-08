@@ -212,7 +212,7 @@ var TTable = function(name){
         o.push(null);
       }
     });
-
+    return f;
   }
   this.setPosXY=function(x,y){
     this.posxy[0]=x;
@@ -686,7 +686,7 @@ var idField = 0;
 var TField = function(table,name){
   
   this.type=0;  //TType
-  this.length=0;
+  this.length=45;
   this.link=null; //null or TField constraint
   this.linkfilter=[false,null,null,null]; //TODOif link attached: enabled, from, to: false,null,null;   true,1,5,idgroup;    true,4,4,idgroup
   this.table=table; //TTable parent
@@ -754,7 +754,12 @@ var TField = function(table,name){
     }
     return div;
   }
-
+  this.setType=function(value) {
+    this.type=value;
+    if (value!=0){
+      this.length=0;
+    }
+  }
 
   this.addLink=function(field){
     this.link = field;    
@@ -2323,11 +2328,12 @@ function AI(){
   var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
 	const recognition = new SpeechRecognition();
   
-  var grammar = '#JSGF V1.0; grammar flowbrick; public <flowbrick> = table | field | create | 1 | 2 | 3 | 4 | 5 | 7 | 8 | 9 | 10 | link | clear | select ;'  
+  var grammar = '#JSGF V1.0; grammar flowbrick; public <flowbrick> = table | field | create | 1 | 2 | 3 | 4 | 5 | 7 | 8 | 9 | 10 | link | clear | select | hét ;'  
   var speechRecognitionList = new SpeechGrammarList();
   speechRecognitionList.addFromString(grammar, 1);
   recognition.grammars = speechRecognitionList;
   //recognition.lang = 'en-US';
+  recognition.lang = 'hu-HU';
   recognition.interimResults = true;
   recognition.maxAlternatives = 1;
 
@@ -2347,18 +2353,20 @@ function AI(){
 }
 
 var commands = [
-  /*OK*/[1,"create 4 tables"],[1,"create 4 table"],[1,"4 tables create"],[1,"készíts 4 táblát"],[1,"szeretnék 4 táblát"],
-  [2,"create 4 field"],[2,"create 4 fields"],
+  /*OK*/[1,"create 4 tables"],[1,"create 4 table"],[1,"4 tables create"],[1,"készíts 4 táblát"],[1,"szeretnék 4 táblát"],[1,"készíts 4 új táblát"],[1,"kérek 4 új táblát"],
+  [2,"create 4 field"],[2,"create 4 fields"],[2,"készíts 4 mezőt"],[2,"készíts 4 új mezőt"],[2,"kérek 4 új mezőt"],
   [3,"link"],
   /*OK*/[4,"clear tables"],[4,"törölj ki minden táblát"],[4,"töröld a táblákat"],[4,"töröld ki az összes táblát"],
-  /*OK*/[7,"rename table to"],[7,"a tábla új neve"],[7,"új táblanév"],[7,"nevezd át a táblát%nevűre"],[7,"nevezd át%nevűre"],[7,"átnevezés"],
-  [5,"rename new tables"],[5,"rename unknown tables"],
-  [6,"rename last table"],
+  /*OK*/[7,"rename table to"],[7,"a tábla új neve"],[7,"új tábla név"],[7,"az új tábla név"],[7,"nevezd át a táblát%nevűre"],[7,"nevezd át%nevűre"],[7,"átnevezés"],[7,"nevezd át"],[7,"a tábla új neve"],
+  [5,"delete table"],[5,"töröld a táblát"],[5,"tábla törlése"],[5,"töröld"],[5,"törlés"],
+  [6,"select new table"],[6,"új tábla"],[6,"kérem az egyik új táblát"],[6,"új tábla kiválasztása"],[6,"válaszd ki az új táblát"],
   /*OK*/[8,"select table"],[8,"select table called"],[8,"tábla kiválasztása"],[8,"tábla választás"],[8,"válaszd ki a%táblát"],
+  [9,"add string field"],[9,"add integer field"],[9,"add date field"],[9,"add boolean field"],[9,"kérek 1 integer mezőt"],[9,"új integer mező"],[9,"kérek 1 string mezőt"],[9,"új string mező"],[9,"kérek 1 boolean mezőt"],[9,"új boolean mező"],[9,"új date mező"],[9,"kérek 1 date mezőt"],
 ];
-var change = [["free","3"],["form","4"],["cleared","create"],["tree","3"],["for","4"],["hive","5"],["one","1"],["two","2"],["too","2"],["six","6"],["sex","6"],
+var change = [["igen","yes"],["nem","no"],["free","3"],["form","4"],["cleared","create"],["tree","3"],["for","4"],["hive","5"],["one","1"],["two","2"],["too","2"],["six","6"],["sex","6"],
 ["84 bus","8 tables"],["timetables","10 tables"],["grade","create"],["portable","4 tables"],["turntables","10 tables"],["neighbour","table"],["you","new"]
-,["egy","1"],["névtáblát","4 táblát"]
+,[" egy "," 1 "],["névtáblát","4 táblát"],[" kettő "," 2 "],[" négy "," 4 "],[" három "," 3 "],[" öt "," 5 "],[" hat "," 6 "],[" hét "," 7 "],[" nyolc "," 8 "],[" kilenc "," 9 "],[" tíz "," 10 "],
+["logikai","boolean"],["szám","integer"],["stream","string"],["sztring","string"],["dátum","date"],["audi","id"],["díj","id"],
 ];
 
 var speechlevel=0;
@@ -2368,6 +2376,12 @@ function robot(command){
     const chg = change[i];
     command=command.replace(chg[0],chg[1]);
   }
+  if (speechlevel!=0){
+    //all text transfer
+    processSpeech(-1,command,0,null);
+  }
+
+
   mini=-1;
   minv=10;
   minparams=[];
@@ -2429,19 +2443,36 @@ function robot(command){
 
 
 function processSpeech(idx,command,minv,minparams=null){
-  switch (commands[mini][0]){
+  var cases=commands[mini][0];
+  if (speechlevel>0){
+    cases=speechlevel;    
+  }
+  switch (cases){
     case 1: //TODO Tablemaker
-      SP_maketable(command.match(/\d/g));
+      SP_maketables(command.match(/\d/g));
       break;
     case 2: //TODO Fieldmaker
+      SP_makefields(command.match(/\d/g));
+      break;
+    case 9: //add typed fields
+      SP_addfield(idx,command);
+      break;
+    case 901:
+      //TODO case 9 after any other attribs like length
       break;
     case 3: //TODO link
       break;
-    case 4: //TODO Clear tables
+    case 4: //Clear tables
       Load('alma');
       break;
-    case 8: //TODO select table
+    case 5:
+      SP_deletetable(idx,command);
+      break;
+    case 8: 
       SP_selecttable(idx,command,minv,minparams);
+      break;
+    case 6: //TODO select NEW table
+      SP_selectnewtable();
       break;
     case 7:
       SP_renametable(idx,command,minv,minparams);
@@ -2451,21 +2482,90 @@ function processSpeech(idx,command,minv,minparams=null){
 }
 
 
-function SP_maketable(num){
-  num=Math.min(10,Math.abs(num.floor(num)));
+function SP_maketables(num){
+  num=Math.min(10,Math.abs(Math.floor(num)));
   for (let i = 0; i < num; i++) {
     var table = newTable();  
     table.moveToPosition(Number(Math.random()*10)*100,Number(Math.random()*7)*100);        
   }
 }
 
+function SP_makefields(num){
+  if (SelectedTable!=null){
+    num=Math.min(10,Math.abs(Math.floor(num)));
+    for (let i = 0; i < num; i++) {
+      SelectedTable.addField("Field"+(idField++),0);
+    }
+    SelectedTable.refreshFields();
+    refreshFieldsListDOM();
+  }
+}
+
+function SP_addfield(idx,command){
+  if (SelectedTable==null) return;
+  if (command.indexOf("integer")>0){
+    var f = SelectedTable.addField("Field"+(idField++),0);
+    f.setType(1);
+    f.length=0;
+  }else if (command.indexOf("string")>0){
+    SelectedTable.addField("Field"+(idField++),0);    
+  } else if (command.indexOf("boolean")>0){
+    var f = SelectedTable.addField("Field"+(idField++),0);
+    f.setType(7);
+    f.length=0;  
+  } else if (command.indexOf("date")>0){
+    var f = SelectedTable.addField("Field"+(idField++),0);
+    f.setType(4);
+    f.length=0;
+  } 
+  SelectedTable.refreshFields();
+  refreshFieldsListDOM();
+}
+
+function SP_selectnewtable() {
+  const t = ATables.find( tab => tab.name.toLowerCase().indexOf("unknown")==0 );
+  if (t!=null) {
+    t.Selected();
+  }
+}
+
+
+function SP_deletetable(idx,cmd) {
+  if (SelectedTable!=null){
+    if (speechlevel!=0){
+      speechlevel=0; //agree
+      document.getElementById("yesno").style.visibility="hidden";
+      if (cmd=="yes"){
+        var index = ATables.indexOf(SelectedTable);
+        if (index > -1) {
+          div = ATables[index].DOMGroup;
+          ATables.splice(index, 1);
+          //div.parentElement.removeChild(div);
+          SelectedTable.destroy();
+          SelectedTable=null;
+          refreshTablesListDOM();          
+          Save(temp);
+        }
+      }
+    } else {
+      speechlevel=commands[idx][0];
+      document.getElementById("yesno").style.visibility="visible";
+    }  
+  }
+    
+}
+
 function SP_selecttable(idx,cmd,minv,minparams) {
   if (idx<0) return;  
   if (idx>=commands.length) return;
-  if ((cmd==null) || (cmd=""))  return;
+  if ((cmd==null) || (cmd==""))  return;
 
   if ((minparams!=null) && (minparams.length>0)) {
-    if (minparams===Array){
+    if (typeof(minparams)=="object"){
+      /*if (minparams[0]=="új"){
+        SP_selectnewtable();
+        return;
+      }*/
       var t = ATables.SearchTableByName(minparams[0]);
       if (t!=null)
         t.Selected(); 
@@ -2475,7 +2575,10 @@ function SP_selecttable(idx,cmd,minv,minparams) {
       cmd=cmd.replace(commands[idx][1],"");
       cmd=cmd.trim();
       if (cmd=="") return;
-      var t = ATables.SearchTableByName(cmd);
+      if (cmd.indexOf("unknown")==0){
+        cmd=cmd.replace(" ","");
+      }
+      var t = ATables.SearchTableByName(cmd.replace(" ","_"));
       if (t!=null)
         t.Selected();
     }
@@ -2496,7 +2599,7 @@ function SP_renametable(idx,cmd,minv,minparams){
     }else {
       if (minv<0){
         cmd=cmd.replace(commands[idx][1],"");
-        cmd=cmd.trim();
+        cmd=cmd.trim();        
         SelectedTable.setName(cmd.replace(" ","_"));
       }
     }      

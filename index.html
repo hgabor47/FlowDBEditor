@@ -223,6 +223,19 @@
             color: green;
             height:1.8rem;
         }
+        #yesno {
+            visibility: hidden;
+            z-index: 300;
+            position: absolute;
+            padding:32px;
+            top:200px;
+            left:200px;  
+            width:300px;
+            height:180px;       
+            background-color: rgba(113, 170, 96, 0.89);
+            border: 1px rgb(88, 197, 74) solid;            
+            font-size: 2.2rem;
+        }
     </style>
     <script>
         var news = [             
@@ -268,6 +281,7 @@
         <div>If you MODIFY this default loaded content this will automatically store to TEMP (and didn't overwrite last SAVEd).</div>
         <div>If you press F5 then reload the latest TEMP flow (and this content will disapear and if you'd like then use LoadDefault button for view it)</div>
     </div>
+    <div id="yesno" onclick="{speechlevel=0;this.style.visibility='hidden';}">YES or NO?</div>
     <div id="news">
         <div style="height:80%;overflow:auto;">
             <h1>News</h1>
