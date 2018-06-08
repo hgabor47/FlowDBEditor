@@ -969,7 +969,8 @@ var constraintField =null; //starting field
 
 var ATables = [];
 SearchTableByName = function(tablename){
-  const result = ATables.find( tab => tab.name === tablename );
+  tablename=tablename.toLowerCase();
+  const result = ATables.find( tab => tab.name.toLowerCase() === tablename );
   return result;
 }
 ATablesclear=function(){
@@ -2322,12 +2323,12 @@ function AI(){
   var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
 	const recognition = new SpeechRecognition();
   
-  var grammar = '#JSGF V1.0; grammar flowbrick; public <flowbrick> = table | field | create | 1 | 2 | 3 | 4 | 5 | 7 | 8 | 9 | 10 | link | clear ;'  
+  var grammar = '#JSGF V1.0; grammar flowbrick; public <flowbrick> = table | field | create | 1 | 2 | 3 | 4 | 5 | 7 | 8 | 9 | 10 | link | clear | select ;'  
   var speechRecognitionList = new SpeechGrammarList();
   speechRecognitionList.addFromString(grammar, 1);
   recognition.grammars = speechRecognitionList;
-  recognition.lang = 'en-US';
-  recognition.interimResults = false;
+  //recognition.lang = 'en-US';
+  recognition.interimResults = true;
   recognition.maxAlternatives = 1;
 
 	recognition.addEventListener('result', e => {
@@ -2346,17 +2347,19 @@ function AI(){
 }
 
 var commands = [
-  [1,"create 4 tables"],[1,"create 4 table"],[1,"4 tables create"],
+  /*OK*/[1,"create 4 tables"],[1,"create 4 table"],[1,"4 tables create"],[1,"készíts 4 táblát"],[1,"szeretnék 4 táblát"],
   [2,"create 4 field"],[2,"create 4 fields"],
   [3,"link"],
-  [4,"clear tables"],
-  [5,"rename new tables"],
+  /*OK*/[4,"clear tables"],[4,"törölj ki minden táblát"],[4,"töröld a táblákat"],[4,"töröld ki az összes táblát"],
+  /*OK*/[7,"rename table to"],[7,"a tábla új neve"],[7,"új táblanév"],[7,"nevezd át a táblát%nevűre"],[7,"nevezd át%nevűre"],[7,"átnevezés"],
+  [5,"rename new tables"],[5,"rename unknown tables"],
   [6,"rename last table"],
-  [7,"rename table called"],
-  [8,"select table"],
+  /*OK*/[8,"select table"],[8,"select table called"],[8,"tábla kiválasztása"],[8,"tábla választás"],[8,"válaszd ki a%táblát"],
 ];
 var change = [["free","3"],["form","4"],["cleared","create"],["tree","3"],["for","4"],["hive","5"],["one","1"],["two","2"],["too","2"],["six","6"],["sex","6"],
-["84 bus","8 tables"],["timetables","10 tables"],["grade","create"],["turntables","10 tables"],["neighbour","table"],["you","new"]];
+["84 bus","8 tables"],["timetables","10 tables"],["grade","create"],["portable","4 tables"],["turntables","10 tables"],["neighbour","table"],["you","new"]
+,["egy","1"],["névtáblát","4 táblát"]
+];
 
 var speechlevel=0;
 function robot(command){
@@ -2367,53 +2370,155 @@ function robot(command){
   }
   mini=-1;
   minv=10;
+  minparams=[];
   for (let i = 0; i < commands.length; i++) {
-    if (command.startsWith(commands[i][1])) {
-      mini=i;
-      minv=-1;
-      break;
-    } else {   
-      var sym=getSimilarity(commands[i][1], command);
-      if (sym<minv){
+    minta=commands[i][1];
+    
+    c = minta.indexOf("%");
+    if (c>0){ //more parts split by %
+      var parts=minta.split("%");
+      var cmd=command;
+      var dst=0;
+      var chrs=0;
+      var res=null;
+      minip=[];
+      for (let i = 0; i < parts.length; i++) {
+        const p = parts[i];        
+        res = getEditDistance2(p,cmd);  //(part,cmd) ->  [dist,chars,newcmd,%paramvalue]
+        if (res==null){
+          break;
+        }
+               
+        dst+=res[0];
+        chrs+=res[1];
+        cmd=res[2];
+        minip.push(res[3]);        
+        if (cmd==null){
+          break;
+        } 
+      }
+      if (res!=null){
+        sym=dst/chrs;//similarity
+        if (sym<minv){
+          mini=i;
+          minv=sym; 
+          minparams=minip;         
+        }
+      }
+  }else {
+      if (command.startsWith(minta)) {
         mini=i;
-        minv=sym;
+        minv=-1;
+        break;
+      } else {   
+        var sym=getSimilarity(commands[i][1], command);
+        if (sym<minv){
+          mini=i;
+          minv=sym;
+        }
       }
     }
   }  
   if (minv<0.3){
     console.log(commands[mini][1],command);
-    processSpeech(mini,command,minv);
+    processSpeech(mini,command,minv,minparams);
   } else {
     console.log(minv,command);
   }
 }
 
 
-function processSpeech(idx,command,minv){
+function processSpeech(idx,command,minv,minparams=null){
   switch (commands[mini][0]){
     case 1: //TODO Tablemaker
-      tablemaker(command.match(/\d/g));
+      SP_maketable(command.match(/\d/g));
       break;
     case 2: //TODO Fieldmaker
       break;
     case 3: //TODO link
       break;
-     case 8: //TODO Clear tables
-    Load('alma');
-    break;
+    case 4: //TODO Clear tables
+      Load('alma');
+      break;
+    case 8: //TODO select table
+      SP_selecttable(idx,command,minv,minparams);
+      break;
+    case 7:
+      SP_renametable(idx,command,minv,minparams);
     default:
       break;
   }
 }
 
 
-function tablemaker(num){
+function SP_maketable(num){
+  num=Math.min(10,Math.abs(num.floor(num)));
   for (let i = 0; i < num; i++) {
     var table = newTable();  
-    table.moveToPosition(Number(Math.random()*1000),Number(Math.random()*900));    
+    table.moveToPosition(Number(Math.random()*10)*100,Number(Math.random()*7)*100);        
   }
 }
 
+function SP_selecttable(idx,cmd,minv,minparams) {
+  if (idx<0) return;  
+  if (idx>=commands.length) return;
+  if ((cmd==null) || (cmd=""))  return;
+
+  if ((minparams!=null) && (minparams.length>0)) {
+    if (minparams===Array){
+      var t = ATables.SearchTableByName(minparams[0]);
+      if (t!=null)
+        t.Selected(); 
+    }
+  }else {
+    if (minv<0){
+      cmd=cmd.replace(commands[idx][1],"");
+      cmd=cmd.trim();
+      if (cmd=="") return;
+      var t = ATables.SearchTableByName(cmd);
+      if (t!=null)
+        t.Selected();
+    }
+  }
+}
+
+function SP_renametable(idx,cmd,minv,minparams){  
+  if (idx<0) return;
+  if (idx>=commands.length) return;
+
+  if (SelectedTable!=null){
+    if ((minparams!=null) && (minparams.length>0)){
+      try {
+        SelectedTable.setName(minparams[0].replace(" ","_"));  
+      } catch (error) {        
+        console.log(minparams);
+      }      
+    }else {
+      if (minv<0){
+        cmd=cmd.replace(commands[idx][1],"");
+        cmd=cmd.trim();
+        SelectedTable.setName(cmd.replace(" ","_"));
+      }
+    }      
+  }
+
+}
+
+function getEditDistance2(p,cmd)  //(part,cmd) ->  [dist,chars,newcmd,%param value]
+{ res=[0,0,0,0];                    // nevezd át a táblát%nevűre > 
+                                  // 1. nevezd át a táblát,nevezd át a táblát almafa névre
+  a=p.split(" ");
+  b=cmd.split(" ");
+  c=b.splice(a.length);
+  if (b.length<a.length){
+    return null;
+  }
+  res[0]=getEditDistance(a.join(" "), b.join(" "));
+  res[1]=p.length;
+  res[3]=c.splice(0,1)[0];
+  res[2]=c.join(" "); 
+  return res; 
+}
 
 function getSimilarity(a,b){  
   var d=getEditDistance(a,b);
