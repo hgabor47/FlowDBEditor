@@ -1,3 +1,4 @@
+/*jshint esversion: 6 */
 /* FlowDBEditor content can load from (maybe automatically)
     GET parameter, 
     localstorage, 
@@ -21,12 +22,12 @@
   so. if the next time you can continue editing where you abandoned. :)
 */
 
-let params = (new URL(document.location)).searchParams;
-let flowdbget = params.get("flowdb");     
-let flowdbplayer = params.get("player");  //USERVIEW if exists
-var ViewModes = Object.freeze({"Developer":1, "User":2})
-VIEWMODE=ViewModes.Developer;
-if (flowdbplayer!=null){
+var params = (new URL(document.location)).searchParams;
+var flowdbget = params.get("flowdb");     
+var flowdbplayer = params.get("player");  //USERVIEW if exists
+var ViewModes = Object.freeze({"Developer":1, "User":2});
+var VIEWMODE=ViewModes.Developer;
+if (flowdbplayer!==null){
   VIEWMODE=ViewModes.User;
 }
 //var flowdbinit=null; //if exists please remove this line flowdbinit is a innercircle start flowdb if you want
@@ -35,11 +36,11 @@ var AUTOINCTSTART=1;
 function flowdbeditor_onload(){
   var but=document.getElementById("flowdbload");
   but.activ=false; //TODO!!! for prevent to double load in same time
-  if (flowdbget!=null){
+  if (flowdbget!==null){
     LoadString(flowdbget);
     but.activ=true;
   } else {  
-    if (flowdbinit==null){
+    if (flowdbinit===null){
       Load(temp);
       but.activ=true;
     }
@@ -81,17 +82,19 @@ function zoom(){
 //#region HINTS, NEWS
 
 function newsdialog(show){
+  if (news===null) return; //defined in INDEX.html
   if (show){
     localStorage.setItem("flowdbeditornews","");
   }
   var newsul = document.getElementById("newsul");
   newsul.innerHTML="";
   var news1 = localStorage.getItem("flowdbeditornews");
-  var shownews=false;        
-  for(i=0;i<news.length;i++){ 
-      if (news1!=null)
-        var p=news1.indexOf(news[i][0]);
-      if (news1==null ||  (p<0)) {
+  var shownews=false;
+  var p=null;        
+  for(let i=0;i<news.length;i++){ 
+      if (news1!==null)
+        p=news1.indexOf(news[i][0]);
+      if (news1===null ||  (p<0)) {
         var d = document.createElement("li");
         d.innerHTML=news[i][1];
         newsul.appendChild(d);
@@ -129,7 +132,7 @@ oncehints.hint = function(hint){
     document.getElementById("help").innerHTML=oncehints[hint];
     oncehints[hint]="";
   }
-}
+};
 
 //#endregion HINTS, NEWS
 
@@ -157,7 +160,7 @@ var TTable = function(name){
     if (this.DOMrect){
       if (SelectedTable!=this){
         if (this.readonly)
-          this.DOMrect.setAttribute("style",noSelectedStyle_readonly)
+          this.DOMrect.setAttribute("style",noSelectedStyle_readonly);
         else {
           this.DOMrect.setAttribute("style",noSelectedStyle);
           this.DOMrect.style.fill=this.color;
@@ -166,24 +169,24 @@ var TTable = function(name){
         this.DOMrect.setAttribute("style",selectedStyle);
       }
     }
-  }  
+  };  
   this.setColor=function(value){
     this.color=value;
-  }
+  };
   this.setDescription=function(value){    
     this.description=nullstring(value);
-  }
+  };
   this.setVisible=function(value){
     this.visible=value;
     if (this.visible){
-      if (this.DOMGroup!=null)
+      if (this.DOMGroup!==null)
         this.DOMGroup.style.visibility="visible";        
     }else {
-      if (this.DOMGroup!=null)
+      if (this.DOMGroup!==null)
         this.DOMGroup.style.visibility="hidden";
     }
     this.refreshConstraints();
-  }
+  };
 
   this.moveToPosition=function(x,y){
       x = Math.floor(x);
@@ -192,18 +195,18 @@ var TTable = function(name){
       this.DOMGroup.setAttribute("transform",s);
       this.setPosXY(x,y);
       this.refreshConstraints();
-  }
+  };
 
   this.setName=function(name){
     this.name=name;
-    if (this.DOMtitle!=null) 
+    if (this.DOMtitle!==null) 
       this.DOMtitle.innerHTML=name;
-  }
+  };
   this.setName(name+(idTable++));
   this.addField = function(name,type){
-    f = new TField(this,name);    
+    var f = new TField(this,name);    
     f.type=type;
-    AF= this.AFields;
+    var AF= this.AFields;
     this.AFields.push(f);    
     this.Records.forEach(function(o,i){
       if (i==0){
@@ -213,11 +216,11 @@ var TTable = function(name){
       }
     });
     return f;
-  }
+  };
   this.setPosXY=function(x,y){
     this.posxy[0]=x;
     this.posxy[1]=y;
-  }
+  };
   this.getDOM=function(){
     this.DOMGroup=document.createElementNS("http://www.w3.org/2000/svg","g");
     this.DOMGroup.table=this;
@@ -261,14 +264,14 @@ var TTable = function(name){
     
     this.refreshDOM();
     return this.DOMGroup;
-  }
+  };
   this.refreshDOM=function(){
     this.setName(this.name);
     this.DOMrect.setAttribute("width",this.width);
     this.DOMrect.setAttribute("height",this.height);
     this.DOMGroup.setAttribute("transform","translate("+this.posxy[0]+","+this.posxy[1]+")");
     this.refreshFields();
-  }
+  };
 
   this.refreshFields=function(){
     var el=this.DOMFieldsGroup;    
@@ -300,9 +303,9 @@ var TTable = function(name){
       fib.setAttribute("height", fieldRowHeight);  
           
       if (i%2==0)
-        fib.setAttribute("class","flow_fields_color3")       
+        fib.setAttribute("class","flow_fields_color3");
       else
-        fib.setAttribute("class","flow_fields_color4") ;      
+        fib.setAttribute("class","flow_fields_color4");      
       fi.field=e;
       e.DOMElement=fi;
       e.posrow=i;
@@ -316,7 +319,7 @@ var TTable = function(name){
       el.appendChild(fi3); 
     }
     this.refreshConstraints();
-  }
+  };
 
   this.refreshConstraints=function(){
     var a = this.AFields;
@@ -324,7 +327,7 @@ var TTable = function(name){
     for (let i = 0; i < a.length; i++) {
       const e = a[i];      
       var t=e.refreshLink();
-      if (t!=null){
+      if (t!==null){
         tmptables.push(t);
       }
     }
@@ -336,7 +339,7 @@ var TTable = function(name){
       if (t!=this && chk!=true){
         for (let j = 0; j < t.AFields.length; j++) {
           const f = t.AFields[j];
-          if (f.link!=null){
+          if (f.link!==null){
             if (f.link.table==this){
               f.refreshLink();
               //f.table.refreshConstraints();
@@ -345,15 +348,15 @@ var TTable = function(name){
         }      
       }
     }
-  }
+  };
 
   this.refreshRecordFields=function(){ //if the fields are change
     if (this.Records.length<2) return;
     var table = this;
     table.AFields.forEach(function(o,i){
       table.Records[0][i]=o.name;
-    })    
-  }
+    });
+  };
 
   this.recalcAutoincFields=function(){
     var table = this;
@@ -370,24 +373,24 @@ var TTable = function(name){
           }
         }
       }
-    })    
-  }
+    });   
+  };
 
   this.Selected=function(){
-    if (SelectedTable!=null) {
+    if (SelectedTable!==null) {
       SelectedTable.noSelected();  //table  
     }
     SelectedTable=this;
     this.setReadOnly(this.readonly);
     //this.DOMrect.setAttribute("style",selectedStyle);
     refreshFieldsListDOM();
-  }
+  };
   this.noSelected=function(){
     SelectedTable=null;
     this.setReadOnly(this.readonly);
     //this.DOMrect.setAttribute("style",noSelectedStyle);
     refreshFieldsListDOM();
-  }
+  };
 
   this.edit=function(parent){
     if (stateEdit) return;
@@ -406,7 +409,7 @@ var TTable = function(name){
      
     div.innerHTML+=`<label>Readonly mean will no export to SQL file</label>`;
     if (this.readonly)
-      div.innerHTML+=`<input type="checkbox" id="edit_readonly" checked >`
+      div.innerHTML+=`<input type="checkbox" id="edit_readonly" checked >`;
     else  
       div.innerHTML+=`<input type="checkbox" id="edit_readonly" >`;
     div.innerHTML+=`<br>
@@ -417,14 +420,14 @@ var TTable = function(name){
     div.table=this;
     parent.appendChild(div);
     return div;
-  }
+  };
 
   this.browse=function (parent) {
     if (stateEdit) return;
     stateEdit=true;
     var div = document.createElement("div");  //create ID=LIST DIV before AREA
     div.className="flow_browse";
-    div.setAttribute("id","list")
+    div.setAttribute("id","list");
     parent.appendChild(div);
     this.Selected();
     list( ATables.indexOf(this),"list");
@@ -432,7 +435,7 @@ var TTable = function(name){
     div.table=this;
     
     return div;
-  }
+  };
 
 
   this.destroy = function(){
@@ -445,16 +448,16 @@ var TTable = function(name){
       fields.deleteLink();      
     });
 
-    AFields=[];
-    Records=[];
-    if (this !=null && this.DOMGroup!=null)
+    this.AFields=[];
+    this.Records=[];
+    if (this !==null && this.DOMGroup!==null)
       flowdbeditor.removeChild(this.DOMGroup); 
 
     /*for (let i = 0; i < AFields.length; i++) {
       const f = AFields[i];
       f.Clear();
     }*/
-  }
+  };
 
   this.getXML = function(xml,root){
     var t = xml.createElement("table");root.appendChild(t);    
@@ -482,9 +485,9 @@ var TTable = function(name){
         } catch (error) {
           console.log(error);          
         }        
-      })
+      });
     });
-  }
+  };
   this.setFromXML = function(node){
     this.name=node.getAttribute("name");
     this.posxy=node.getAttribute("posxy").split(",");
@@ -507,12 +510,12 @@ var TTable = function(name){
     }
 
     var rec = node.getElementsByTagName("records");
-    if (rec!=null) 
+    if (rec!==null) 
       rec = rec[0];
     
     var row = rec.getElementsByTagName("row");
     this.Records=[];
-    Rec=this.Records;
+    var Rec=this.Records;
     Array.prototype.forEach.call(row,function(r,ridx){
       var col = r.getElementsByTagName("col");
       var bc=[];
@@ -525,36 +528,36 @@ var TTable = function(name){
     
     
 
-  }
+  };
   this.setLinksFromTemp = function(){    
     for (let i = 0; i < this.AFields.length; i++) {
       const f = this.AFields[i];      
       f.setLinksFromTemp();
     }
-  }
+  };
   this.SearchFieldByName=function(fieldname){
     const result = this.find( fi => fi.name === fieldname );
-    return result
-  }
+    return result;
+  };
   this.getLinksTo=function(){ //result fields[]
-    res=[];
-    if (this.AFields!=null){
+    var res=[];
+    if (this.AFields!==null){
       this.AFields.forEach(function(field,index){
-        if (field!=null && field.link!=null){
+        if (field!==null && field.link!==null){
           res.push(field);
         }
       });
     }
     return res;
-  }
+  };
   this.getLinksFrom=function(){ //result fields[]
     var res=[];
     const Table=this;
-    if (ATables!=null){
+    if (ATables!==null){
       ATables.forEach(function(table,index){
-        if (table!=null && table.AFields!=null){
+        if (table!==null && table.AFields!==null){
           table.AFields.forEach(function(field,index2){
-            if (field!=null && field.link!=null){
+            if (field!==null && field.link!==null){
               if (field.link.table==Table)
                 res.push(field);
             }
@@ -563,7 +566,7 @@ var TTable = function(name){
       });
     }
     return res;
-  }
+  };
 
   this.changeFieldType=function(oldtyp,newtyp,fieldidx){
     if (oldtyp==newtyp) return;
@@ -577,19 +580,19 @@ var TTable = function(name){
           this.Records.forEach(function(o,i){
             if(i>0)
               o[fieldidx]=Number(o[fieldidx]);              
-          })            
+          });            
           break;
         case 7: //bool
           this.Records.forEach(function(o,i){
             if(i>0)
               if ((o[fieldidx]!='0') && (o[fieldidx]!='1')){
-                if ((o[fieldidx]==null) || (o[fieldidx]=="")){
-                  o[fieldidx]='0'
+                if ((o[fieldidx]===null) || (o[fieldidx]=="")){
+                  o[fieldidx]='0';
                 } else {
                   o[fieldidx]='1';    
                 }
               }              
-          })            
+          });     
           break;
         default:
           break;
@@ -603,17 +606,18 @@ var TTable = function(name){
           this.Records.forEach(function(o,i){
             if(i>0)
               o[fieldidx]=Math.round(Number(o[fieldidx]));
-          }) 
+          });
           break;
         case 7:
           this.Records.forEach(function(o,i){
             if(i>0)
               o[fieldidx]=Math.round(Number(o[fieldidx]));
               if (o[fieldidx]>1) 
-                o[fieldidx]=1
+                o[fieldidx]=1;
               else if (o[fieldidx]<0)
                 o[fieldidx]=0;
-          })    
+          });
+          break;    
         case 4: //date
           this.Records.forEach(function(o,i){
             if(i>0) {
@@ -670,7 +674,7 @@ var TTable = function(name){
                 o[fieldidx]=0;
               }
             }
-          }) 
+          }); 
           break;
       
         default:
@@ -680,7 +684,7 @@ var TTable = function(name){
   };
 
   this.AFields.SearchFieldByName=this.SearchFieldByName;
-}
+};
 var idField = 0;
 
 var TField = function(table,name){
@@ -700,7 +704,15 @@ var TField = function(table,name){
 
   this.setDescription=function(value){    
     this.description=nullstring(value);
-  }
+  };
+  this.setName=function(name){
+    this.name=name;
+    if (this.table!==null){
+      this.table.refreshRecordFields();
+      this.table.refreshFields();
+    }
+    refreshFieldsListDOM();    
+  };
   this.edit=function(parent){
     if (stateEdit) return;
     stateEdit=true;
@@ -733,7 +745,7 @@ var TField = function(table,name){
      <hr><label>Data from another table:</label>
      <button onclick="editFieldLink(this)">LinkTo</button>
      <button onclick="editFieldLinkDelete(this)">DeleteLink</button>`;
-     if (this.link!=null){
+     if (this.link!==null){
         div.innerHTML+=`<label>Link filtered values range:</label>`;
         if (this.linkfilter[0]) {
           div.innerHTML+=`<input type="checkbox" linked="DOMfilterDIV" onchange="changeCHKfilter(this)" id="edit_linkfilter" checked>`;
@@ -749,17 +761,17 @@ var TField = function(table,name){
      <button onclick="editFieldCancel(this)">Cancel</button>`;
     div.field=this;
     parent.appendChild(div);
-    if (this.link!=null) {
+    if (this.link!==null) {
       changeCHKfilter(document.getElementById("edit_linkfilter"));
     }
     return div;
-  }
+  };
   this.setType=function(value) {
     this.type=value;
     if (value!=0){
       this.length=0;
     }
-  }
+  };
 
   this.addLink=function(field){
     this.link = field;    
@@ -790,23 +802,23 @@ var TField = function(table,name){
     
   
     this.refreshLink();
-  }
+  };
   this.deleteLink=function(){
-    if(this.link!=null){
-      if (this.DOMLink!=null){
-        if (this.DOMLink.v!=null)
+    if(this.link!==null){
+      if (this.DOMLink!==null){
+        if (this.DOMLink.v!==null)
           flowdbeditor.removeChild(this.DOMLink.v);
-        if (this.DOMLink.k!=null)          
+        if (this.DOMLink.k!==null)          
           flowdbeditor.removeChild(this.DOMLink.k);
         flowdbeditor.removeChild(this.DOMLink);
         this.DOMLink=null;
         this.link=null;
       }
     }
-  } 
+  }; 
   this.refreshLink=function(){
-    if (this.DOMLink!=null){
-      if (this.link!=null){
+    if (this.DOMLink!==null){
+      if (this.link!==null){
         if ((!this.table.visible) || (!this.link.table.visible)){
           //TODO each table is invisible
           this.DOMLink.setAttribute("class","flow_line_hidden");
@@ -817,8 +829,8 @@ var TField = function(table,name){
           this.DOMLink.k.setAttribute("class","flow_line_start");
           this.DOMLink.v.setAttribute("class","flow_line_end");
         }
-        a=this.getPosXY();
-        b=this.link.getPosXY();
+        var a=this.getPosXY();
+        var b=this.link.getPosXY();
         this.DOMLink.setAttribute("x1",a[0]-16);
         this.DOMLink.setAttribute("y1",a[1]);
         this.DOMLink.setAttribute("x2",b[0]+this.link.table.width);
@@ -837,7 +849,7 @@ var TField = function(table,name){
         return this.link.table;
       }
     }
-  }
+  };
   this.getPosXY=function(){  
     //var t = this.table.DOMGroup.getAttribute("transform"); //Late!
     //var o1 = tool_getTransform(t);
@@ -848,7 +860,7 @@ var TField = function(table,name){
     return [o1[0],o1[1]];
     //Table  
     //return [this.table.posxy[0],this.table.posxy[1]];
-  }
+  };
   this.getXML = function(xml,root){
     var f = xml.createElement("field");root.appendChild(f);    
     f.setAttribute("name",this.name);
@@ -863,21 +875,21 @@ var TField = function(table,name){
     f.setAttribute("linkfiltermax",this.linkfilter[2]);
     f.setAttribute("linkfilterfield",this.linkfilter[3]);
     if (this.display)
-      f.setAttribute("display",1)
+      f.setAttribute("display",1);
     else
     f.setAttribute("display",0);
-    if (this.link!=null){
+    if (this.link!==null){
       f.setAttribute("link",[this.link.table.name,this.link.name]);
     }    
     f.setAttribute("autoinc",[this.autoinc]);
-  }
+  };
   this.setFromXML = function(node){
     this.name=node.getAttribute("name");
     this.type=Number(node.getAttribute("type"));
     this.length=Number(node.getAttribute("length")); 
     this.linktext = node.getAttribute("link");
     this.display = node.getAttribute("display");
-    linkfilt = node.getAttribute("linkfilter");
+    var linkfilt = node.getAttribute("linkfilter");
     this.setDescription(nullstring(node.getAttribute("description")));
     if (this.display=='0') 
       this.display = false;
@@ -892,25 +904,25 @@ var TField = function(table,name){
     this.linkfilter[3] = nullstring(node.getAttribute("linkfilterfield"));
       
     this.autoinc = node.getAttribute("autoinc");
-    if (this.linktext!=null){
+    if (this.linktext!==null){
       this.linktext=this.linktext.split(",");
     }
-  }
+  };
   this.setLinksFromTemp = function(){
-    if (this.linktext!=null){
-      tablename=this.linktext[0];
-      fieldname=this.linktext[1];
+    if (this.linktext!==null){
+      var tablename=this.linktext[0];
+      var fieldname=this.linktext[1];
       
       var t = ATables.SearchTableByName(tablename);
       var f = t.AFields.SearchFieldByName(fieldname);
       //this.link=f;
       this.addLink(f);
     }    
-  }
+  };
   this.destroy = function(){
     var index = this.table.AFields.indexOf(this);
     if (index>-1){
-      if (this.link!=null){
+      if (this.link!==null){
         this.deleteLink();
       }
       var linksfrom = this.table.getLinksFrom();
@@ -927,12 +939,12 @@ var TField = function(table,name){
       refreshFieldsListDOM();
 
     }
-  }
+  };
 
   this.toString=function(){
     return this.name+" "+AType.SearchTypeById(this.type).name+" "+this.length;
-  }
-}
+  };
+};
 
 //#region Arrays, Types -----------------------------
 
@@ -943,7 +955,7 @@ var TType = function(name,sql,inputtype,mssql){
   this.sql=sql;
   this.inputtype=inputtype;
   this.mssql = mssql;
-}
+};
 
 var OpenEye = Object.freeze({"Open":"&#xf06e;&nbsp;","Close":"&#xf070;&nbsp;"});
 var FlowModes = Object.freeze({"Flow":1, "Constraint":2});
@@ -961,32 +973,32 @@ var AType = [new TType("String","varchar(%)","text","[nvarchar(%)]"),
        new TType("Image","mediumblob",'<img src="%0">',"[image]"),
        new TType("URL","varchar(400)",'<a href="%0">%1</a>',"[nvarchar(400)]"),
        new TType("VideoLink","varchar(400)",'<a href="%0">%1</a>',"[nvarchar(400)]")];
-SearchTypeById = function(id){
+var SearchTypeById = function(id){
   const result = AType.find( tab => tab.id === id );
   return result;
-}
+};
 AType.SearchTypeById=SearchTypeById;
 
 var SelectedTable = null;
 var flowMode = FlowModes.Flow;
-var SelectedField = null;//not used
+var SelectedField = null;//SPRcog only TODO
 var constraintField =null; //starting field
 
 var ATables = [];
-SearchTableByName = function(tablename){
+var SearchTableByName = function(tablename){
   tablename=tablename.toLowerCase();
   const result = ATables.find( tab => tab.name.toLowerCase() === tablename );
   return result;
-}
-ATablesclear=function(){
+};
+var ATablesclear=function(){
   for (let i = 0; i < ATables.length; i++) {
     const t = ATables[i];
-    if (t!=null)
+    if (t!==null)
       t.destroy();
   }
   ATables = [];ATables.clear=ATablesclear; 
   ATables.SearchTableByName=SearchTableByName;
-}
+};
 ATables.clear=ATablesclear;
 ATables.SearchTableByName=SearchTableByName;
 
@@ -996,7 +1008,7 @@ ATables.SearchTableByName=SearchTableByName;
 
 function sortTables(){
   oncehints.hint("outside");
-  if (ATables!=null){
+  if (ATables!==null){
     ATables.forEach(function(table,idx){
       var ok=true;
       if (table.posxy[0]<0) {table.posxy[0]=100;ok=false;}
@@ -1025,16 +1037,16 @@ function refreshTablesListDOM(){
     const e = ATables[i];
     var obj = document.createElement("div");
     if (i%2==0)
-      obj.className="flow_tables flow_tables_color1"
+      obj.className="flow_tables flow_tables_color1";
     else
       obj.className="flow_tables flow_tables_color2";
     
-    bt =  document.createElement("span");
+    var bt =  document.createElement("span");
     bt.table= e;
     bt.className="flow_context";
     bt.setAttribute("onclick","hidetable(this)");
     if (e.visible){
-      bt.innerHTML=OpenEye.Open
+      bt.innerHTML=OpenEye.Open;
       bt.className="flow_context";
     }
     else{
@@ -1063,7 +1075,7 @@ function hidetable(button){
 }
 
 function newField(){
-  if (SelectedTable!=null){
+  if (SelectedTable!==null){
     SelectedTable.addField("Field"+(idField++),0);
     SelectedTable.refreshFields();
     refreshFieldsListDOM();
@@ -1078,7 +1090,7 @@ function refreshFieldsListDOM(){
   l.innerHTML="";
   var co=document.getElementById("constraints");
   co.innerHTML="";
-  if (SelectedTable==null) return;
+  if (SelectedTable===null) return;
   var coindex=0;
 
   for (let i = 0; i < SelectedTable.AFields.length; i++) {
@@ -1092,11 +1104,11 @@ function refreshFieldsListDOM(){
 
     obj.innerHTML=e.name;
     l.appendChild(obj);
-    if (e.link!=null){
+    if (e.link!==null){
       var f2=e.link;      
       obj = document.createElement("div");
       if (coindex++%2==0)
-        obj.className="flow_constraints flow_constraints_color1"
+        obj.className="flow_constraints flow_constraints_color1";
       else
         obj.className="flow_constraints flow_constraints_color2";
       obj.innerHTML=f2.table.name+"."+f2.name+"->"+e.name;
@@ -1107,7 +1119,7 @@ function refreshFieldsListDOM(){
 
 var automodeLink=true;
 function newConstraint(b,nohint){  
-  if (b!=null){
+  if (b!==null){
     if (flowMode==FlowModes.Flow){
       flowMode=FlowModes.Constraint;
       b.innerHTML="Stop link";
@@ -1138,7 +1150,7 @@ function fieldClick(e){
     this.field.edit(document.getElementById("area"));
   }
   if (flowMode==FlowModes.Constraint){
-    if (constraintField==null){ //startpoint
+    if (constraintField===null){ //startpoint
       constraintField  = this.field;
     } else { //endpoint
       constraintField.deleteLink();      
@@ -1207,29 +1219,29 @@ function PastePanel(e){
   else if( window.clipboardData ){
     content = window.clipboardData.getData('Text');    
   }
-  if ((content!="") && (content!=null)){
+  if ((content!="") && (content!==null)){
     var div=document.createElement("div");
     div.className="flow_clipboard";
     document.body.appendChild(div);
     div.clipboard=content;
     div.innerHTML=`<input id="pasteheader" type="checkbox">The clipboard data has header in first row<br>`;
     div.innerHTML+=`<input id="pastenewtable" type="checkbox" >Create new table instead of fill selected table<br>`;
-    div.innerHTML+=`<button onclick="onPaste(this.parentElement,null)">Rendben</button><button onclick="this.parentElement.parentElement.removeChild(this.parentElement)">Mégsem</button>`
+    div.innerHTML+=`<button onclick="onPaste(this.parentElement,null)">Rendben</button><button onclick="this.parentElement.parentElement.removeChild(this.parentElement)">Mégsem</button>`;
   }
 }
 
 function onPaste(div,startidx){        
-    content = div.clipboard;
+    var content = div.clipboard;
     
-    if (startidx==null){
-      idx=document.getElementById("pasteheader");
+    if (startidx===null){
+      var idx=document.getElementById("pasteheader");
       if (idx.checked)
         startidx = 1
       else 
         startidx = 0;
     }
 
-    newtable = document.getElementById("pastenewtable");
+    var newtable = document.getElementById("pastenewtable");
     if (newtable.checked) {
       
       var t = new TTable("Unknown");      
@@ -1289,7 +1301,7 @@ function editFieldOK(div){
   var elinkfilter1 = document.getElementById('edit_linkfilter1');
   var elinkfilter2 = document.getElementById('edit_linkfilter2');  
   var elinkfilterfield = document.getElementById('edit_linkfilterfield');  
-  if (elinkfilter!=null){
+  if (elinkfilter!==null){
     try {
       panel.field.linkfilter[0]=elinkfilter.checked;
       panel.field.linkfilter[1]=elinkfilter1.value;
@@ -1344,9 +1356,9 @@ function editFieldLinkDelete(div){
 }
 function changeCHKfilter(chk){  
   var DOM = chk.getAttribute("linked");
-  if (DOM==null) return;
-  DOMfilterDIV = document.getElementById(DOM);
-  if ((chk.checked) && (DOMfilterDIV!=null)){
+  if (DOM===null) return;
+  var DOMfilterDIV = document.getElementById(DOM);
+  if ((chk.checked) && (DOMfilterDIV!==null)){
     DOMfilterDIV.style.visibility="visible";
     DOMfilterDIV.style.display="block";
   } else {
@@ -1367,7 +1379,7 @@ var cY=-1;
 var grab=0;
 
 function down(e){
-  var t = this;
+  //var t = this;
   var b = event.buttons;
 
   if (flowMode==FlowModes.Flow){
@@ -1383,7 +1395,7 @@ function down(e){
       cY = event.clientY-grab; 
       this.table.Selected();  //table
     } else {
-      if (e.touches!=null){
+      if (e.touches!==null){
         if (e.touches.length>0){
           cX = e.touches[0].clientX-grab;  
           cY = e.touches[0].clientY-grab; 
@@ -1408,17 +1420,17 @@ function touchmove(e){
   if (flowMode==FlowModes.Flow){
     if(event.preventDefault) 
       event.preventDefault();
-    if (e.touches!=null){
+    if (e.touches!==null){
       if (e.touches.length>0){            
         var evtt = e.touches[0];
         this.parentElement.appendChild(this);
-        dX = evtt.clientX -cX;  
-        dY = evtt.clientY -cY;  
+        //var dX = evtt.clientX -cX;  
+        //var dY = evtt.clientY -cY;  
         cX = evtt.clientX-grab;  
         cY = evtt.clientY-grab;
         var s = this.getAttribute("transform");
         var o =tool_getTransform(s);
-        var s = "translate("+o[0]+","+o[1]+")";
+        s = "translate("+o[0]+","+o[1]+")";
         this.setAttribute("transform",s);
         this.table.setPosXY(o[0],o[1]);
         this.table.refreshConstraints();
@@ -1437,7 +1449,7 @@ function move(e){
       cY = event.clientY-grab;
       var s = this.getAttribute("transform");
       var o =tool_getTransform(s);
-      var s = "translate("+o[0]+","+o[1]+")";
+      s = "translate("+o[0]+","+o[1]+")";
       this.setAttribute("transform",s);
       this.table.setPosXY(o[0],o[1]);
       this.table.refreshConstraints();
@@ -1456,16 +1468,71 @@ function up(e){
 
 //#region TOOLS
 
+function getEditDistance2(p,cmd)  //(part,cmd) ->  [dist,chars,newcmd,%param value]
+{ var res=[0,0,0,0];                    // nevezd át a táblát%nevűre > 
+                                  // 1. nevezd át a táblát,nevezd át a táblát almafa névre
+  var a=p.split(" ");
+  var b=cmd.split(" ");
+  var c=b.splice(a.length);
+  if (b.length<a.length){
+    return null;
+  }
+  res[0]=getEditDistance(a.join(" "), b.join(" "));
+  res[1]=p.length;
+  res[3]=c.splice(0,1)[0];
+  res[2]=c.join(" "); 
+  return res; 
+}
+
+function getSimilarity(a,b){  
+  var d=getEditDistance(a,b);
+  return d/Math.max(a.length,b.length);
+}
+
+function getEditDistance(a, b){
+  if(a.length == 0) return b.length; 
+  if(b.length == 0) return a.length; 
+
+  var matrix = [];
+
+  // increment along the first column of each row
+  var i;
+  for(i = 0; i <= b.length; i++){
+    matrix[i] = [i];
+  }
+
+  // increment each column in the first row
+  var j;
+  for(j = 0; j <= a.length; j++){
+    matrix[0][j] = j;
+  }
+
+  // Fill in the rest of the matrix
+  for(i = 1; i <= b.length; i++){
+    for(j = 1; j <= a.length; j++){
+      if(b.charAt(i-1) == a.charAt(j-1)){
+        matrix[i][j] = matrix[i-1][j-1];
+      } else {
+        matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, // substitution
+                                Math.min(matrix[i][j-1] + 1, // insertion
+                                         matrix[i-1][j] + 1)); // deletion
+      }
+    }
+  }
+
+  return matrix[b.length][a.length];
+}
+/*
 function LoadFile(file,fuggveny){ //function(responsetxt) {
   $.get(file, fuggveny);
-}
+}*/
 function LoadContentFromServer(file,fuggveny){
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function(){ 
       if (this.readyState==2){
-          mtimefile = this.getResponseHeader('Last-Modified')+file;
-          stimefile = localStorage.getItem("flowdbeditor_infileID");
-          if ((stimefile!=null) && (stimefile==mtimefile))
+          var mtimefile = this.getResponseHeader('Last-Modified')+file;
+          var stimefile = localStorage.getItem("flowdbeditor_infileID");
+          if ((stimefile!==null) && (stimefile==mtimefile))
             this.abort();
           else 
             localStorage.setItem("flowdbeditor_infileID",mtimefile);
@@ -1473,7 +1540,7 @@ function LoadContentFromServer(file,fuggveny){
       if (this.readyState==4){ // && xhttp.status==200){  
           fuggveny(this.responseText,this.status); //1. sora fejlec  2.adat        
       }
-  }
+  };
   var s=file+"?id="+Math.random();
   xhttp.open("GET",s,true);            
   xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
@@ -1514,9 +1581,9 @@ function loadModule(jsname,div){
 }
 
 function nullstring(value,helyettes){
-  if (value==null)
-  {  if (helyettes==null)
-      return ""
+  if (value===null)
+  {  if (helyettes===null)
+      return "";
     else
       return helyettes;
   }
@@ -1597,7 +1664,7 @@ var xmlroot="flowdbeditor";
 function Save(variable){
   oncehints.hint("save");
   var xmlText = SavetoString();
-  if (variable!=null){
+  if (variable!==null){
     //alert(variable);
     localStorage.setItem(variable,xmlText);
   } else {
@@ -1606,7 +1673,7 @@ function Save(variable){
 }
 function Load(variable){
   var xmlText="";
-  if (variable!=null){ 
+  if (variable!==null){ 
     xmlText  = localStorage.getItem(variable);
   } else {
     xmlText  = localStorage.getItem("flowdbeditor");
@@ -1662,7 +1729,7 @@ function LoadString(xmlText){
               <stop stop-color="red" offset="1" />
           </linearGradient>
       </defs>`; 
-  if (xmlText==null){
+  if (xmlText===null){
     SelectedTable=null;
     refreshTablesListDOM();
     refreshFieldsListDOM();
@@ -1686,13 +1753,13 @@ function LoadString(xmlText){
   }
   refreshTablesListDOM();
   var setup = root.getElementsByTagName("setup");
-  if ((setup!=null && setup.length>0)){     
+  if ((setup!==null && setup.length>0)){     
      setup=setup[0];
      var v = setup.getAttribute("idField");
-     if (v!=null) 
+     if (v!==null) 
         idField = Number(v);
      v = setup.getAttribute("idTable");
-     if (v!=null) 
+     if (v!==null) 
         idTable = Number(v);
 
   }
@@ -1702,9 +1769,9 @@ function LoadString(xmlText){
 var SQLdb="flowdbeditor";
 var LF='\r\n';
 function mySQL(linknode){
-  if (ATables==null) return;
+  if (ATables===null) return;
   linknode=document.getElementById(linknode);
-  source=`START TRANSACTION;`+LF+` 
+  var source=`START TRANSACTION;`+LF+` 
   SET time_zone = "+00:00";`+LF ;
   source+=`drop database if exists `+SQLdb+`;`+LF+`  
   CREATE DATABASE IF NOT EXISTS `+SQLdb+` DEFAULT CHARACTER SET utf8 COLLATE utf8_hungarian_ci;`+LF+`
@@ -1723,13 +1790,13 @@ function mySQL(linknode){
     source=source.substring(0,source.length-3)+LF; //utolso vesszo
     source+=`) ENGINE=InnoDB DEFAULT CHARSET=utf8;`+LF ;
 
-    if (table.Records!=null && table.Records.length>1){
+    if (table.Records!==null && table.Records.length>1){
       source+=`INSERT INTO `+table.name+` (`+fields+`) VALUES `;
       table.Records.forEach(function(o,i){
         if (i>0){
             //content            
             source+=`(`;
-            value="";
+            var value="";
             o.forEach(function(o2,i2){
               value+="'"+o2+"',";
             });
@@ -1759,7 +1826,7 @@ function mySQL(linknode){
     var one=false;
     var s="";
     table.AFields.forEach(function(field,index2){ 
-      if ( field.link!=null){
+      if ( field.link!==null){
         one=true;
         s+='ADD CONSTRAINT `'+table.name+field.link.table.name+'` FOREIGN KEY (`'+field.name+'`) REFERENCES `'+field.link.table.name+'`('+field.link.name+'),'+LF;
       }
@@ -1783,9 +1850,9 @@ function mySQL(linknode){
 var LFGO='\r\nGO\r\n';
 var mscollate = 'HUNGARIAN_CI_AS';
 function MSSQL(linknode){
-  if (ATables==null) return;
+  if (ATables===null) return;
   linknode=document.getElementById(linknode);
-  source=`BEGIN TRAN`+LFGO;
+  var source=`BEGIN TRAN`+LFGO;
   source+=`drop database if exists `+SQLdb+LFGO+`  
   CREATE DATABASE IF NOT EXISTS `+SQLdb+` COLLATE `+mscollate+LFGO+`
   USE `+SQLdb+LFGO;
@@ -1804,7 +1871,7 @@ function MSSQL(linknode){
     source+=`) `+LFGO ;
 
     
-    if (table.Records!=null && table.Records.length>1){
+    if (table.Records!==null && table.Records.length>1){
       source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] ON `+LF;
       source+=`INSERT INTO [dbo].[`+table.name+`] (`+fields+`) VALUES `;
       table.Records.forEach(function(o,i){
@@ -1843,7 +1910,7 @@ function MSSQL(linknode){
     var one=false;
     var s="";
     table.AFields.forEach(function(field,index2){ 
-      if ( field.link!=null){
+      if ( field.link!==null){
         one=true;
         s+='ADD CONSTRAINT `'+table.name+field.link.table.name+'` FOREIGN KEY (`'+field.name+'`) REFERENCES `'+field.link.table.name+'`('+field.link.name+'),'+LF;
       }
@@ -1883,7 +1950,7 @@ function FlowDBLoad(e) {
 
   oncehints.hint("loadfromfile");
   var input = document.getElementById("filename");
-  if (input.file!=null || input.files[0]!=null)
+  if (input.file!==null || input.files[0]!==null)
   {
       var reader = new FileReader();
       reader.onload = function(){
@@ -1894,8 +1961,7 @@ function FlowDBLoad(e) {
         input.form.reset();        
         e.activ=false;
         console.log(source.substring(0, 200));
-      };    
-      
+      };          
       reader.readAsText(input.files[0]);
   } else {
     //alert("Please choose a file before click loadfromfile button!")
@@ -1914,7 +1980,7 @@ function FlowDBCopy(e){
   } 
   navigator.clipboard.writeText(encodeURI(loc+'?flowdb='+xmlText))
   .then(() => {
-    new URL(document.location)
+    new URL(document.location);
     console.log('Text copied to clipboard');
   })
   .catch(err => {
@@ -1930,8 +1996,8 @@ var Divname=null;
 var browsebuttonleft=true;  //left or right side
 function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
   if (tableidx<0 || tableidx>=ATables.length) return ;
-  if (divname==null)
-    divname=Divname
+  if (divname===null)
+    divname=Divname;
   Divname=divname;    
   var div = document.getElementById(divname);
   div.innerHTML=``;
@@ -1939,7 +2005,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
     var hdr = document.getElementById("list_header");
     hdr.style.top=(e.target.scrollTop)+'px';
   });
-  if (divname!=null) //TODO New position in new table
+  if (divname!==null) //TODO New position in new table
   {    
     div.style.top=Number(window.pageYOffset)+20+"px";
     div.style.left=Number(window.pageXOffset)+30+"px";
@@ -1948,13 +2014,13 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
 
 
 
-  div2=document.createElement("div");
+  var div2=document.createElement("div");
   div2.setAttribute("id","list_header");
   div2.className="flow_browse_header";
 
   div2.innerHTML=`<button onclick="list_new(`+tableidx+`)">NewRecord</button>    
   <button onclick="editTableCancel(this.parentElement)">Exit</button><button onclick="editTableClear(`+tableidx+`)">ClearRecords</button>`;
-  table = ATables[tableidx];
+  var table = ATables[tableidx];
   tomb=table.Records;
 
   if (tomb.length>1) 
@@ -1972,7 +2038,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
         {
             var b  = document.createElement("option");
             b.value=i;
-            if (hdr==null){
+            if (hdr===null){
               b.innerHTML="Empty";
             } else {
               b.innerHTML=hdr.replace("_s","");
@@ -2000,8 +2066,8 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
       //preprocess
       combo=[];
       table.AFields.forEach(function(o,i){
-        if (o.link!=null){
-          combo.push( getTable(o.link.table) ) //0,1  idx,name
+        if (o.link!==null){
+          combo.push( getTable(o.link.table) ); //0,1  idx,name
         } else {
           combo.push(null);
         }
@@ -2010,7 +2076,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
     var start=0;
     if ((table.AFields.length>0) && (table.AFields[0].type==3)) {
       start =  1;
-    }; //autoinc
+    } //autoinc
     for (let i = 0; i < tomb.length; i++) {
         const sor = tomb[i];
         var r = document.createElement("tr");
@@ -2033,10 +2099,10 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
         //r.setAttribute("sqlid",sor[0]);
         for (let j = start; j < sor.length; j++) {
             var cell=sor[j];
-            if ((i==0) || (combo==null) || (combo[j]==null)){
+            if ((i==0) || (combo===null) || (combo[j]===null)){
               cell = sor[j];
             }else {
-              //comboj !=null
+              //comboj !==null
               var t2=combo[j];
               try {
                 //lookup
@@ -2046,7 +2112,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
             }
             var c= document.createElement("td");
             r.appendChild(c);
-            if (cell==null) { cell = ""};
+            if (cell===null) { cell = ""};
             c.innerHTML=cell;
         }          
         if ((!browsebuttonleft) && (i>0)){
@@ -2058,7 +2124,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
     }
   }  
   var hdr = document.getElementById("list_header");    
-  if (hdr!=null)
+  if (hdr!==null)
     hdr.style.top=(div.scrollTop)+'px';            
 }
 
@@ -2073,7 +2139,7 @@ function getTable(table,filterfieldname) {
       filtidx=i;
     }
     if (table.AFields[i].display==true){
-      if (table.AFields[i].link==null){        
+      if (table.AFields[i].link===null){        
         displayidx.push([i,null]);
       } else {
         displayidx.push([i,
@@ -2088,11 +2154,11 @@ function getTable(table,filterfieldname) {
           var sor=Array(2);
           sor[0]=o[0];
           sor[1]="";
-          if (filtidx!=null){
+          if (filtidx!==null){
             sor.filtervalue=o[filtidx];
           }
           displayidx.forEach(function(oi){
-            if (oi[1]==null){
+            if (oi[1]===null){
               sor[1]+=o[oi[0]]+" ";
             } else {
               //linked oi[1]
@@ -2105,7 +2171,7 @@ function getTable(table,filterfieldname) {
                   break;
                 }
               }
-              if (res==null){
+              if (res===null){
                 sor[1]+=o[oi[0]]+" ";
               } else {
                 sor[1]+=res[1];
@@ -2124,7 +2190,7 @@ function getTable(table,filterfieldname) {
         var sor=Array(2);
         sor[0]=o[0];
         sor[1]="";
-        if (filtidx!=null){
+        if (filtidx!==null){
           sor.filtervalue=o[filtidx];
         }
         o.forEach(function(o2,i2){
@@ -2142,7 +2208,7 @@ function getTable(table,filterfieldname) {
 function list_addrecordheader(table) {
   if (table.Records.length<1)
   {
-    sor=[];
+    var sor=[];
     for (let i = 0; i < table.AFields.length; i++) {
       const fi = table.AFields[i];
       fi.autoinc=AUTOINCTSTART;
@@ -2158,7 +2224,7 @@ function list_new(tableidx) {
     return ;
   var t = ATables[tableidx];
   list_addrecordheader(t);
-  sor=[];
+  var sor=[];
   for (let i = 0; i < t.AFields.length; i++) {
     const fi = t.AFields[i];
     if (fi.type==3){        
@@ -2172,7 +2238,7 @@ function list_new(tableidx) {
   list(tableidx,null);
 }
 function list_edit(e,tableidx,id) {
-  var r = e.parentElement;
+  //var r = e.parentElement;
   if ((tableidx<0) || (tableidx>=ATables.length)) 
     return ;
   var t = ATables[tableidx];
@@ -2186,13 +2252,13 @@ function list_edit(e,tableidx,id) {
 
   var fi = t.AFields;
   fi.forEach(function(f,idx){
-    if (f.link==null){
+    if (f.link===null){
       if (f.type==7){ //bool
         div.innerHTML+=ComboBoxYesNoDOM(rec[idx],f);
       } else if (f.type==3){ //autoinc
         div.innerHTML+=`<label>`+f.name+`</label><div>`+rec[idx]+`</div>`;
       } else {
-        typ=AType.SearchTypeById(f.type);                
+        var typ=AType.SearchTypeById(f.type);                
         div.innerHTML+=`<label>`+f.name+`</label><input type="`+typ.inputtype+`" id="`+t.name+f.name+`" value="`+rec[idx]+`"><br>`;
       }
     } else {
@@ -2212,7 +2278,7 @@ function listEditOK(e){
   for (let i = 0; i < div.table.AFields.length; i++) { //and div.REC has same element
     const f = t.AFields[i];      
     var o=document.getElementById(t.name+f.name);
-    if (o!=null){
+    if (o!==null){
       div.rec[i]=o.value;
     }
   }
@@ -2225,7 +2291,7 @@ function listEditCancel(e){
   //list(ATables.indexOf(div.table),null);
 }
 function list_del(e,tableidx,id) {
-  var div = e.parentElement;//List
+  //var div = e.parentElement;//List
   if ((tableidx<0) || (tableidx>=ATables.length)) 
     return ;
   var t = ATables[tableidx];
@@ -2237,8 +2303,8 @@ function list_del(e,tableidx,id) {
         list(ATables.indexOf(t),null);
       }
     }
-  })
-  const rec = t.Records.find( fi => fi[0] == id );
+  });
+  //const rec = t.Records.find( fi => fi[0] == id );
 }
 function editTableClear(tableidx){
   var t = ATables[tableidx];
@@ -2262,14 +2328,14 @@ function ComboBoxYesNoDOM(value,field1) {
     opt+=`selected `;
   }
   return (opt+=`value="1">Igen</option></select><br>`);
-}
+};
 
 function ComboBoxDOM(value,field1,field2){    
   var filtered=field1.linkfilter[0];
   var min=field1.linkfilter[1];
   var max=field1.linkfilter[2];
   var filterfield=field1.linkfilter[3];  
-  num =false; // ai intervallum kereséshez szám kell
+  var num =false; // ai intervallum kereséshez szám kell
   switch (field1.type) {
     case 1:
     case 2:
@@ -2290,8 +2356,8 @@ function ComboBoxDOM(value,field1,field2){
   }
   for (let i = 0; i < t.length; i++) {    
     const e = t[i];
-    id = e[0];
-    filt=e.filtervalue;
+    var id = e[0];
+    var filt=e.filtervalue;
     if(num){
       try {
         filt=Number(filt);
@@ -2314,7 +2380,7 @@ function ComboBoxDOM(value,field1,field2){
     }
   }
   return (opt+`</select><br>`);
-}
+};
 
 
 
@@ -2328,7 +2394,7 @@ function AI(){
   var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
 	const recognition = new SpeechRecognition();
   
-  var grammar = '#JSGF V1.0; grammar flowbrick; public <flowbrick> = table | field | create | 1 | 2 | 3 | 4 | 5 | 7 | 8 | 9 | 10 | link | clear | select | hét ;'  
+  var grammar = '#JSGF V1.0; grammar flowbrick; public <flowbrick> = table | field | create | 1 | 2 | 3 | 4 | 5 | 7 | 8 | 9 | 10 | link | clear | select | hét ;'  ;
   var speechRecognitionList = new SpeechGrammarList();
   speechRecognitionList.addFromString(grammar, 1);
   recognition.grammars = speechRecognitionList;
@@ -2341,7 +2407,7 @@ function AI(){
 		const speechTotext = Array.from(e.results)
 			.map(result => result[0])
 			.map(result => result.transcript)
-			.join('')
+			.join('');
 			
 			if (e.results[0].isFinal) {
         robot(speechTotext);
@@ -2353,21 +2419,47 @@ function AI(){
 }
 
 var commands = [
-  /*OK*/[1,"create 4 tables"],[1,"create 4 table"],[1,"4 tables create"],[1,"készíts 4 táblát"],[1,"szeretnék 4 táblát"],[1,"készíts 4 új táblát"],[1,"kérek 4 új táblát"],
-  [2,"create 4 field"],[2,"create 4 fields"],[2,"készíts 4 mezőt"],[2,"készíts 4 új mezőt"],[2,"kérek 4 új mezőt"],
+  /*OK*/[1,"create 4 tables"],[1,"create 4 table"],[1,"4 tables create"],[1,"készíts 4 táblát"],[1,"szeretnék 4 táblát"],[1,"készíts 4 új táblát"],[1,"kérek 4 új táblát"],[1,"csinálj 4 új táblát"],[1,"adj 4 új táblát"],
+  /*OK*/[2,"create 4 field"],[2,"create 4 fields"],[2,"készíts 4 mezőt"],[2,"készíts 4 új mezőt"],[2,"kérek 4 új mezőt"],[2,"csinálj 4 új mezőt"],[2,"adj 4 új mezőt"],
   [3,"link"],
   /*OK*/[4,"clear tables"],[4,"törölj ki minden táblát"],[4,"töröld a táblákat"],[4,"töröld ki az összes táblát"],
-  /*OK*/[7,"rename table to"],[7,"a tábla új neve"],[7,"új tábla név"],[7,"az új tábla név"],[7,"nevezd át a táblát%nevűre"],[7,"nevezd át%nevűre"],[7,"átnevezés"],[7,"nevezd át"],[7,"a tábla új neve"],
-  [5,"delete table"],[5,"töröld a táblát"],[5,"tábla törlése"],[5,"töröld"],[5,"törlés"],
-  [6,"select new table"],[6,"új tábla"],[6,"kérem az egyik új táblát"],[6,"új tábla kiválasztása"],[6,"válaszd ki az új táblát"],
+  /*OK*/[7,"rename table to"],[7,"a tábla új neve"],[7,"új tábla név"],[7,"az új tábla név"],[7,"nevezd át a táblát%nevűre"],[7,"nevezd át%nevűre"],[7,"átnevezés"],[7,"nevezd át"],[7,"a tábla új neve"],[2,"a tábla neve"],
+  /*OK*/[5,"delete table"],[5,"töröld a táblát"],[5,"tábla törlése"],[5,"töröld"],[5,"törlés"],[5,"a%tábla törlése"],
+  /*OK*/[6,"select new table"],[6,"új tábla"],[6,"kérem az egyik új táblát"],[6,"új tábla kiválasztása"],[6,"válaszd ki az új táblát"],
   /*OK*/[8,"select table"],[8,"select table called"],[8,"tábla kiválasztása"],[8,"tábla választás"],[8,"válaszd ki a%táblát"],
-  [9,"add string field"],[9,"add integer field"],[9,"add date field"],[9,"add boolean field"],[9,"kérek 1 integer mezőt"],[9,"új integer mező"],[9,"kérek 1 string mezőt"],[9,"új string mező"],[9,"kérek 1 boolean mezőt"],[9,"új boolean mező"],[9,"új date mező"],[9,"kérek 1 date mezőt"],
+  /*OK*/[9,"add string field"],[9,"add integer field"],[9,"add date field"],[9,"add boolean field"],[9,"kérek 1 integer mezőt"],[9,"új integer mező"],[9,"kérek 1 string mezőt"],[9,"új string mező"],[9,"kérek 1 boolean mezőt"],[9,"új boolean mező"],[9,"új date mező"],[9,"kérek 1 date mezőt"],
+  [10,"rename field to"],[10,"legyen a mező neve"],[10,"a mező neve"],
+  
 ];
 var change = [["igen","yes"],["nem","no"],["free","3"],["form","4"],["cleared","create"],["tree","3"],["for","4"],["hive","5"],["one","1"],["two","2"],["too","2"],["six","6"],["sex","6"],
-["84 bus","8 tables"],["timetables","10 tables"],["grade","create"],["portable","4 tables"],["turntables","10 tables"],["neighbour","table"],["you","new"]
-,[" egy "," 1 "],["névtáblát","4 táblát"],[" kettő "," 2 "],[" négy "," 4 "],[" három "," 3 "],[" öt "," 5 "],[" hat "," 6 "],[" hét "," 7 "],[" nyolc "," 8 "],[" kilenc "," 9 "],[" tíz "," 10 "],
-["logikai","boolean"],["szám","integer"],["stream","string"],["sztring","string"],["dátum","date"],["audi","id"],["díj","id"],
+["84 bus","8 tables"],["timetables","10 tables"],["grade","create"],["portable","4 tables"],["turntables","10 tables"],["neighbour","table"],["you","new"],
+[" egy "," 1 "],["névtáblát","4 táblát"],[" kettő "," 2 "],[" négy "," 4 "],[" három "," 3 "],[" öt "," 5 "],[" hat "," 6 "],[" hét "," 7 "],[" nyolc "," 8 "],[" kilenc "," 9 "],[" tíz "," 10 "],
+["logikai","boolean"],["szám","integer"],["stream","string"],["sztring","string"],["dátum","date"],["audi","id"],["díj","id"],["agy","adj"]
 ];
+
+var TSPHistory = function(limit=20,timelimit=3000){ //pieces,ms
+  this.limit=limit;
+  this.timelimit=timelimit;
+  this.verem=[];
+  this.mode=null;  
+  this.add=function (p,mode=null) {    
+    this.verem.push(p);
+    if (mode!==null) this.mode=mode;
+    if (this.verem.length>this.limit){
+      this.verem=this.verem.splice(1);
+    }
+    this.time=(new Date()).getTime();
+  };
+  this.last=function() {
+    return this.verem[this.verem.length-1];
+  };
+  this.ellapsed=function(){
+    if ((this.time+timelimit)<(new Date()).getTime()) return true;   
+    return false; 
+  };
+};
+var SPHistory = new TSPHistory();
+
 
 var speechlevel=0;
 function robot(command){
@@ -2380,26 +2472,23 @@ function robot(command){
     //all text transfer
     processSpeech(-1,command,0,null);
   }
-
-
-  mini=-1;
-  minv=10;
-  minparams=[];
+  var mini=-1;
+  var minv=10;
+  var minparams=[];
   for (let i = 0; i < commands.length; i++) {
-    minta=commands[i][1];
-    
-    c = minta.indexOf("%");
+    var minta=commands[i][1];    
+    var c = minta.indexOf("%");
     if (c>0){ //more parts split by %
       var parts=minta.split("%");
       var cmd=command;
       var dst=0;
       var chrs=0;
       var res=null;
-      minip=[];
+      var minip=[];
       for (let i = 0; i < parts.length; i++) {
         const p = parts[i];        
         res = getEditDistance2(p,cmd);  //(part,cmd) ->  [dist,chars,newcmd,%paramvalue]
-        if (res==null){
+        if (res===null){
           break;
         }
                
@@ -2407,12 +2496,12 @@ function robot(command){
         chrs+=res[1];
         cmd=res[2];
         minip.push(res[3]);        
-        if (cmd==null){
+        if (cmd===null){
           break;
         } 
       }
-      if (res!=null){
-        sym=dst/chrs;//similarity
+      if (res!==null){
+        var sym=dst/chrs;//similarity
         if (sym<minv){
           mini=i;
           minv=sym; 
@@ -2438,18 +2527,35 @@ function robot(command){
     processSpeech(mini,command,minv,minparams);
   } else {
     console.log(minv,command);
+    if (!SPHistory.ellapsed()){
+      command=command.split(" ")[0]; //only one word
+      switch (SPHistory.mode){
+        case 1:
+          SP_renametable(0,0,0,[command]); 
+          break;
+        case 2:
+          SP_renamefield(0,0,0,[command]); 
+          break;
+        default:
+          break;
+
+      }
+    }
   }
 }
 
 
+
+
 function processSpeech(idx,command,minv,minparams=null){
-  var cases=commands[mini][0];
+  var cases=commands[idx][0];
+  SPHistory.add([idx,command,minv,minparams],cases);
   if (speechlevel>0){
     cases=speechlevel;    
   }
   switch (cases){
     case 1: //TODO Tablemaker
-      SP_maketables(command.match(/\d/g));
+      SP_maketables(command.match(/\d/g));      
       break;
     case 2: //TODO Fieldmaker
       SP_makefields(command.match(/\d/g));
@@ -2476,7 +2582,12 @@ function processSpeech(idx,command,minv,minparams=null){
       break;
     case 7:
       SP_renametable(idx,command,minv,minparams);
+      break;
+    case 10:
+      SP_renamefield(idx,command,minv,minparams);
+      break;  
     default:
+      
       break;
   }
 }
@@ -2484,37 +2595,49 @@ function processSpeech(idx,command,minv,minparams=null){
 
 function SP_maketables(num){
   num=Math.min(10,Math.abs(Math.floor(num)));
+  var table=null;
   for (let i = 0; i < num; i++) {
-    var table = newTable();  
+    table = newTable();  
     table.moveToPosition(Number(Math.random()*10)*100,Number(Math.random()*7)*100);        
   }
+  if (table!==null)
+    table.Selected();
+  return num;  
 }
 
-function SP_makefields(num){
-  if (SelectedTable!=null){
+function SP_makefields(num){  
+  if (SelectedTable!==null){
+    SelectedField=null;
     num=Math.min(10,Math.abs(Math.floor(num)));
+    var f=null;
     for (let i = 0; i < num; i++) {
-      SelectedTable.addField("Field"+(idField++),0);
+      f=SelectedTable.addField("Field"+(idField++),0);
+      if (SelectedField===null) {
+        SelectedField=f;//first field selected
+      } 
     }
     SelectedTable.refreshFields();
     refreshFieldsListDOM();
+    return num;
   }
+  return 0;
 }
 
 function SP_addfield(idx,command){
-  if (SelectedTable==null) return;
+  if (SelectedTable===null) return;
+  var f=null;
   if (command.indexOf("integer")>0){
-    var f = SelectedTable.addField("Field"+(idField++),0);
+    f = SelectedTable.addField("Field"+(idField++),0);
     f.setType(1);
     f.length=0;
   }else if (command.indexOf("string")>0){
     SelectedTable.addField("Field"+(idField++),0);    
   } else if (command.indexOf("boolean")>0){
-    var f = SelectedTable.addField("Field"+(idField++),0);
+    f = SelectedTable.addField("Field"+(idField++),0);
     f.setType(7);
     f.length=0;  
   } else if (command.indexOf("date")>0){
-    var f = SelectedTable.addField("Field"+(idField++),0);
+    f = SelectedTable.addField("Field"+(idField++),0);
     f.setType(4);
     f.length=0;
   } 
@@ -2524,21 +2647,21 @@ function SP_addfield(idx,command){
 
 function SP_selectnewtable() {
   const t = ATables.find( tab => tab.name.toLowerCase().indexOf("unknown")==0 );
-  if (t!=null) {
+  if (t!==null) {
     t.Selected();
   }
 }
 
 
 function SP_deletetable(idx,cmd) {
-  if (SelectedTable!=null){
+  if (SelectedTable!==null){
     if (speechlevel!=0){
       speechlevel=0; //agree
       document.getElementById("yesno").style.visibility="hidden";
       if (cmd=="yes"){
         var index = ATables.indexOf(SelectedTable);
         if (index > -1) {
-          div = ATables[index].DOMGroup;
+          //var div = ATables[index].DOMGroup;
           ATables.splice(index, 1);
           //div.parentElement.removeChild(div);
           SelectedTable.destroy();
@@ -2558,16 +2681,12 @@ function SP_deletetable(idx,cmd) {
 function SP_selecttable(idx,cmd,minv,minparams) {
   if (idx<0) return;  
   if (idx>=commands.length) return;
-  if ((cmd==null) || (cmd==""))  return;
-
-  if ((minparams!=null) && (minparams.length>0)) {
+  if ((cmd===null) || (cmd==""))  return;
+  var t=null;
+  if ((minparams!==null) && (minparams.length>0)) {
     if (typeof(minparams)=="object"){
-      /*if (minparams[0]=="új"){
-        SP_selectnewtable();
-        return;
-      }*/
-      var t = ATables.SearchTableByName(minparams[0]);
-      if (t!=null)
+      t = ATables.SearchTableByName(minparams[0]);
+      if (t!==null)
         t.Selected(); 
     }
   }else {
@@ -2578,8 +2697,8 @@ function SP_selecttable(idx,cmd,minv,minparams) {
       if (cmd.indexOf("unknown")==0){
         cmd=cmd.replace(" ","");
       }
-      var t = ATables.SearchTableByName(cmd.replace(" ","_"));
-      if (t!=null)
+      t = ATables.SearchTableByName(cmd.replace(" ","_"));
+      if (t!==null)
         t.Selected();
     }
   }
@@ -2589,8 +2708,8 @@ function SP_renametable(idx,cmd,minv,minparams){
   if (idx<0) return;
   if (idx>=commands.length) return;
 
-  if (SelectedTable!=null){
-    if ((minparams!=null) && (minparams.length>0)){
+  if (SelectedTable!==null){
+    if ((minparams!==null) && (minparams.length>0)){
       try {
         SelectedTable.setName(minparams[0].replace(" ","_"));  
       } catch (error) {        
@@ -2604,62 +2723,28 @@ function SP_renametable(idx,cmd,minv,minparams){
       }
     }      
   }
-
 }
 
-function getEditDistance2(p,cmd)  //(part,cmd) ->  [dist,chars,newcmd,%param value]
-{ res=[0,0,0,0];                    // nevezd át a táblát%nevűre > 
-                                  // 1. nevezd át a táblát,nevezd át a táblát almafa névre
-  a=p.split(" ");
-  b=cmd.split(" ");
-  c=b.splice(a.length);
-  if (b.length<a.length){
-    return null;
-  }
-  res[0]=getEditDistance(a.join(" "), b.join(" "));
-  res[1]=p.length;
-  res[3]=c.splice(0,1)[0];
-  res[2]=c.join(" "); 
-  return res; 
-}
-
-function getSimilarity(a,b){  
-  var d=getEditDistance(a,b);
-  return d/Math.max(a.length,b.length);
-}
-
-function getEditDistance(a, b){
-  if(a.length == 0) return b.length; 
-  if(b.length == 0) return a.length; 
-
-  var matrix = [];
-
-  // increment along the first column of each row
-  var i;
-  for(i = 0; i <= b.length; i++){
-    matrix[i] = [i];
-  }
-
-  // increment each column in the first row
-  var j;
-  for(j = 0; j <= a.length; j++){
-    matrix[0][j] = j;
-  }
-
-  // Fill in the rest of the matrix
-  for(i = 1; i <= b.length; i++){
-    for(j = 1; j <= a.length; j++){
-      if(b.charAt(i-1) == a.charAt(j-1)){
-        matrix[i][j] = matrix[i-1][j-1];
-      } else {
-        matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, // substitution
-                                Math.min(matrix[i][j-1] + 1, // insertion
-                                         matrix[i-1][j] + 1)); // deletion
-      }
+function SP_renamefield(idx,cmd,minv,minparams) {
+  if (idx<0) return;
+  if (idx>=commands.length) return;
+  if (SelectedTable!==null){
+    if (SelectedField!==null){
+      if ((minparams!==null) && (minparams.length>0)){
+        try {
+          SelectedField.setName(minparams[0].replace(" ","_"));  
+        } catch (error) {        
+          console.log(minparams);
+        }      
+      }else {
+        if (minv<0){
+          cmd=cmd.replace(commands[idx][1],"");
+          cmd=cmd.trim();        
+          SelectedField.setName(cmd.replace(" ","_"));
+        }
+      }   
     }
   }
+}
 
-  return matrix[b.length][a.length];
-};
-  
 //endregion SPEECH 

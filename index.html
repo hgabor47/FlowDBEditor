@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <script>
-        var vers="0.92";
+        var vers="0.95";
         var flowdbinit=null;    //can use content (XML) or file path on server side. On client side please use GET 
                                 //example: copy tro clipbrd saved flowdb file content and paste to here among `` signs
     </script>
@@ -236,6 +236,17 @@
             border: 1px rgb(88, 197, 74) solid;            
             font-size: 2.2rem;
         }
+        #donate {
+            color:black;
+            font-weight: 500;
+            font-size: 0.6rem;
+            padding-left:60px;
+            padding-right:60px;
+            background-color: rgba(211, 211, 211, 0.472);
+        }
+        .micro {
+            font-size:0.6rem;
+        }
     </style>
     <script>
         var news = [             
@@ -293,6 +304,7 @@
     </div>
     <div id="mainarea" class="container-fluid">
         <span class="display-5" >FlowDBEditor4</span><b id="vers"></b><i> for CHROME and SVG compatible browsers</i>
+        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=hgabor47%40gmail%2ecom&lc=AL&item_number=flowdbeditor&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted"><span id="donate">DONATE</span></a>
         <div id="help" onclick="this.innerHTML=''">Write records with right click on created tables :)</div>
         <div id="area" class="row">    
             <div class="col-2">   
@@ -300,6 +312,7 @@
                     <div class="flow_tables">CommandPanel
                         <i style="font-size:16px" class="fa">&#xf103;</i>
                     </div>
+                    <button class="commandbutton" onclick="{this.disabled=true;AI()}" class="fa" style="font-family: FontAwesome;" >&#xf130;<span class="micro">A.I.</span></button> 
                     <button class="commandbutton" onclick="Save()">Save</button>
                     <button class="commandbutton" onclick="Load()">Load</button>
                     <button class="commandbutton" onclick="Load('alma')">Clear</button>
@@ -312,8 +325,8 @@
                     <button class="commandbutton" onclick="mySQL('print')">Download MySQL</button>
                     <button class="commandbutton" onclick="newsdialog(true)">News</button>
                     <button class="commandbutton" onclick="zoom()">Zoom</button>                                        
-                    <button class="commandbutton" onclick="AI()">A.I.</button> 
-                    <button class="commandbutton" onclick="robot('válaszd ki a company táblát');robot('nevezd át a táblát companies névre')">A.I.TEST</button> 
+                    
+                    <!-- <button class="commandbutton" onclick="robot('válaszd ki a company táblát');robot('nevezd át a táblát companies névre')">A.I.TEST</button> -->
                     <div id="modules"></div>
                     <a target="_blank" style="visibility:hidden;" id="print" download="file.txt" href="">RightClickforDownload</a>                    
                 </div>
