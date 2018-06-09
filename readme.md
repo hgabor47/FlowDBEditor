@@ -24,3 +24,4 @@ So you can try a database without any preparation.
 ![Preview image](https://github.com/hgabor47/FlowDBEditor/blob/master/flowdbeditor1.jpg?raw=true "Preview")
 
 
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=hgabor47%40gmail%2ecom&lc=AL&item_number=flowdbeditor&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted)
