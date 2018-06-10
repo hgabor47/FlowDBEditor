@@ -2432,7 +2432,7 @@ function AI(){
 
 var commands = [
   [ //0
-  /*OK*/[1,"create 4 tables"],[1,"create 4 table"],[1,"4 tables create"],[1,"készíts 4 táblát"],[1,"szeretnék 4 táblát"],[1,"készíts 4 új táblát"],[1,"kérek 4 új táblát"],[1,"csinálj 4 új táblát"],[1,"adj 4 új táblát"],
+  /*OK*/[1,"create 4 tables"],[1,"create 4 table"],[1,"create a table"],[1,"4 tables create"],[1,"készíts 4 táblát"],[1,"szeretnék 4 táblát"],[1,"készíts 4 új táblát"],[1,"kérek 4 új táblát"],[1,"csinálj 4 új táblát"],[1,"adj 4 új táblát"],
   /*OK*/[2,"create 4 field"],[2,"create 4 fields"],[2,"készíts 4 mezőt"],[2,"készíts 4 új mezőt"],[2,"kérek 4 új mezőt"],[2,"csinálj 4 új mezőt"],[2,"adj 4 új mezőt"],[2,"új 1 mező"],
   [3,"link"],
   /*OK*/[4,"clear all tables"],[4,"törölj ki minden táblát"],[4,"töröld a táblákat"],[4,"töröld ki az összes táblát",0.1],
