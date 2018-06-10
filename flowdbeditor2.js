@@ -27,7 +27,7 @@ var flowdbget = params.get("flowdb");
 var flowdbplayer = params.get("player");  //USERVIEW if exists
 var ViewModes = Object.freeze({"Developer":1, "User":2});
 var VIEWMODE=ViewModes.Developer;
-if (flowdbplayer!==null){
+if (flowdbplayer!=null){
   VIEWMODE=ViewModes.User;
 }
 //var flowdbinit=null; //if exists please remove this line flowdbinit is a innercircle start flowdb if you want
@@ -36,11 +36,11 @@ var AUTOINCTSTART=1;
 function flowdbeditor_onload(){
   var but=document.getElementById("flowdbload");
   but.activ=false; //TODO!!! for prevent to double load in same time
-  if (flowdbget!==null){
+  if (flowdbget!=null){
     LoadString(flowdbget);
     but.activ=true;
   } else {  
-    if (flowdbinit===null){
+    if (flowdbinit==null){
       Load(temp);
       but.activ=true;
     }
@@ -82,7 +82,7 @@ function zoom(){
 //#region HINTS, NEWS
 
 function newsdialog(show){
-  if (news===null) return; //defined in INDEX.html
+  if (news==null) return; //defined in INDEX.html
   if (show){
     localStorage.setItem("flowdbeditornews","");
   }
@@ -92,9 +92,9 @@ function newsdialog(show){
   var shownews=false;
   var p=null;        
   for(let i=0;i<news.length;i++){ 
-      if (news1!==null)
+      if (news1!=null)
         p=news1.indexOf(news[i][0]);
-      if (news1===null ||  (p<0)) {
+      if (news1==null ||  (p<0)) {
         var d = document.createElement("li");
         d.innerHTML=news[i][1];
         newsul.appendChild(d);
@@ -179,10 +179,10 @@ var TTable = function(name){
   this.setVisible=function(value){
     this.visible=value;
     if (this.visible){
-      if (this.DOMGroup!==null)
+      if (this.DOMGroup!=null)
         this.DOMGroup.style.visibility="visible";        
     }else {
-      if (this.DOMGroup!==null)
+      if (this.DOMGroup!=null)
         this.DOMGroup.style.visibility="hidden";
     }
     this.refreshConstraints();
@@ -199,7 +199,7 @@ var TTable = function(name){
 
   this.setName=function(name){
     this.name=name;
-    if (this.DOMtitle!==null) 
+    if (this.DOMtitle!=null) 
       this.DOMtitle.innerHTML=name;
   };
   this.setName(name+(idTable++));
@@ -327,7 +327,7 @@ var TTable = function(name){
     for (let i = 0; i < a.length; i++) {
       const e = a[i];      
       var t=e.refreshLink();
-      if (t!==null){
+      if (t!=null){
         tmptables.push(t);
       }
     }
@@ -339,7 +339,7 @@ var TTable = function(name){
       if (t!=this && chk!=true){
         for (let j = 0; j < t.AFields.length; j++) {
           const f = t.AFields[j];
-          if (f.link!==null){
+          if (f.link!=null){
             if (f.link.table==this){
               f.refreshLink();
               //f.table.refreshConstraints();
@@ -377,16 +377,18 @@ var TTable = function(name){
   };
 
   this.Selected=function(){
-    if (SelectedTable!==null) {
+    if (SelectedTable!=null) {
       SelectedTable.noSelected();  //table  
     }
     SelectedTable=this;
+    SelectedField=null;
     this.setReadOnly(this.readonly);
     //this.DOMrect.setAttribute("style",selectedStyle);
     refreshFieldsListDOM();
   };
   this.noSelected=function(){
     SelectedTable=null;
+    SelectedField=null;
     this.setReadOnly(this.readonly);
     //this.DOMrect.setAttribute("style",noSelectedStyle);
     refreshFieldsListDOM();
@@ -450,7 +452,7 @@ var TTable = function(name){
 
     this.AFields=[];
     this.Records=[];
-    if (this !==null && this.DOMGroup!==null)
+    if (this !=null && this.DOMGroup!=null)
       flowdbeditor.removeChild(this.DOMGroup); 
 
     /*for (let i = 0; i < AFields.length; i++) {
@@ -510,7 +512,7 @@ var TTable = function(name){
     }
 
     var rec = node.getElementsByTagName("records");
-    if (rec!==null) 
+    if (rec!=null) 
       rec = rec[0];
     
     var row = rec.getElementsByTagName("row");
@@ -535,15 +537,16 @@ var TTable = function(name){
       f.setLinksFromTemp();
     }
   };
+  //don't use!! USE like AFields.SearchFieldByName...
   this.SearchFieldByName=function(fieldname){
     const result = this.find( fi => fi.name === fieldname );
     return result;
   };
   this.getLinksTo=function(){ //result fields[]
     var res=[];
-    if (this.AFields!==null){
+    if (this.AFields!=null){
       this.AFields.forEach(function(field,index){
-        if (field!==null && field.link!==null){
+        if (field!=null && field.link!=null){
           res.push(field);
         }
       });
@@ -553,11 +556,11 @@ var TTable = function(name){
   this.getLinksFrom=function(){ //result fields[]
     var res=[];
     const Table=this;
-    if (ATables!==null){
+    if (ATables!=null){
       ATables.forEach(function(table,index){
-        if (table!==null && table.AFields!==null){
+        if (table!=null && table.AFields!=null){
           table.AFields.forEach(function(field,index2){
-            if (field!==null && field.link!==null){
+            if (field!=null && field.link!=null){
               if (field.link.table==Table)
                 res.push(field);
             }
@@ -586,7 +589,7 @@ var TTable = function(name){
           this.Records.forEach(function(o,i){
             if(i>0)
               if ((o[fieldidx]!='0') && (o[fieldidx]!='1')){
-                if ((o[fieldidx]===null) || (o[fieldidx]=="")){
+                if ((o[fieldidx]==null) || (o[fieldidx]=="")){
                   o[fieldidx]='0';
                 } else {
                   o[fieldidx]='1';    
@@ -706,8 +709,12 @@ var TField = function(table,name){
     this.description=nullstring(value);
   };
   this.setName=function(name){
+    name=name.trim().replace(" ","_");
+    if (name==""){
+      name="Field"+(idField++);
+    }
     this.name=name;
-    if (this.table!==null){
+    if (this.table!=null){
       this.table.refreshRecordFields();
       this.table.refreshFields();
     }
@@ -745,7 +752,7 @@ var TField = function(table,name){
      <hr><label>Data from another table:</label>
      <button onclick="editFieldLink(this)">LinkTo</button>
      <button onclick="editFieldLinkDelete(this)">DeleteLink</button>`;
-     if (this.link!==null){
+     if (this.link!=null){
         div.innerHTML+=`<label>Link filtered values range:</label>`;
         if (this.linkfilter[0]) {
           div.innerHTML+=`<input type="checkbox" linked="DOMfilterDIV" onchange="changeCHKfilter(this)" id="edit_linkfilter" checked>`;
@@ -761,7 +768,7 @@ var TField = function(table,name){
      <button onclick="editFieldCancel(this)">Cancel</button>`;
     div.field=this;
     parent.appendChild(div);
-    if (this.link!==null) {
+    if (this.link!=null) {
       changeCHKfilter(document.getElementById("edit_linkfilter"));
     }
     return div;
@@ -804,11 +811,11 @@ var TField = function(table,name){
     this.refreshLink();
   };
   this.deleteLink=function(){
-    if(this.link!==null){
-      if (this.DOMLink!==null){
-        if (this.DOMLink.v!==null)
+    if(this.link!=null){
+      if (this.DOMLink!=null){
+        if (this.DOMLink.v!=null)
           flowdbeditor.removeChild(this.DOMLink.v);
-        if (this.DOMLink.k!==null)          
+        if (this.DOMLink.k!=null)          
           flowdbeditor.removeChild(this.DOMLink.k);
         flowdbeditor.removeChild(this.DOMLink);
         this.DOMLink=null;
@@ -817,8 +824,8 @@ var TField = function(table,name){
     }
   }; 
   this.refreshLink=function(){
-    if (this.DOMLink!==null){
-      if (this.link!==null){
+    if (this.DOMLink!=null){
+      if (this.link!=null){
         if ((!this.table.visible) || (!this.link.table.visible)){
           //TODO each table is invisible
           this.DOMLink.setAttribute("class","flow_line_hidden");
@@ -878,7 +885,7 @@ var TField = function(table,name){
       f.setAttribute("display",1);
     else
     f.setAttribute("display",0);
-    if (this.link!==null){
+    if (this.link!=null){
       f.setAttribute("link",[this.link.table.name,this.link.name]);
     }    
     f.setAttribute("autoinc",[this.autoinc]);
@@ -904,12 +911,12 @@ var TField = function(table,name){
     this.linkfilter[3] = nullstring(node.getAttribute("linkfilterfield"));
       
     this.autoinc = node.getAttribute("autoinc");
-    if (this.linktext!==null){
+    if (this.linktext!=null){
       this.linktext=this.linktext.split(",");
     }
   };
   this.setLinksFromTemp = function(){
-    if (this.linktext!==null){
+    if (this.linktext!=null){
       var tablename=this.linktext[0];
       var fieldname=this.linktext[1];
       
@@ -922,7 +929,7 @@ var TField = function(table,name){
   this.destroy = function(){
     var index = this.table.AFields.indexOf(this);
     if (index>-1){
-      if (this.link!==null){
+      if (this.link!=null){
         this.deleteLink();
       }
       var linksfrom = this.table.getLinksFrom();
@@ -993,7 +1000,7 @@ var SearchTableByName = function(tablename){
 var ATablesclear=function(){
   for (let i = 0; i < ATables.length; i++) {
     const t = ATables[i];
-    if (t!==null)
+    if (t!=null)
       t.destroy();
   }
   ATables = [];ATables.clear=ATablesclear; 
@@ -1008,7 +1015,7 @@ ATables.SearchTableByName=SearchTableByName;
 
 function sortTables(){
   oncehints.hint("outside");
-  if (ATables!==null){
+  if (ATables!=null){
     ATables.forEach(function(table,idx){
       var ok=true;
       if (table.posxy[0]<0) {table.posxy[0]=100;ok=false;}
@@ -1075,7 +1082,7 @@ function hidetable(button){
 }
 
 function newField(){
-  if (SelectedTable!==null){
+  if (SelectedTable!=null){
     SelectedTable.addField("Field"+(idField++),0);
     SelectedTable.refreshFields();
     refreshFieldsListDOM();
@@ -1090,7 +1097,7 @@ function refreshFieldsListDOM(){
   l.innerHTML="";
   var co=document.getElementById("constraints");
   co.innerHTML="";
-  if (SelectedTable===null) return;
+  if (SelectedTable==null) return;
   var coindex=0;
 
   for (let i = 0; i < SelectedTable.AFields.length; i++) {
@@ -1104,7 +1111,7 @@ function refreshFieldsListDOM(){
 
     obj.innerHTML=e.name;
     l.appendChild(obj);
-    if (e.link!==null){
+    if (e.link!=null){
       var f2=e.link;      
       obj = document.createElement("div");
       if (coindex++%2==0)
@@ -1119,7 +1126,7 @@ function refreshFieldsListDOM(){
 
 var automodeLink=true;
 function newConstraint(b,nohint){  
-  if (b!==null){
+  if (b!=null){
     if (flowMode==FlowModes.Flow){
       flowMode=FlowModes.Constraint;
       b.innerHTML="Stop link";
@@ -1147,10 +1154,11 @@ function titleClick(e){
 
 function fieldClick(e){
   if (flowMode==FlowModes.Flow){
+    SelectedField=this.field;
     this.field.edit(document.getElementById("area"));
   }
   if (flowMode==FlowModes.Constraint){
-    if (constraintField===null){ //startpoint
+    if (constraintField==null){ //startpoint
       constraintField  = this.field;
     } else { //endpoint
       constraintField.deleteLink();      
@@ -1168,7 +1176,7 @@ function fieldClick(e){
 //TABLE FIELD PANEL REMOVE
 function removePanelDOM(div){
   div.parentElement.parentElement.removeChild(div.parentElement);
-  stateEdit=false;
+  stateEdit=false;  
 }
 //region TABLE Buttons
 function editTableOK(div){
@@ -1193,6 +1201,7 @@ function editTableOK(div){
 }
 function editTableCancel(div){
   removePanelDOM(div);
+    
 }
 function editTableDelete(div){
   if (confirm("DELETE TABLE with all fields! Sure?")) {
@@ -1219,7 +1228,7 @@ function PastePanel(e){
   else if( window.clipboardData ){
     content = window.clipboardData.getData('Text');    
   }
-  if ((content!="") && (content!==null)){
+  if ((content!="") && (content!=null)){
     var div=document.createElement("div");
     div.className="flow_clipboard";
     document.body.appendChild(div);
@@ -1233,7 +1242,7 @@ function PastePanel(e){
 function onPaste(div,startidx){        
     var content = div.clipboard;
     
-    if (startidx===null){
+    if (startidx==null){
       var idx=document.getElementById("pasteheader");
       if (idx.checked)
         startidx = 1
@@ -1301,7 +1310,7 @@ function editFieldOK(div){
   var elinkfilter1 = document.getElementById('edit_linkfilter1');
   var elinkfilter2 = document.getElementById('edit_linkfilter2');  
   var elinkfilterfield = document.getElementById('edit_linkfilterfield');  
-  if (elinkfilter!==null){
+  if (elinkfilter!=null){
     try {
       panel.field.linkfilter[0]=elinkfilter.checked;
       panel.field.linkfilter[1]=elinkfilter1.value;
@@ -1356,9 +1365,9 @@ function editFieldLinkDelete(div){
 }
 function changeCHKfilter(chk){  
   var DOM = chk.getAttribute("linked");
-  if (DOM===null) return;
+  if (DOM==null) return;
   var DOMfilterDIV = document.getElementById(DOM);
-  if ((chk.checked) && (DOMfilterDIV!==null)){
+  if ((chk.checked) && (DOMfilterDIV!=null)){
     DOMfilterDIV.style.visibility="visible";
     DOMfilterDIV.style.display="block";
   } else {
@@ -1395,7 +1404,7 @@ function down(e){
       cY = event.clientY-grab; 
       this.table.Selected();  //table
     } else {
-      if (e.touches!==null){
+      if (e.touches!=null){
         if (e.touches.length>0){
           cX = e.touches[0].clientX-grab;  
           cY = e.touches[0].clientY-grab; 
@@ -1416,16 +1425,19 @@ function contextmenu(e){
     //this.table.browse(document.getElementById("area"));      
 }
 
+var dX=0;
+var dY=0;
+
 function touchmove(e){
   if (flowMode==FlowModes.Flow){
     if(event.preventDefault) 
       event.preventDefault();
-    if (e.touches!==null){
+    if (e.touches!=null){
       if (e.touches.length>0){            
         var evtt = e.touches[0];
         this.parentElement.appendChild(this);
-        //var dX = evtt.clientX -cX;  
-        //var dY = evtt.clientY -cY;  
+        dX = evtt.clientX -cX;  
+        dY = evtt.clientY -cY;  
         cX = evtt.clientX-grab;  
         cY = evtt.clientY-grab;
         var s = this.getAttribute("transform");
@@ -1471,7 +1483,7 @@ function up(e){
 function getEditDistance2(p,cmd)  //(part,cmd) ->  [dist,chars,newcmd,%param value]
 { var res=[0,0,0,0];                    // nevezd át a táblát%nevűre > 
                                   // 1. nevezd át a táblát,nevezd át a táblát almafa névre
-  var a=p.split(" ");
+  var a=p.trim().split(" ");
   var b=cmd.split(" ");
   var c=b.splice(a.length);
   if (b.length<a.length){
@@ -1532,7 +1544,7 @@ function LoadContentFromServer(file,fuggveny){
       if (this.readyState==2){
           var mtimefile = this.getResponseHeader('Last-Modified')+file;
           var stimefile = localStorage.getItem("flowdbeditor_infileID");
-          if ((stimefile!==null) && (stimefile==mtimefile))
+          if ((stimefile!=null) && (stimefile==mtimefile))
             this.abort();
           else 
             localStorage.setItem("flowdbeditor_infileID",mtimefile);
@@ -1581,8 +1593,8 @@ function loadModule(jsname,div){
 }
 
 function nullstring(value,helyettes){
-  if (value===null)
-  {  if (helyettes===null)
+  if (value==null)
+  {  if (helyettes==null)
       return "";
     else
       return helyettes;
@@ -1664,7 +1676,7 @@ var xmlroot="flowdbeditor";
 function Save(variable){
   oncehints.hint("save");
   var xmlText = SavetoString();
-  if (variable!==null){
+  if (variable!=null){
     //alert(variable);
     localStorage.setItem(variable,xmlText);
   } else {
@@ -1673,7 +1685,7 @@ function Save(variable){
 }
 function Load(variable){
   var xmlText="";
-  if (variable!==null){ 
+  if (variable!=null){ 
     xmlText  = localStorage.getItem(variable);
   } else {
     xmlText  = localStorage.getItem("flowdbeditor");
@@ -1729,8 +1741,9 @@ function LoadString(xmlText){
               <stop stop-color="red" offset="1" />
           </linearGradient>
       </defs>`; 
-  if (xmlText===null){
+  if (xmlText==null){
     SelectedTable=null;
+    SelectedField=null;
     refreshTablesListDOM();
     refreshFieldsListDOM();
     return;
@@ -1753,13 +1766,13 @@ function LoadString(xmlText){
   }
   refreshTablesListDOM();
   var setup = root.getElementsByTagName("setup");
-  if ((setup!==null && setup.length>0)){     
+  if ((setup!=null && setup.length>0)){     
      setup=setup[0];
      var v = setup.getAttribute("idField");
-     if (v!==null) 
+     if (v!=null) 
         idField = Number(v);
      v = setup.getAttribute("idTable");
-     if (v!==null) 
+     if (v!=null) 
         idTable = Number(v);
 
   }
@@ -1769,7 +1782,7 @@ function LoadString(xmlText){
 var SQLdb="flowdbeditor";
 var LF='\r\n';
 function mySQL(linknode){
-  if (ATables===null) return;
+  if (ATables==null) return;
   linknode=document.getElementById(linknode);
   var source=`START TRANSACTION;`+LF+` 
   SET time_zone = "+00:00";`+LF ;
@@ -1790,7 +1803,7 @@ function mySQL(linknode){
     source=source.substring(0,source.length-3)+LF; //utolso vesszo
     source+=`) ENGINE=InnoDB DEFAULT CHARSET=utf8;`+LF ;
 
-    if (table.Records!==null && table.Records.length>1){
+    if (table.Records!=null && table.Records.length>1){
       source+=`INSERT INTO `+table.name+` (`+fields+`) VALUES `;
       table.Records.forEach(function(o,i){
         if (i>0){
@@ -1826,7 +1839,7 @@ function mySQL(linknode){
     var one=false;
     var s="";
     table.AFields.forEach(function(field,index2){ 
-      if ( field.link!==null){
+      if ( field.link!=null){
         one=true;
         s+='ADD CONSTRAINT `'+table.name+field.link.table.name+'` FOREIGN KEY (`'+field.name+'`) REFERENCES `'+field.link.table.name+'`('+field.link.name+'),'+LF;
       }
@@ -1850,7 +1863,7 @@ function mySQL(linknode){
 var LFGO='\r\nGO\r\n';
 var mscollate = 'HUNGARIAN_CI_AS';
 function MSSQL(linknode){
-  if (ATables===null) return;
+  if (ATables==null) return;
   linknode=document.getElementById(linknode);
   var source=`BEGIN TRAN`+LFGO;
   source+=`drop database if exists `+SQLdb+LFGO+`  
@@ -1871,7 +1884,7 @@ function MSSQL(linknode){
     source+=`) `+LFGO ;
 
     
-    if (table.Records!==null && table.Records.length>1){
+    if (table.Records!=null && table.Records.length>1){
       source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] ON `+LF;
       source+=`INSERT INTO [dbo].[`+table.name+`] (`+fields+`) VALUES `;
       table.Records.forEach(function(o,i){
@@ -1910,7 +1923,7 @@ function MSSQL(linknode){
     var one=false;
     var s="";
     table.AFields.forEach(function(field,index2){ 
-      if ( field.link!==null){
+      if ( field.link!=null){
         one=true;
         s+='ADD CONSTRAINT `'+table.name+field.link.table.name+'` FOREIGN KEY (`'+field.name+'`) REFERENCES `'+field.link.table.name+'`('+field.link.name+'),'+LF;
       }
@@ -1950,7 +1963,7 @@ function FlowDBLoad(e) {
 
   oncehints.hint("loadfromfile");
   var input = document.getElementById("filename");
-  if (input.file!==null || input.files[0]!==null)
+  if (input.file!=null || input.files[0]!=null)
   {
       var reader = new FileReader();
       reader.onload = function(){
@@ -1996,7 +2009,7 @@ var Divname=null;
 var browsebuttonleft=true;  //left or right side
 function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
   if (tableidx<0 || tableidx>=ATables.length) return ;
-  if (divname===null)
+  if (divname==null)
     divname=Divname;
   Divname=divname;    
   var div = document.getElementById(divname);
@@ -2005,21 +2018,18 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
     var hdr = document.getElementById("list_header");
     hdr.style.top=(e.target.scrollTop)+'px';
   });
-  if (divname!==null) //TODO New position in new table
+  if (divname!=null) //TODO New position in new table
   {    
     div.style.top=Number(window.pageYOffset)+20+"px";
     div.style.left=Number(window.pageXOffset)+30+"px";
   }
-
-
-
 
   var div2=document.createElement("div");
   div2.setAttribute("id","list_header");
   div2.className="flow_browse_header";
 
   div2.innerHTML=`<button onclick="list_new(`+tableidx+`)">NewRecord</button>    
-  <button onclick="editTableCancel(this.parentElement)">Exit</button><button onclick="editTableClear(`+tableidx+`)">ClearRecords</button>`;
+  <button onclick="{commandgroup=0;editTableCancel(this.parentElement);}">Exit</button><button onclick="editTableClear(`+tableidx+`)">ClearRecords</button>`;
   var table = ATables[tableidx];
   tomb=table.Records;
 
@@ -2038,7 +2048,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
         {
             var b  = document.createElement("option");
             b.value=i;
-            if (hdr===null){
+            if (hdr==null){
               b.innerHTML="Empty";
             } else {
               b.innerHTML=hdr.replace("_s","");
@@ -2066,7 +2076,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
       //preprocess
       combo=[];
       table.AFields.forEach(function(o,i){
-        if (o.link!==null){
+        if (o.link!=null){
           combo.push( getTable(o.link.table) ); //0,1  idx,name
         } else {
           combo.push(null);
@@ -2099,10 +2109,10 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
         //r.setAttribute("sqlid",sor[0]);
         for (let j = start; j < sor.length; j++) {
             var cell=sor[j];
-            if ((i==0) || (combo===null) || (combo[j]===null)){
+            if ((i==0) || (combo==null) || (combo[j]==null)){
               cell = sor[j];
             }else {
-              //comboj !==null
+              //comboj !=null
               var t2=combo[j];
               try {
                 //lookup
@@ -2112,7 +2122,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
             }
             var c= document.createElement("td");
             r.appendChild(c);
-            if (cell===null) { cell = ""};
+            if (cell==null) { cell = ""};
             c.innerHTML=cell;
         }          
         if ((!browsebuttonleft) && (i>0)){
@@ -2124,7 +2134,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
     }
   }  
   var hdr = document.getElementById("list_header");    
-  if (hdr!==null)
+  if (hdr!=null)
     hdr.style.top=(div.scrollTop)+'px';            
 }
 
@@ -2139,7 +2149,7 @@ function getTable(table,filterfieldname) {
       filtidx=i;
     }
     if (table.AFields[i].display==true){
-      if (table.AFields[i].link===null){        
+      if (table.AFields[i].link==null){        
         displayidx.push([i,null]);
       } else {
         displayidx.push([i,
@@ -2154,11 +2164,11 @@ function getTable(table,filterfieldname) {
           var sor=Array(2);
           sor[0]=o[0];
           sor[1]="";
-          if (filtidx!==null){
+          if (filtidx!=null){
             sor.filtervalue=o[filtidx];
           }
           displayidx.forEach(function(oi){
-            if (oi[1]===null){
+            if (oi[1]==null){
               sor[1]+=o[oi[0]]+" ";
             } else {
               //linked oi[1]
@@ -2171,7 +2181,7 @@ function getTable(table,filterfieldname) {
                   break;
                 }
               }
-              if (res===null){
+              if (res==null){
                 sor[1]+=o[oi[0]]+" ";
               } else {
                 sor[1]+=res[1];
@@ -2190,7 +2200,7 @@ function getTable(table,filterfieldname) {
         var sor=Array(2);
         sor[0]=o[0];
         sor[1]="";
-        if (filtidx!==null){
+        if (filtidx!=null){
           sor.filtervalue=o[filtidx];
         }
         o.forEach(function(o2,i2){
@@ -2236,6 +2246,7 @@ function list_new(tableidx) {
   t.Records.push(sor);
   //t.Records.push(new Array(t.AFields.length));
   list(tableidx,null);
+  return sor[0];
 }
 function list_edit(e,tableidx,id) {
   //var r = e.parentElement;
@@ -2252,7 +2263,7 @@ function list_edit(e,tableidx,id) {
 
   var fi = t.AFields;
   fi.forEach(function(f,idx){
-    if (f.link===null){
+    if (f.link==null){
       if (f.type==7){ //bool
         div.innerHTML+=ComboBoxYesNoDOM(rec[idx],f);
       } else if (f.type==3){ //autoinc
@@ -2278,7 +2289,7 @@ function listEditOK(e){
   for (let i = 0; i < div.table.AFields.length; i++) { //and div.REC has same element
     const f = t.AFields[i];      
     var o=document.getElementById(t.name+f.name);
-    if (o!==null){
+    if (o!=null){
       div.rec[i]=o.value;
     }
   }
@@ -2393,11 +2404,12 @@ function AI(){
   window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
   var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
 	const recognition = new SpeechRecognition();
-  
+  /*
   var grammar = '#JSGF V1.0; grammar flowbrick; public <flowbrick> = table | field | create | 1 | 2 | 3 | 4 | 5 | 7 | 8 | 9 | 10 | link | clear | select | hét ;'  ;
   var speechRecognitionList = new SpeechGrammarList();
   speechRecognitionList.addFromString(grammar, 1);
   recognition.grammars = speechRecognitionList;
+  */
   //recognition.lang = 'en-US';
   recognition.lang = 'hu-HU';
   recognition.interimResults = true;
@@ -2419,23 +2431,34 @@ function AI(){
 }
 
 var commands = [
+  [ //0
   /*OK*/[1,"create 4 tables"],[1,"create 4 table"],[1,"4 tables create"],[1,"készíts 4 táblát"],[1,"szeretnék 4 táblát"],[1,"készíts 4 új táblát"],[1,"kérek 4 új táblát"],[1,"csinálj 4 új táblát"],[1,"adj 4 új táblát"],
-  /*OK*/[2,"create 4 field"],[2,"create 4 fields"],[2,"készíts 4 mezőt"],[2,"készíts 4 új mezőt"],[2,"kérek 4 új mezőt"],[2,"csinálj 4 új mezőt"],[2,"adj 4 új mezőt"],
+  /*OK*/[2,"create 4 field"],[2,"create 4 fields"],[2,"készíts 4 mezőt"],[2,"készíts 4 új mezőt"],[2,"kérek 4 új mezőt"],[2,"csinálj 4 új mezőt"],[2,"adj 4 új mezőt"],[2,"új 1 mező"],
   [3,"link"],
-  /*OK*/[4,"clear tables"],[4,"törölj ki minden táblát"],[4,"töröld a táblákat"],[4,"töröld ki az összes táblát"],
-  /*OK*/[7,"rename table to"],[7,"a tábla új neve"],[7,"új tábla név"],[7,"az új tábla név"],[7,"nevezd át a táblát%nevűre"],[7,"nevezd át%nevűre"],[7,"átnevezés"],[7,"nevezd át"],[7,"a tábla új neve"],[2,"a tábla neve"],
-  /*OK*/[5,"delete table"],[5,"töröld a táblát"],[5,"tábla törlése"],[5,"töröld"],[5,"törlés"],[5,"a%tábla törlése"],
+  /*OK*/[4,"clear all tables"],[4,"törölj ki minden táblát"],[4,"töröld a táblákat"],[4,"töröld ki az összes táblát",0.1],
+  /*OK*/[7,"rename table to"],[7,"új tábla név"],[7,"nevezd át a táblát%nevűre"],[7,"nevezd át%nevűre"],[7,"átnevezés"],[7,"nevezd át"],[7,"tábla neve%"],[7,"a tábla név%"],[7,"az új tábla név%"],
+  /*OK*/[5,"delete table"],[5,"töröld a táblát"],[5,"tábla törlése"],[5,"törlés"],[5,"a%tábla törlése"],
   /*OK*/[6,"select new table"],[6,"új tábla"],[6,"kérem az egyik új táblát"],[6,"új tábla kiválasztása"],[6,"válaszd ki az új táblát"],
   /*OK*/[8,"select table"],[8,"select table called"],[8,"tábla kiválasztása"],[8,"tábla választás"],[8,"válaszd ki a%táblát"],
   /*OK*/[9,"add string field"],[9,"add integer field"],[9,"add date field"],[9,"add boolean field"],[9,"kérek 1 integer mezőt"],[9,"új integer mező"],[9,"kérek 1 string mezőt"],[9,"új string mező"],[9,"kérek 1 boolean mezőt"],[9,"új boolean mező"],[9,"új date mező"],[9,"kérek 1 date mezőt"],
-  [10,"rename field to"],[10,"legyen a mező neve"],[10,"a mező neve"],
-  
+  [10,"rename field to"],[10,"legyen a mező neve"],[10,"a mező neve"],[10,"a mezőnév"],[10,"az új mezőnév"],
+  [11,"the new name of table is"],[11,"the new table's name is"],[11,"the new table called"],[11,"az új tábla neve"],
+  [12,"connect from % to %"],[12,"kösd össze a%és%táblákat"],[12,"kapcsold össze a%és%táblákat"],[12,"kösd össze a%és a%táblákat"],[12,"kapcsold össze a%és a%táblákat"],[12,"kösd össze a% táblát a%táblával"],
+  [13,"double size"],[13,"dubla méret"],[13,"dubla széles"],
+  [14,"half size"],[14,"kisebb méret"],[14,"fele méret"],
+  [15,"köszönöm"],[15,"thank"],[15,"thank you"],
+  [16,"data entry"],[16,"adatfelvétel"],
+  ],
+  [ //1 browse
+    [1000,"új sor"],[1000,"new record"],[1000,"új rekord"],
+    [1001,"exit"],[1001,"kilépés"],
+  ]
 ];
 var change = [["igen","yes"],["nem","no"],["free","3"],["form","4"],["cleared","create"],["tree","3"],["for","4"],["hive","5"],["one","1"],["two","2"],["too","2"],["six","6"],["sex","6"],
-["84 bus","8 tables"],["timetables","10 tables"],["grade","create"],["portable","4 tables"],["turntables","10 tables"],["neighbour","table"],["you","new"],
-[" egy "," 1 "],["névtáblát","4 táblát"],[" kettő "," 2 "],[" négy "," 4 "],[" három "," 3 "],[" öt "," 5 "],[" hat "," 6 "],[" hét "," 7 "],[" nyolc "," 8 "],[" kilenc "," 9 "],[" tíz "," 10 "],
-["logikai","boolean"],["szám","integer"],["stream","string"],["sztring","string"],["dátum","date"],["audi","id"],["díj","id"],["agy","adj"]
-];
+ ["84 bus","8 tables"],["timetables","10 tables"],["grade","create"],["portable","4 tables"],["turntables","10 tables"],["neighbour","table"],["you","new"],
+ [" egy "," 1 "],["névtáblát","4 táblát"],[" kettő "," 2 "],[" négy "," 4 "],[" három "," 3 "],[" öt "," 5 "],[" hat "," 6 "],[" hét "," 7 "],[" nyolc "," 8 "],[" kilenc "," 9 "],[" tíz "," 10 "],
+ ["logikai","boolean"],["szám","integer"],["stream","string"],["sztring","string"],["dátum","date"],["audi","id"],["díj","id"],["agy","adj"]
+ ];
 
 var TSPHistory = function(limit=20,timelimit=3000){ //pieces,ms
   this.limit=limit;
@@ -2444,7 +2467,7 @@ var TSPHistory = function(limit=20,timelimit=3000){ //pieces,ms
   this.mode=null;  
   this.add=function (p,mode=null) {    
     this.verem.push(p);
-    if (mode!==null) this.mode=mode;
+    if (mode!=null) this.mode=mode;
     if (this.verem.length>this.limit){
       this.verem=this.verem.splice(1);
     }
@@ -2462,7 +2485,17 @@ var SPHistory = new TSPHistory();
 
 
 var speechlevel=0;
+var commandgroup=0; //commands[0]
 function robot(command){
+  if ((document.activeElement!=null)){
+    if ((document.activeElement.nodeName=="INPUT") ||  ((document.activeElement.nodeName=="TEXTAREA"))){
+      var s = document.activeElement.value;
+      s=s.slice(0,document.activeElement.selectionStart)+command+s.slice(document.activeElement.selectionEnd,23452345245425);      
+      document.activeElement.value = s;
+      return;
+    }
+  }
+
   command=command.toLowerCase();
   for (let i = 0; i < change.length; i++) {
     const chg = change[i];
@@ -2475,8 +2508,12 @@ function robot(command){
   var mini=-1;
   var minv=10;
   var minparams=[];
-  for (let i = 0; i < commands.length; i++) {
-    var minta=commands[i][1];    
+  for (let i = 0; i < commands[commandgroup].length; i++) {
+    var minta=commands[commandgroup][i][1];
+    var egyezes=0.3;
+    if (commands[commandgroup][i][2]!=null){
+      egyezes = commands[commandgroup][i][2];
+    }        
     var c = minta.indexOf("%");
     if (c>0){ //more parts split by %
       var parts=minta.split("%");
@@ -2488,7 +2525,7 @@ function robot(command){
       for (let i = 0; i < parts.length; i++) {
         const p = parts[i];        
         res = getEditDistance2(p,cmd);  //(part,cmd) ->  [dist,chars,newcmd,%paramvalue]
-        if (res===null){
+        if (res==null){
           break;
         }
                
@@ -2496,34 +2533,35 @@ function robot(command){
         chrs+=res[1];
         cmd=res[2];
         minip.push(res[3]);        
-        if (cmd===null){
+        if (cmd==null){
           break;
         } 
       }
-      if (res!==null){
+      if (res!=null){
         var sym=dst/chrs;//similarity
-        if (sym<minv){
+        if ((sym<egyezes) && (sym<minv)){
           mini=i;
           minv=sym; 
           minparams=minip;         
         }
       }
-  }else {
+    }else {
       if (command.startsWith(minta)) {
         mini=i;
         minv=-1;
         break;
       } else {   
-        var sym=getSimilarity(commands[i][1], command);
-        if (sym<minv){
+        var sym=getSimilarity(commands[commandgroup][i][1], command);
+        if ((sym<egyezes) && (sym<minv)){
           mini=i;
           minv=sym;
         }
       }
     }
   }  
-  if (minv<0.3){
-    console.log(commands[mini][1],command);
+  
+  if (minv<egyezes){
+    console.log(commands[commandgroup][mini][1],command);
     processSpeech(mini,command,minv,minparams);
   } else {
     console.log(minv,command);
@@ -2548,8 +2586,10 @@ function robot(command){
 
 
 function processSpeech(idx,command,minv,minparams=null){
-  var cases=commands[idx][0];
-  SPHistory.add([idx,command,minv,minparams],cases);
+  if (idx>-1){ //yes or no -1
+    var cases=commands[commandgroup][idx][0];
+    SPHistory.add([idx,command,minv,minparams],cases);
+  }
   if (speechlevel>0){
     cases=speechlevel;    
   }
@@ -2562,9 +2602,6 @@ function processSpeech(idx,command,minv,minparams=null){
       break;
     case 9: //add typed fields
       SP_addfield(idx,command);
-      break;
-    case 901:
-      //TODO case 9 after any other attribs like length
       break;
     case 3: //TODO link
       break;
@@ -2580,39 +2617,138 @@ function processSpeech(idx,command,minv,minparams=null){
     case 6: //TODO select NEW table
       SP_selectnewtable();
       break;
+    case 11:
+      SP_selectnewtable();
+      SP_renametable(idx,command,minv,minparams);
+      break;  
     case 7:
       SP_renametable(idx,command,minv,minparams);
       break;
     case 10:
       SP_renamefield(idx,command,minv,minparams);
       break;  
+    case 12:
+      SP_link(idx,command,minv,minparams);
+      break;
+    case 13:
+      SP_newtablesize(2);
+      break;
+    case 14:
+      SP_newtablesize(0.5);
+      break;
+    case 15:
+      SP_smile();
+      break;
+    case 16:
+      SP_adatfelvitel();
+      break;
+
+      case 1000:
+      SP_adatfelvitel_new();
+      break;
+      case 1001:
+      SP_adatfelvitel_exit();
+      break;
+
     default:
       
       break;
   }
 }
 
+function SP_adatfelvitel(params) {
+  if (SelectedTable){
+    commandgroup=1;    
+    SelectedTable.browse(document.getElementById("area"));
+  }  
+}
+
+function SP_adatfelvitel_new(){
+  if (SelectedTable){
+    var idx = ATables.indexOf(SelectedTable);
+    var sorid = list_new(idx);
+    list_edit(this,idx,sorid);
+  }
+}
+
+function SP_adatfelvitel_exit() {
+  editTableCancel(document.getElementById("list").childNodes[0]);
+  commandgroup=0;  
+}
+
+function SP_smile(){
+  var img = document.getElementById("smile");
+  if (img!=null){
+    img.src = "";
+    img.src = "smile.gif";
+    img.style.opacity=1.0;
+    img.style.visibility="visible";
+    var a= function(){
+      img.style.opacity=img.style.opacity-0.03;
+      if (img.style.visibility=="visible")
+        window.setTimeout(a, 50);  
+    }
+    window.setTimeout(a, 100);
+    window.setTimeout(function(){
+      img.style.visibility="hidden";
+    },2000);
+  }
+
+}
+
+function SP_newtablesize(szorzo){
+  if (SelectedTable){
+    SelectedTable.width=Math.floor(SelectedTable.width*szorzo);
+    SelectedTable.refreshDOM();
+  }
+}
+
+function SP_link(idx,command,minv,minparams){
+  if (idx<0) return;  
+  if (idx>=commands[commandgroup].length) return;
+  if ((minparams!=null) && (minparams.length>1)) {
+    var id2="id";
+    var id1="id"+minparams[1];
+    var t1=SearchTableByName(minparams[0]);
+    var t2=SearchTableByName(minparams[1]);
+    if ((t1!=null)&&(t2!=null)){
+      var f1 = t1.AFields.SearchFieldByName(id1);
+      var f2 = t2.AFields.SearchFieldByName(id2);
+      if (f1==null){ //null??
+        f1 = t1.addField(id1,1);
+        t1.refreshFields();
+      }
+      if (f2==null){ //null??
+        f2 = t2.addField(id2,3);
+        t2.refreshFields();
+      }
+      f1.addLink(f2);
+      t1.refreshConstraints();
+    }
+  }
+}
 
 function SP_maketables(num){
   num=Math.min(10,Math.abs(Math.floor(num)));
   var table=null;
   for (let i = 0; i < num; i++) {
     table = newTable();  
-    table.moveToPosition(Number(Math.random()*10)*100,Number(Math.random()*7)*100);        
+    table.moveToPosition((i*10)+(Math.floor(Math.random()*8)*120),Math.floor(Math.random()*4)*130);
   }
-  if (table!==null)
+  if (table!=null)
     table.Selected();
   return num;  
 }
 
 function SP_makefields(num){  
-  if (SelectedTable!==null){
+  if (SelectedTable!=null){
     SelectedField=null;
     num=Math.min(10,Math.abs(Math.floor(num)));
+    if (num<1) num=1;
     var f=null;
     for (let i = 0; i < num; i++) {
       f=SelectedTable.addField("Field"+(idField++),0);
-      if (SelectedField===null) {
+      if (SelectedField==null) {
         SelectedField=f;//first field selected
       } 
     }
@@ -2624,7 +2760,7 @@ function SP_makefields(num){
 }
 
 function SP_addfield(idx,command){
-  if (SelectedTable===null) return;
+  if (SelectedTable==null) return;
   var f=null;
   if (command.indexOf("integer")>0){
     f = SelectedTable.addField("Field"+(idField++),0);
@@ -2641,20 +2777,23 @@ function SP_addfield(idx,command){
     f.setType(4);
     f.length=0;
   } 
+  SelectedField=f;
   SelectedTable.refreshFields();
   refreshFieldsListDOM();
 }
 
 function SP_selectnewtable() {
   const t = ATables.find( tab => tab.name.toLowerCase().indexOf("unknown")==0 );
-  if (t!==null) {
+  if (t!=null) {
     t.Selected();
+  } else {
+    SP_maketables(1);
   }
 }
 
 
 function SP_deletetable(idx,cmd) {
-  if (SelectedTable!==null){
+  if (SelectedTable!=null){
     if (speechlevel!=0){
       speechlevel=0; //agree
       document.getElementById("yesno").style.visibility="hidden";
@@ -2666,12 +2805,13 @@ function SP_deletetable(idx,cmd) {
           //div.parentElement.removeChild(div);
           SelectedTable.destroy();
           SelectedTable=null;
+          SelectedField=null;
           refreshTablesListDOM();          
           Save(temp);
         }
       }
     } else {
-      speechlevel=commands[idx][0];
+      speechlevel=commands[commandgroup][idx][0];
       document.getElementById("yesno").style.visibility="visible";
     }  
   }
@@ -2680,25 +2820,25 @@ function SP_deletetable(idx,cmd) {
 
 function SP_selecttable(idx,cmd,minv,minparams) {
   if (idx<0) return;  
-  if (idx>=commands.length) return;
-  if ((cmd===null) || (cmd==""))  return;
+  if (idx>=commands[commandgroup].length) return;
+  if ((cmd==null) || (cmd==""))  return;
   var t=null;
-  if ((minparams!==null) && (minparams.length>0)) {
+  if ((minparams!=null) && (minparams.length>0)) {
     if (typeof(minparams)=="object"){
       t = ATables.SearchTableByName(minparams[0]);
-      if (t!==null)
+      if (t!=null)
         t.Selected(); 
     }
   }else {
     if (minv<0){
-      cmd=cmd.replace(commands[idx][1],"");
+      cmd=cmd.replace(commands[commandgroup][idx][1],"");
       cmd=cmd.trim();
       if (cmd=="") return;
       if (cmd.indexOf("unknown")==0){
         cmd=cmd.replace(" ","");
       }
       t = ATables.SearchTableByName(cmd.replace(" ","_"));
-      if (t!==null)
+      if (t!=null)
         t.Selected();
     }
   }
@@ -2706,20 +2846,22 @@ function SP_selecttable(idx,cmd,minv,minparams) {
 
 function SP_renametable(idx,cmd,minv,minparams){  
   if (idx<0) return;
-  if (idx>=commands.length) return;
+  if (idx>=commands[commandgroup].length) return;
 
-  if (SelectedTable!==null){
-    if ((minparams!==null) && (minparams.length>0)){
+  if (SelectedTable!=null){
+    if ((minparams!=null) && (minparams.length>0)){
       try {
-        SelectedTable.setName(minparams[0].replace(" ","_"));  
+        if (minparams[0]!="")
+          SelectedTable.setName(minparams[0].replace(" ","_"));  
       } catch (error) {        
         console.log(minparams);
       }      
     }else {
       if (minv<0){
-        cmd=cmd.replace(commands[idx][1],"");
+        cmd=cmd.replace(commands[commandgroup][idx][1],"");
         cmd=cmd.trim();        
-        SelectedTable.setName(cmd.replace(" ","_"));
+        if (cmd!="")
+          SelectedTable.setName(cmd.replace(" ","_"));
       }
     }      
   }
@@ -2727,10 +2869,10 @@ function SP_renametable(idx,cmd,minv,minparams){
 
 function SP_renamefield(idx,cmd,minv,minparams) {
   if (idx<0) return;
-  if (idx>=commands.length) return;
-  if (SelectedTable!==null){
-    if (SelectedField!==null){
-      if ((minparams!==null) && (minparams.length>0)){
+  if (idx>=commands[commandgroup].length) return;
+  if (SelectedTable!=null){
+    if (SelectedField!=null){
+      if ((minparams!=null) && (minparams.length>0)){
         try {
           SelectedField.setName(minparams[0].replace(" ","_"));  
         } catch (error) {        
@@ -2738,7 +2880,7 @@ function SP_renamefield(idx,cmd,minv,minparams) {
         }      
       }else {
         if (minv<0){
-          cmd=cmd.replace(commands[idx][1],"");
+          cmd=cmd.replace(commands[commandgroup][idx][1],"");
           cmd=cmd.trim();        
           SelectedField.setName(cmd.replace(" ","_"));
         }

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <script>
-        var vers="0.95";
+        var vers="0.96";
         var flowdbinit=null;    //can use content (XML) or file path on server side. On client side please use GET 
                                 //example: copy tro clipbrd saved flowdb file content and paste to here among `` signs
     </script>
@@ -247,10 +247,18 @@
         .micro {
             font-size:0.6rem;
         }
+        #smile {
+            visibility: hidden;
+            opacity:0.5;
+            z-index: 310;
+            left:300px;
+            position: absolute;            
+        }
     </style>
     <script>
         var news = [             
-            [110,"9.Built in default flow option"]
+            [112,"10.Control by VOICE :) Hungarian and English"]
+            ,[111,"9.Built in default flow load option"]
             ,[109,"8.Filtered linked combobox able to setup by Field editor window"]
             ,[108,"7. Touch is working on tablet or mobile and Zoom implemented by a button"]
             ,[106,"6.Bug fixes (can't able to insert new record to table content."]
@@ -284,6 +292,7 @@
     </script>
 </head>
 <body>   
+    <img id="smile" src="smile.gif" title="smile" />
     <div id="defaultcontent" onclick="{this.style.visibility='hidden'}">
         <div class="display-3">Default content changed on server and loaded.</div>
         <div class="display-5">Your last saved content not modified!</div>
@@ -326,7 +335,7 @@
                     <button class="commandbutton" onclick="newsdialog(true)">News</button>
                     <button class="commandbutton" onclick="zoom()">Zoom</button>                                        
                     
-                    <!-- <button class="commandbutton" onclick="robot('válaszd ki a company táblát');robot('nevezd át a táblát companies névre')">A.I.TEST</button> -->
+                    <!--<button class="commandbutton" onclick="robot('az új tábla név alma');">A.I.TEST</button> -->
                     <div id="modules"></div>
                     <a target="_blank" style="visibility:hidden;" id="print" download="file.txt" href="">RightClickforDownload</a>                    
                 </div>
