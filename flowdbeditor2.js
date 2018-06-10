@@ -2680,7 +2680,7 @@ function SP_smile(){
   var img = document.getElementById("smile");
   if (img!=null){
     img.src = "";
-    img.src = "smile.gif";
+    img.src = imgs+"smile.gif";
     img.style.opacity=1.0;
     img.style.visibility="visible";
     var a= function(){
