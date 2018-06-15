@@ -402,7 +402,7 @@ var TTable = function(name){
     div.style.top=Number(this.posxy[1]+20)+"px";
     div.style.left=Number(this.posxy[0]-30)+"px";
     div.innerHTML=
-    `<label>Tablename</label><input type="text" id="edit_name" value="`+this.name+`"><br>
+    `<label>Tablename</label><input type="text" id="edit_name" tabindex="0" autofocus value="`+this.name+`"><br>
      <label>Width</label><input type="number" id="edit_width" step="30" value="`+this.width+`"><br>
      <label>Height</label><input type="number" id="edit_height" step="30" value="`+this.height+`"><br>
      <label>Color</label><input type="color" id="edit_color" value="`+this.color+`"><br>
@@ -421,6 +421,7 @@ var TTable = function(name){
     `;
     div.table=this;
     parent.appendChild(div);
+    setFocus("edit_name");
     return div;
   };
 
@@ -727,7 +728,7 @@ var TField = function(table,name){
     div.className="flow_edit";    
     div.style.top=Number(this.table.posxy[1]+20)+"px";
     div.style.left=Number(this.table.posxy[0]-30)+"px";
-    div.innerHTML=`<label>Fieldname</label><input type="text" id="edit_name" value="`+this.name+`"><br>`;
+    div.innerHTML=`<label>Fieldname</label><input type="text" id="edit_name" tabindex="0" autofocus value="`+this.name+`"><br>`;
     var opt = `<label>Fieldtype</label><select id="edit_type">`;
     for (let i = 0; i < AType.length; i++) {
       const at = AType[i];
@@ -768,6 +769,8 @@ var TField = function(table,name){
      <button onclick="editFieldCancel(this)">Cancel</button>`;
     div.field=this;
     parent.appendChild(div);
+    setFocus("edit_name");
+       
     if (this.link!=null) {
       changeCHKfilter(document.getElementById("edit_linkfilter"));
     }
@@ -1037,7 +1040,7 @@ function newTable(){
   return t;
 }
 
-function refreshTablesListDOM(){
+function refreshTablesListDOM(){  //tables / [div (button,span)] ...
   var l=document.getElementById("tables");
   l.innerHTML="";
   for (let i = 0; i < ATables.length; i++) {
@@ -1068,6 +1071,18 @@ function refreshTablesListDOM(){
     //obj.innerHTML=`<button class='flow_context' onclick="hidetable(this)">&#xf06e;&nbsp;</i><span>`+e.name+`</span>`;
     l.appendChild(obj);
   }
+}
+
+function searchTableListDOMButton(table){
+  var l=document.getElementById("tables");  
+  for (let i = 0;  i< l.childNodes.length; i++) {
+    const div = l.childNodes[i];
+    var b=div.childNodes[0];
+    if (b.table==table){
+      return b;
+    }
+  }
+  return null;
 }
 
 function hidetable(button){
@@ -1479,7 +1494,13 @@ function up(e){
 //#endregion  MOUSE MOVE TOUCH
 
 //#region TOOLS
-
+function setFocus(DOMname){
+    var foc=document.getElementById(DOMname);
+    setTimeout(function(){
+      foc.focus();
+      foc.select();
+    }, 5);  
+}
 function getEditDistance2(p,cmd)  //(part,cmd) ->  [dist,chars,newcmd,%param value]
 { var res=[0,0,0,0];                    // nevezd át a táblát%nevűre > 
                                   // 1. nevezd át a táblát,nevezd át a táblát almafa névre
@@ -2400,7 +2421,54 @@ function ComboBoxDOM(value,field1,field2){
 
 //region SPEECH 
 
-function AI(){
+function AIHelp(lang="en"){
+  var b = document.getElementById("AIHelp");
+  b.style.visibility="visible";
+  var aiul = document.getElementById("aiul");
+  aiul.innerHTML="";
+  var t=document.createElement("table");  
+  for(let i=0;i<commands.length;i++){ 
+
+    for (let k = 0; k < commands[i][0].length; k++) {
+      const title = commands[i][0][k];
+      if (title.startsWith(lang)){
+
+        t.innerHTML+="<tr><td class='AITitle'>"+title.substring(2,999)+"</td></tr>";
+        break;
+      }
+    }
+
+
+    
+    var mod=0;
+    var r=null;
+    for (let j = 1; j < commands[i].length; j++) {
+      var cmd = commands[i][j];      
+      if (cmd.language==lang){
+        if (mod%3==0){
+          r=document.createElement("tr");                    
+        }
+        r.innerHTML+="<td class='AIText'>"+cmd.command.replace("4","3").replace("1","")+"</td>";
+        if (mod++%3==2){
+          t.appendChild(r);
+          r=null ;
+        }
+      }
+    }
+    if (r!=null){
+      t.appendChild(r);
+    }
+  }
+  aiul.appendChild(t);  
+}
+
+
+var startedAI=false;
+function AI(){  
+  AIHelp();
+  if (startedAI) return;
+  startedAI=true;
+
   window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
   var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
 	const recognition = new SpeechRecognition();
@@ -2430,33 +2498,58 @@ function AI(){
   recognition.start();
 }
 
+// groupid,voicecommand[,difference(0.1 =10%),HU or EN]
+class TCMD{
+  constructor (vgrp,command,langcode="hu",maxdifference=null){
+    this.group=vgrp;//groupid
+    this.cmd=command;
+    this.diff=maxdifference;
+    this.lang=langcode;
+    if (this.lang!=null)
+      this.lang=this.lang.toLowerCase();
+  }
+  get grp(){ //0
+    return this.group;
+  }
+  get command(){ //1
+    return this.cmd;
+  }
+  get difference(){ //2
+    return this.diff;
+  }
+  get language(){ //3
+    return this.lang;
+  }
+}
 var commands = [
-  [ //0
-  /*OK*/[1,"create 4 tables"],[1,"create 4 table"],[1,"create a table"],[1,"4 tables create"],[1,"készíts 4 táblát"],[1,"szeretnék 4 táblát"],[1,"készíts 4 új táblát"],[1,"kérek 4 új táblát"],[1,"csinálj 4 új táblát"],[1,"adj 4 új táblát"],
-  /*OK*/[2,"create 4 field"],[2,"create 4 fields"],[2,"készíts 4 mezőt"],[2,"készíts 4 új mezőt"],[2,"kérek 4 új mezőt"],[2,"csinálj 4 új mezőt"],[2,"adj 4 új mezőt"],[2,"új 1 mező"],
-  [3,"link"],
-  /*OK*/[4,"clear all tables"],[4,"törölj ki minden táblát"],[4,"töröld a táblákat"],[4,"töröld ki az összes táblát",0.1],
-  /*OK*/[7,"rename table to"],[7,"új tábla név"],[7,"nevezd át a táblát%nevűre"],[7,"nevezd át%nevűre"],[7,"átnevezés"],[7,"nevezd át"],[7,"tábla neve%"],[7,"a tábla név%"],[7,"az új tábla név%"],
-  /*OK*/[5,"delete table"],[5,"töröld a táblát"],[5,"tábla törlése"],[5,"törlés"],[5,"a%tábla törlése"],
-  /*OK*/[6,"select new table"],[6,"új tábla"],[6,"kérem az egyik új táblát"],[6,"új tábla kiválasztása"],[6,"válaszd ki az új táblát"],
-  /*OK*/[8,"select table"],[8,"select table called"],[8,"tábla kiválasztása"],[8,"tábla választás"],[8,"válaszd ki a%táblát"],
-  /*OK*/[9,"add string field"],[9,"add integer field"],[9,"add date field"],[9,"add boolean field"],[9,"kérek 1 integer mezőt"],[9,"új integer mező"],[9,"kérek 1 string mezőt"],[9,"új string mező"],[9,"kérek 1 boolean mezőt"],[9,"új boolean mező"],[9,"új date mező"],[9,"kérek 1 date mezőt"],
-  [10,"rename field to"],[10,"legyen a mező neve"],[10,"a mező neve"],[10,"a mezőnév"],[10,"az új mezőnév"],
-  [11,"the new name of table is"],[11,"the new table's name is"],[11,"the new table called"],[11,"az új tábla neve"],
-  [12,"connect from % to %"],[12,"kösd össze a%és%táblákat"],[12,"kapcsold össze a%és%táblákat"],[12,"kösd össze a%és a%táblákat"],[12,"kapcsold össze a%és a%táblákat"],[12,"kösd össze a% táblát a%táblával"],
-  [13,"double size"],[13,"dubla méret"],[13,"dubla széles"],
-  [14,"half size"],[14,"kisebb méret"],[14,"fele méret"],
-  [15,"köszönöm"],[15,"thank"],[15,"thank you"],
-  [16,"data entry"],[16,"adatfelvétel"],
+  [ ["enStandard commands samples","huStandard parancs példák"], 
+  /*OK*/new TCMD(1,"create 4 tables","en"),new TCMD(1,"create 4 table","en"),new TCMD(1,"create a table","en"),new TCMD(1,"4 tables create","en"),new TCMD(1,"készíts 4 táblát"),new TCMD(1,"szeretnék 4 táblát"),new TCMD(1,"készíts 4 új táblát"),new TCMD(1,"kérek 4 új táblát"),new TCMD(1,"csinálj 4 új táblát"),new TCMD(1,"adj 4 új táblát"),
+  /*OK*/new TCMD(2,"create 4 field","en"),new TCMD(2,"create 4 fields","en"),new TCMD(2,"készíts 4 mezőt"),new TCMD(2,"készíts 4 új mezőt"),new TCMD(2,"kérek 4 új mezőt"),new TCMD(2,"csinálj 4 új mezőt"),new TCMD(2,"adj 4 új mezőt"),new TCMD(2,"új 1 mező"),
+  
+  /*OK*/new TCMD(4,"clear all tables","en"),new TCMD(4,"törölj ki minden táblát"),new TCMD(4,"töröld a táblákat"),new TCMD(4,"töröld ki az összes táblát","hu",0.1),
+  /*OK*/new TCMD(7,"rename table to","en"),new TCMD(7,"új tábla név"),new TCMD(7,"nevezd át a táblát%nevűre"),new TCMD(7,"nevezd át%nevűre"),new TCMD(7,"átnevezés"),new TCMD(7,"nevezd át"),new TCMD(7,"tábla neve%"),new TCMD(7,"a tábla név%"),new TCMD(7,"az új tábla név%"),
+  /*OK*/new TCMD(5,"delete table","en"),new TCMD(5,"töröld a táblát"),new TCMD(5,"tábla törlése"),new TCMD(5,"törlés"),new TCMD(5,"a%tábla törlése"),
+  /*OK*/new TCMD(6,"select new table","en"),new TCMD(6,"új tábla"),new TCMD(6,"kérem az egyik új táblát"),new TCMD(6,"új tábla kiválasztása"),new TCMD(6,"válaszd ki az új táblát"),
+  /*OK*/new TCMD(8,"select table","en"),new TCMD(8,"select table called","en"),new TCMD(8,"tábla kiválasztása"),new TCMD(8,"tábla választás"),new TCMD(8,"válaszd ki a%táblát"),
+  /*OK*/new TCMD(9,"add string field","en"),new TCMD(9,"add integer field","en"),new TCMD(9,"add date field","en"),new TCMD(9,"add boolean field","en"),new TCMD(9,"kérek 1 integer mezőt"),new TCMD(9,"új integer mező"),new TCMD(9,"kérek 1 string mezőt"),new TCMD(9,"új string mező"),new TCMD(9,"kérek 1 boolean mezőt"),new TCMD(9,"új boolean mező"),new TCMD(9,"új date mező"),new TCMD(9,"kérek 1 date mezőt"),
+  new TCMD(10,"rename field to","en"),new TCMD(10,"legyen a mező neve"),new TCMD(10,"a mező neve"),new TCMD(10,"a mezőnév"),new TCMD(10,"az új mezőnév"),
+  new TCMD(11,"the new name of table is","en"),new TCMD(11,"the new table's name is","en"),new TCMD(11,"the new table called","en"),new TCMD(11,"az új tábla neve"),
+  new TCMD(12,"connect from % to %","en"),new TCMD(12,"kösd össze a%és%táblákat"),new TCMD(12,"kapcsold össze a%és%táblákat"),new TCMD(12,"kösd össze a%és a%táblákat"),new TCMD(12,"kapcsold össze a%és a%táblákat"),new TCMD(12,"kösd össze a% táblát a%táblával"),
+  new TCMD(13,"double size","en"),new TCMD(13,"dubla méret"),new TCMD(13,"dubla széles"),
+  new TCMD(14,"half size","en"),new TCMD(14,"kisebb méret"),new TCMD(14,"fele méret"),
+  new TCMD(15,"köszönöm"),new TCMD(15,"thank","en"),new TCMD(15,"thank you","en"),
+  new TCMD(16,"data entry","en"),new TCMD(16,"adatfelvétel"),
+  new TCMD(17,"hide table"),new TCMD(17,"tábla elrejtése"),new TCMD(17,"rejtsd el a táblát"),new TCMD(17,"tüntesd el a táblát"),
+  new TCMD(18,"show table%"),new TCMD(18,"mutasd a%táblát"),new TCMD(18,"jelenítsd meg a%táblát"),
   ],
-  [ //1 browse
-    [1000,"új sor"],[1000,"new record"],[1000,"új rekord"],
-    [1001,"exit"],[1001,"kilépés"],
+  [ ["enData entry commands samples","huAdatfelvételi parancs példák"],
+    new TCMD(1000,"új sor"),new TCMD(1000,"new record","en"),new TCMD(1000,"új rekord"),
+    new TCMD(1001,"exit","en"),new TCMD(1001,"kilépés")
   ]
 ];
 var change = [["igen","yes"],["nem","no"],["free","3"],["form","4"],["cleared","create"],["tree","3"],["for","4"],["hive","5"],["one","1"],["two","2"],["too","2"],["six","6"],["sex","6"],
  ["84 bus","8 tables"],["timetables","10 tables"],["grade","create"],["portable","4 tables"],["turntables","10 tables"],["neighbour","table"],["you","new"],
- [" egy "," 1 "],["névtáblát","4 táblát"],[" kettő "," 2 "],[" négy "," 4 "],[" három "," 3 "],[" öt "," 5 "],[" hat "," 6 "],[" hét "," 7 "],[" nyolc "," 8 "],[" kilenc "," 9 "],[" tíz "," 10 "],
+ [" egy "," 1 "],["névtáblát","4 táblát"],[" két "," 2 "],[" kettő "," 2 "],[" négy "," 4 "],[" három "," 3 "],[" öt "," 5 "],[" hat "," 6 "],[" hét "," 7 "],[" nyolc "," 8 "],[" kilenc "," 9 "],[" tíz "," 10 "],
  ["logikai","boolean"],["szám","integer"],["stream","string"],["sztring","string"],["dátum","date"],["audi","id"],["díj","id"],["agy","adj"]
  ];
 
@@ -2508,14 +2601,14 @@ function robot(command){
   var mini=-1;
   var minv=10;
   var minparams=[];
-  for (let i = 0; i < commands[commandgroup].length; i++) {
-    var minta=commands[commandgroup][i][1];
+  for (let i = 1; i < commands[commandgroup].length; i++) {
+    var minta=commands[commandgroup][i].command;//[1];
     var egyezes=0.3;
-    if (commands[commandgroup][i][2]!=null){
-      egyezes = commands[commandgroup][i][2];
+    if (commands[commandgroup][i].difference!=null){  //2
+      egyezes = commands[commandgroup][i].difference;
     }        
     var c = minta.indexOf("%");
-    if (c>0){ //more parts split by %
+    if (c>-1){ //more parts split by %
       var parts=minta.split("%");
       var cmd=command;
       var dst=0;
@@ -2551,7 +2644,7 @@ function robot(command){
         minv=-1;
         break;
       } else {   
-        var sym=getSimilarity(commands[commandgroup][i][1], command);
+        var sym=getSimilarity(commands[commandgroup][i].command, command); //1
         if ((sym<egyezes) && (sym<minv)){
           mini=i;
           minv=sym;
@@ -2561,7 +2654,7 @@ function robot(command){
   }  
   
   if (minv<egyezes){
-    console.log(commands[commandgroup][mini][1],command);
+    console.log(commands[commandgroup][mini].command,command); //1
     processSpeech(mini,command,minv,minparams);
   } else {
     console.log(minv,command);
@@ -2587,7 +2680,7 @@ function robot(command){
 
 function processSpeech(idx,command,minv,minparams=null){
   if (idx>-1){ //yes or no -1
-    var cases=commands[commandgroup][idx][0];
+    var cases=commands[commandgroup][idx].grp; //0
     SPHistory.add([idx,command,minv,minparams],cases);
   }
   if (speechlevel>0){
@@ -2642,11 +2735,17 @@ function processSpeech(idx,command,minv,minparams=null){
     case 16:
       SP_adatfelvitel();
       break;
+    case 17:
+      SP_hidetable();
+      break;
+    case 18:
+      SP_showtable(idx,command,minv,minparams);
+      break;
 
-      case 1000:
+    case 1000:
       SP_adatfelvitel_new();
       break;
-      case 1001:
+    case 1001:
       SP_adatfelvitel_exit();
       break;
 
@@ -2654,7 +2753,33 @@ function processSpeech(idx,command,minv,minparams=null){
       
       break;
   }
+  Save(temp);
 }
+
+
+function SP_hidetable(){
+  if (SelectedTable){
+    var b= searchTableListDOMButton(SelectedTable);
+    if (b!=null){
+        b.table.visible=true; //and switch to hide in the next line
+        hidetable(b);
+    }
+  }
+}
+
+function SP_showtable(idx,command,minv,minparams){
+  if (minparams.length>0){
+    var t = ATables.SearchTableByName(minparams[0]);
+    if (t!=null){
+      var b= searchTableListDOMButton(t);
+      if (b!=null){
+        b.table.visible=false; //and switch to show in the next line
+        hidetable(b);
+      }
+    }
+  }
+}
+
 
 function SP_adatfelvitel(params) {
   if (SelectedTable){
@@ -2704,7 +2829,7 @@ function SP_newtablesize(szorzo){
 }
 
 function SP_link(idx,command,minv,minparams){
-  if (idx<0) return;  
+  if (idx<1) return;  
   if (idx>=commands[commandgroup].length) return;
   if ((minparams!=null) && (minparams.length>1)) {
     var id2="id";
@@ -2811,7 +2936,7 @@ function SP_deletetable(idx,cmd) {
         }
       }
     } else {
-      speechlevel=commands[commandgroup][idx][0];
+      speechlevel=commands[commandgroup][idx].grp;
       document.getElementById("yesno").style.visibility="visible";
     }  
   }
@@ -2819,7 +2944,7 @@ function SP_deletetable(idx,cmd) {
 }
 
 function SP_selecttable(idx,cmd,minv,minparams) {
-  if (idx<0) return;  
+  if (idx<1) return;  
   if (idx>=commands[commandgroup].length) return;
   if ((cmd==null) || (cmd==""))  return;
   var t=null;
@@ -2831,7 +2956,7 @@ function SP_selecttable(idx,cmd,minv,minparams) {
     }
   }else {
     if (minv<0){
-      cmd=cmd.replace(commands[commandgroup][idx][1],"");
+      cmd=cmd.replace(commands[commandgroup][idx].command,"");
       cmd=cmd.trim();
       if (cmd=="") return;
       if (cmd.indexOf("unknown")==0){
@@ -2845,7 +2970,7 @@ function SP_selecttable(idx,cmd,minv,minparams) {
 }
 
 function SP_renametable(idx,cmd,minv,minparams){  
-  if (idx<0) return;
+  if (idx<1) return;
   if (idx>=commands[commandgroup].length) return;
 
   if (SelectedTable!=null){
@@ -2858,7 +2983,7 @@ function SP_renametable(idx,cmd,minv,minparams){
       }      
     }else {
       if (minv<0){
-        cmd=cmd.replace(commands[commandgroup][idx][1],"");
+        cmd=cmd.replace(commands[commandgroup][idx].command,"");
         cmd=cmd.trim();        
         if (cmd!="")
           SelectedTable.setName(cmd.replace(" ","_"));
@@ -2868,7 +2993,7 @@ function SP_renametable(idx,cmd,minv,minparams){
 }
 
 function SP_renamefield(idx,cmd,minv,minparams) {
-  if (idx<0) return;
+  if (idx<1) return;
   if (idx>=commands[commandgroup].length) return;
   if (SelectedTable!=null){
     if (SelectedField!=null){
@@ -2880,7 +3005,7 @@ function SP_renamefield(idx,cmd,minv,minparams) {
         }      
       }else {
         if (minv<0){
-          cmd=cmd.replace(commands[commandgroup][idx][1],"");
+          cmd=cmd.replace(commands[commandgroup][idx].command,"");
           cmd=cmd.trim();        
           SelectedField.setName(cmd.replace(" ","_"));
         }

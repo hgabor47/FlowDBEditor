@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <script>
-        var vers="0.96";
+        var vers="0.97";
         var flowdbinit=null;    //can use content (XML) or file path on server side. On client side please use GET 
                                 //example: copy tro clipbrd saved flowdb file content and paste to here among `` signs
+        //var img="";//for local
         var imgs="https://raw.githubusercontent.com/hgabor47/FlowDBEditor/master/";
     </script>
     <meta charset="UTF-8">
@@ -27,6 +28,28 @@
         }
         #area {
             display: flex;
+        }
+        #AIHelp {
+            z-index: 200;
+            position: absolute;
+            padding:16px;
+            top:10%;
+            left:10%;
+            height:60%;
+            width:70%;
+            background-color: rgba(255, 231, 166, 0.7);
+            border:black 1px dotted;
+            color: rgb(0, 29, 29);
+            visibility: hidden;
+        }
+        .AITitle {
+            color: rgb(153, 105, 0);
+            font-weight: 800;
+            font-size: 1.4rem;            
+        }
+        .AIText {
+            color:rgb(44, 30, 0);
+            font-size: 1rem;
         }
         #news {
             z-index: 200;
@@ -294,6 +317,17 @@
 </head>
 <body>   
     <img id="smile" src="smile.gif" title="smile" />
+    <div id="AIHelp">
+        <div style="height:80%;overflow:auto;">
+            <h1>A.I. Help</h1>
+            <button onclick="AIHelp('en')">English</button>
+            <button onclick="AIHelp('hu')">Hungarian</button>
+            <ul id="aiul">
+                
+            </ul>
+        </div>
+        <button  onclick='{this.parentElement.style.visibility="hidden"}'>OK</button>        
+    </div>
     <div id="defaultcontent" onclick="{this.style.visibility='hidden'}">
         <div class="display-3">Default content changed on server and loaded.</div>
         <div class="display-5">Your last saved content not modified!</div>
@@ -322,7 +356,7 @@
                     <div class="flow_tables">CommandPanel
                         <i style="font-size:16px" class="fa">&#xf103;</i>
                     </div>
-                    <button class="commandbutton" onclick="{this.disabled=true;AI()}" class="fa" style="font-family: FontAwesome;" >&#xf130;<span class="micro">A.I.</span></button> 
+                    <button class="commandbutton" onclick="{this.style.color='#ff0000';AI()}" class="fa" style="font-family: FontAwesome;" >&#xf130;<span class="micro">A.I.</span></button> 
                     <button class="commandbutton" onclick="Save()">Save</button>
                     <button class="commandbutton" onclick="Load()">Load</button>
                     <button class="commandbutton" onclick="Load('alma')">Clear</button>
