@@ -912,6 +912,9 @@ var TField = function(table,name){
     this.linkfilter[1] = node.getAttribute("linkfiltermin");
     this.linkfilter[2] = node.getAttribute("linkfiltermax");
     this.linkfilter[3] = nullstring(node.getAttribute("linkfilterfield"));
+    if (this.linkfilter[3]==""){
+      this.linkfilter[0] = false;
+    }
       
     this.autoinc = node.getAttribute("autoinc");
     if (this.linktext!=null){
@@ -1330,7 +1333,11 @@ function editFieldOK(div){
       panel.field.linkfilter[0]=elinkfilter.checked;
       panel.field.linkfilter[1]=elinkfilter1.value;
       panel.field.linkfilter[2]=elinkfilter2.value;        
-      panel.field.linkfilter[3]=elinkfilterfield.value;
+      panel.field.linkfilter[3]=elinkfilterfield.value.trim();
+      if (panel.field.linkfilter[3]==""){
+        panel.field.linkfilter[0]=false;
+      }
+
     } catch (error) {
       
     }
