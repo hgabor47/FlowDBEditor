@@ -310,6 +310,9 @@
             v = document.getElementById("vers");
             v.innerHTML="v"+vers;
             document.title+="."+vers;
+            var img=document.getElementById("donateimg");
+            img.setAttribute("src",imgs+"donate.jpg");
+            img.style.height="2rem";
             flowdbeditor_onload();
         }
 
@@ -348,7 +351,7 @@
     </div>
     <div id="mainarea" class="container-fluid">
         <span class="display-5" >FlowDBEditor4</span><b id="vers"></b><i> for CHROME and SVG compatible browsers</i>
-        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=hgabor47%40gmail%2ecom&lc=AL&item_number=flowdbeditor&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted"><span id="donate">DONATE</span></a>
+        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=hgabor47%40gmail%2ecom&lc=AL&item_number=flowdbeditor&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted"><span id="donate"><img src="" id="donateimg"></span></a>
         <div id="help" onclick="this.innerHTML=''">Write records with right click on created tables :)</div>
         <div id="area" class="row">    
             <div class="col-2">   
