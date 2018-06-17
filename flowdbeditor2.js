@@ -415,9 +415,9 @@ var TTable = function(name){
     else  
       div.innerHTML+=`<input type="checkbox" id="edit_readonly" >`;
     div.innerHTML+=`<br>
-     <button onclick="editTableOK(this)">OK</button>
-     <button onclick="editTableCancel(this)">Cancel</button>
-     <button onclick="editTableDelete(this)">Delete</button>
+     <button onclick="{commandgroup=0;editTableOK(this);}">OK</button>
+     <button onclick="{commandgroup=0;editTableCancel(this);}">Cancel</button>
+     <button onclick="{commandgroup=0;editTableDelete(this);}">Delete</button>
     `;
     div.table=this;
     parent.appendChild(div);
@@ -2528,11 +2528,12 @@ class TCMD{
     return this.lang;
   }
 }
+
+var commandgroup=0; //commands[0]
 var commands = [
   [ ["enStandard commands samples","huStandard parancs példák"], 
   /*OK*/new TCMD(1,"create 4 tables","en"),new TCMD(1,"create 4 table","en"),new TCMD(1,"create a table","en"),new TCMD(1,"4 tables create","en"),new TCMD(1,"készíts 4 táblát"),new TCMD(1,"szeretnék 4 táblát"),new TCMD(1,"készíts 4 új táblát"),new TCMD(1,"kérek 4 új táblát"),new TCMD(1,"csinálj 4 új táblát"),new TCMD(1,"adj 4 új táblát"),
-  /*OK*/new TCMD(2,"create 4 field","en"),new TCMD(2,"create 4 fields","en"),new TCMD(2,"készíts 4 mezőt"),new TCMD(2,"készíts 4 új mezőt"),new TCMD(2,"kérek 4 új mezőt"),new TCMD(2,"csinálj 4 új mezőt"),new TCMD(2,"adj 4 új mezőt"),new TCMD(2,"új 1 mező"),
-  
+  /*OK*/new TCMD(2,"create 4 field","en"),new TCMD(2,"create 4 fields","en"),new TCMD(2,"készíts 4 mezőt"),new TCMD(2,"készíts 4 új mezőt"),new TCMD(2,"kérek 4 új mezőt"),new TCMD(2,"csinálj 4 új mezőt"),new TCMD(2,"adj 4 új mezőt"),new TCMD(2,"új 1 mező"),  
   /*OK*/new TCMD(4,"clear all tables","en"),new TCMD(4,"törölj ki minden táblát"),new TCMD(4,"töröld a táblákat"),new TCMD(4,"töröld ki az összes táblát","hu",0.1),
   /*OK*/new TCMD(7,"rename table to","en"),new TCMD(7,"új tábla név"),new TCMD(7,"nevezd át a táblát%nevűre"),new TCMD(7,"nevezd át%nevűre"),new TCMD(7,"átnevezés"),new TCMD(7,"nevezd át"),new TCMD(7,"tábla neve%"),new TCMD(7,"a tábla név%"),new TCMD(7,"az új tábla név%"),
   /*OK*/new TCMD(5,"delete table","en"),new TCMD(5,"töröld a táblát"),new TCMD(5,"tábla törlése"),new TCMD(5,"törlés"),new TCMD(5,"a%tábla törlése"),
@@ -2546,12 +2547,23 @@ var commands = [
   new TCMD(14,"half size","en"),new TCMD(14,"kisebb méret"),new TCMD(14,"fele méret"),
   new TCMD(15,"köszönöm"),new TCMD(15,"thank","en"),new TCMD(15,"thank you","en"),
   new TCMD(16,"data entry","en"),new TCMD(16,"adatfelvétel"),
-  new TCMD(17,"hide table"),new TCMD(17,"tábla elrejtése"),new TCMD(17,"rejtsd el a táblát"),new TCMD(17,"tüntesd el a táblát"),
-  new TCMD(18,"show table%"),new TCMD(18,"mutasd a%táblát"),new TCMD(18,"jelenítsd meg a%táblát"),
+  new TCMD(17,"hide table","en"),new TCMD(17,"tábla elrejtése"),new TCMD(17,"rejtsd el a táblát"),new TCMD(17,"tüntesd el a táblát"),
+  new TCMD(18,"show table%","en"),new TCMD(18,"mutasd a%táblát"),new TCMD(18,"jelenítsd meg a%táblát"),
+  new TCMD(19,"show datasheet of%table","en"),new TCMD(19,"datasheet","en"),new TCMD(19,"mutasd a%tábla adatlapját"),new TCMD(19,"mutasd a tábla adatlapját"),new TCMD(19,"adatlap"),
+  new TCMD(20,"show datasheet of%field","en"),new TCMD(20,"field datasheet","en"),new TCMD(20,"mutasd a%mező adatlapját"),
   ],
   [ ["enData entry commands samples","huAdatfelvételi parancs példák"],
     new TCMD(1000,"új sor"),new TCMD(1000,"new record","en"),new TCMD(1000,"új rekord"),
     new TCMD(1001,"exit","en"),new TCMD(1001,"kilépés")
+  ],
+  [ ["enTable's datasheet commands samples","huTábla adatlap példák"],
+    new TCMD(2000,"tablename","en"),new TCMD(2000,"táblanév"),new TCMD(2000,"tábla neve"),
+    new TCMD(2001,"width","en"),new TCMD(2001,"szélesség"),
+    new TCMD(2002,"height","en"),new TCMD(2002,"magasság"),
+    new TCMD(2003,"color","en"),new TCMD(2003,"szín"),
+    new TCMD(2004,"description","en"),new TCMD(2004,"leírás"),
+    new TCMD(2005,"readonly","en"),new TCMD(2005,"legyen csak olvasható"),new TCMD(2005,"csak olvasható"),
+    new TCMD(2006,"writeable","en"),new TCMD(2006,"legyen írható"),new TCMD(2006,"írható is"),
   ]
 ];
 var change = [["igen","yes"],["nem","no"],["free","3"],["form","4"],["cleared","create"],["tree","3"],["for","4"],["hive","5"],["one","1"],["two","2"],["too","2"],["six","6"],["sex","6"],
@@ -2585,7 +2597,7 @@ var SPHistory = new TSPHistory();
 
 
 var speechlevel=0;
-var commandgroup=0; //commands[0]
+
 function robot(command){
   if ((document.activeElement!=null)){
     if ((document.activeElement.nodeName=="INPUT") ||  ((document.activeElement.nodeName=="TEXTAREA"))){
@@ -2682,9 +2694,6 @@ function robot(command){
   }
 }
 
-
-
-
 function processSpeech(idx,command,minv,minparams=null){
   if (idx>-1){ //yes or no -1
     var cases=commands[commandgroup][idx].grp; //0
@@ -2748,6 +2757,13 @@ function processSpeech(idx,command,minv,minparams=null){
     case 18:
       SP_showtable(idx,command,minv,minparams);
       break;
+    case 19:
+      SP_tabledatasheet(idx,command,minv,minparams);
+    break;
+
+    case 20:
+      SP_fielddatasheet();
+    break;
 
     case 1000:
       SP_adatfelvitel_new();
@@ -2756,6 +2772,29 @@ function processSpeech(idx,command,minv,minparams=null){
       SP_adatfelvitel_exit();
       break;
 
+      case 2000:
+      SP_focusInput("edit_name");
+      break;
+      case 2001:
+      SP_focusInput("edit_width");
+      break;
+      case 2002:
+      SP_focusInput("edit_height");
+      break;
+      case 2003:
+      SP_focusInput("edit_color");
+      break;
+      case 2004:
+      SP_focusInput("edit_description");
+      break;
+      case 2005:
+      SP_setCheckbox("edit_readonly",true);
+      break;
+      case 2006:
+      SP_setCheckbox("edit_readonly",false);
+      break;
+      
+    break;
     default:
       
       break;
@@ -2763,6 +2802,31 @@ function processSpeech(idx,command,minv,minparams=null){
   Save(temp);
 }
 
+function SP_setCheckbox(id,logic) {
+  var chk =document.getElementById(id);
+  chk.checked=logic;
+}
+
+function SP_focusInput(id){
+  setFocus(id);  
+}
+
+function SP_tabledatasheet(idx,command,minv,minparams){
+  if (minparams.length>0){
+    SelectedTable.noSelected();
+    SP_selecttable(idx,command,minv,minparams);
+  }
+  if (SelectedTable){
+    SelectedTable.edit(document.getElementById("area"));
+    commandgroup=2;  
+   }  
+}
+
+function SP_fielddatasheet(){
+  if (SelectedField){
+    SelectedField.edit(document.getElementById("area"));
+  }
+}
 
 function SP_hidetable(){
   if (SelectedTable){
