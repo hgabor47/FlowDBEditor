@@ -5,8 +5,8 @@
         var vers="0.971";
         var flowdbinit=null;    //can use content (XML) or file path on server side. On client side please use GET 
                                 //example: copy tro clipbrd saved flowdb file content and paste to here among `` signs
-        //var img="";//for local
-        var imgs="https://raw.githubusercontent.com/hgabor47/FlowDBEditor/master/";
+        var imgs="";//for local
+        //var imgs="https://raw.githubusercontent.com/hgabor47/FlowDBEditor/master/";
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=0.7">
@@ -373,9 +373,9 @@
                     <button class="commandbutton" onclick="newsdialog(true)">News</button>
                     <button class="commandbutton" onclick="zoom()">Zoom</button>                                        
                     
-                    <!--<button class="commandbutton" onclick="robot('az új tábla név alma');">A.I.TEST</button> -->
+                    <button class="commandbutton" onclick="{var cmd = prompt('Command','exit');setTimeout(function(){robot(cmd)},2000);}">A.I.TEST</button>
                     <div id="modules"></div>
-                    <a target="_blank" style="visibility:hidden;" id="print" download="file.txt" href="">RightClickforDownload</a>                    
+                    <!-- <a target="_blank" style="visibility:hidden;" id="print" download="file.txt" href="">RightClickforDownload</a> -->
                 </div>
                 <div class="flex-column p-2"> 
                     <span class="s100 display-6">Tables</span>
