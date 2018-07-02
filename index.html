@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <script>
-        var vers="0.971";
+        var vers="0.98";
         var flowdbinit=null;    //can use content (XML) or file path on server side. On client side please use GET 
                                 //example: copy tro clipbrd saved flowdb file content and paste to here among `` signs
         var imgs="";//for local
@@ -370,12 +370,13 @@
                     <button class="commandbutton" onclick="FlowDBCopy('print')">CopyToURL</button>                                        
                     <button class="commandbutton" onclick="savetosvgfile('print','flowdbeditor')">Download SVG</button>
                     <button class="commandbutton" onclick="mySQL('print')">Download MySQL</button>
+                    <button class="commandbutton" onclick="MSSQL('print',0)">Download MSSQL</button>
                     <button class="commandbutton" onclick="newsdialog(true)">News</button>
                     <button class="commandbutton" onclick="zoom()">Zoom</button>                                        
                     
                     <button class="commandbutton" onclick="{var cmd = prompt('Command','exit');setTimeout(function(){robot(cmd)},2000);}">A.I.TEST</button>
                     <div id="modules"></div>
-                    <!-- <a target="_blank" style="visibility:hidden;" id="print" download="file.txt" href="">RightClickforDownload</a> -->
+                    <a target="_blank" style="visibility:hidden;" id="print" download="file.txt" href="">RightClickforDownload</a>
                 </div>
                 <div class="flex-column p-2"> 
                     <span class="s100 display-6">Tables</span>
@@ -386,10 +387,9 @@
                     </div>
                 </div>
                 <div class="flex-column p-2"> 
-                        <span class="s100 display-6">Fields</span>
+                    <span class="s100 display-6">Fields</span>
                     <button class="s100" onclick="newField()">New</button>
-                    <div id="fields" class="s100">
-                        
+                    <div id="fields" class="s100">                        
                     </div>
                 </div>
                 <div class="flex-column p-2"> 

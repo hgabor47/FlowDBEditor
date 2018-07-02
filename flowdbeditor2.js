@@ -980,18 +980,18 @@ var OpenEye = Object.freeze({"Open":"&#xf06e;&nbsp;","Close":"&#xf070;&nbsp;"});
 var FlowModes = Object.freeze({"Flow":1, "Constraint":2});
 //AType struct: displaytext,mysqltype,htmltype,| mssqltype,,,,
 //                     0        1         2         3  
-var AType = [new TType("String","varchar(%)","text","[nvarchar(%)]"),
+var AType = [new TType("String","varchar(%)","text","[nvarchar](%)"),
        new TType("Integer","int(11)","number","[int]"),
        new TType("Float","Float","number","[float]"),
-       new TType("Autoinc","int(11) not null","number","[int]"),
+       new TType("Autoinc","int(11) not null","number","[int] PRIMARY KEY NOT NULL"),
        new TType("Date","date","date","[date]"),
        new TType("DateTime","datetime","datetime-local","[datetime2]"),
        new TType("Time","time","time","[time]"),
        new TType("Bool","tinyint","checkbox","[tinyint]"),
-       new TType("Text","text","text","[nvarchar(max)]"),
+       new TType("Text","text","text","[nvarchar](max)"),
        new TType("Image","mediumblob",'<img src="%0">',"[image]"),
-       new TType("URL","varchar(400)",'<a href="%0">%1</a>',"[nvarchar(400)]"),
-       new TType("VideoLink","varchar(400)",'<a href="%0">%1</a>',"[nvarchar(400)]")];
+       new TType("URL","varchar(400)",'<a href="%0">%1</a>',"[nvarchar](400)"),
+       new TType("VideoLink","varchar(400)",'<a href="%0">%1</a>',"[nvarchar](400)")];
 var SearchTypeById = function(id){
   const result = AType.find( tab => tab.id === id );
   return result;
@@ -1931,17 +1931,24 @@ function mySQL(linknode){
 //**************************MSSQL */
 var LFGO='\r\nGO\r\n';
 var mscollate = 'HUNGARIAN_CI_AS';
-function MSSQL(linknode){
+function MSSQL(linknode,ver){
+  var ifex="";
+  var ifnex="";
+  if (ver>0) {
+    ifex='IF EXISTS ';
+    ifnex='IF NOT EXISTS ';
+  }
+
   if (ATables==null) return;
   linknode=document.getElementById(linknode);
-  var source=`BEGIN TRAN`+LFGO;
-  source+=`drop database if exists `+SQLdb+LFGO+`  
-  CREATE DATABASE IF NOT EXISTS `+SQLdb+` COLLATE `+mscollate+LFGO+`
-  USE `+SQLdb+LFGO;
+  var source=`USE [master];`+LFGO;  
+  source+=`drop database `+ifex+SQLdb+LFGO+`;
+  CREATE DATABASE `+ifex+SQLdb+` COLLATE `+mscollate+LFGO+`
+  USE `+SQLdb+LFGO+`BEGIN TRAN`+LFGO;
 
   ATables.forEach(function(table,index){
-    source+=`DROP TABLE IF EXISTS [dbo].[`+table.name+`]`+LFGO+` 
-    CREATE TABLE [dbo].[`+table.name+`] (`+LF;
+    //source+=`DROP TABLE `+ifex+` [dbo].[`+table.name+`]`+LFGO; 
+    source+=`CREATE TABLE [dbo].[`+table.name+`] (`+LF;
     var fields="";
     table.AFields.forEach(function(field,index2){      
       tip= AType.SearchTypeById(field.type);
@@ -1951,10 +1958,9 @@ function MSSQL(linknode){
     fields=fields.substring(0,fields.length-1);
     source=source.substring(0,source.length-3)+LF; //utolso vesszo
     source+=`) `+LFGO ;
-
     
     if (table.Records!=null && table.Records.length>1){
-      source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] ON `+LF;
+      //source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] ON `+LF;
       source+=`INSERT INTO [dbo].[`+table.name+`] (`+fields+`) VALUES `;
       table.Records.forEach(function(o,i){
         if (i>0){
@@ -1969,11 +1975,12 @@ function MSSQL(linknode){
         }
       });
       source=source.substring(0,source.length-1)+LF;
-      source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] OFF `+LF;
+      //source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] OFF `+LF;
     }
     
   });
   //Autoinc primary key
+/*
   ATables.forEach(function(table,index){
     var one=false;
     var s="";
@@ -1987,6 +1994,7 @@ function MSSQL(linknode){
       source+=`ALTER TABLE `+table.name+LF+s;
     }
   });
+
   //constraints
   ATables.forEach(function(table,index){
     var one=false;
@@ -2002,7 +2010,7 @@ function MSSQL(linknode){
       source+=`ALTER TABLE `+table.name+LF+s;
     }
   });
-
+*/
   source += 'COMMIT TRAN;'+LF ;
   var url = "data:application/sql;charset=utf-8,"+encodeURIComponent(source);
   linknode.href = url;
@@ -2611,12 +2619,12 @@ var commands = [
   ],
   [ 
     ["enField's datasheet commands samples","huAdatmező adatlap példák"],
-    new TCMD(3000,"fieldname","en"),new TCMD(3000,"mezőnév"),new TCMD(3000,"mező neve"),
-    new TCMD(3001,"length","en")   ,new TCMD(3001,"hossz"),new TCMD(3001,"hosszúság"),
-    new TCMD(3002,"type","en")     ,new TCMD(3002,"type of field","en"),new TCMD(3002,"típus"),
+    new TCMD(3000,"fieldname","en"),  new TCMD(3000,"mezőnév"),new TCMD(3000,"mező neve"),
+    new TCMD(3001,"length","en")   ,  new TCMD(3001,"hossz"),new TCMD(3001,"hosszúság"),
+    new TCMD(3002,"type","en")     ,  new TCMD(3002,"type of field","en"),new TCMD(3002,"típus"),
     new TCMD(3004,"description","en"),new TCMD(3004,"leírás"),
-    new TCMD(3005,"display","en")  ,new TCMD(3005,"megjelenítés"),new TCMD(3005,"jelenjen meg"),new TCMD(3005,"jelenjen meg listában"),
-    new TCMD(3006,"no display","en"),new TCMD(3006,"ne jelenjen meg"),new TCMD(3006,"ne jelenjen meg listában"),
+    new TCMD(3005,"display","en")  ,  new TCMD(3005,"megjelenítés"),new TCMD(3005,"jelenjen meg"),new TCMD(3005,"jelenjen meg listában"),
+    new TCMD(3006,"no display","en"), new TCMD(3006,"ne jelenjen meg"),new TCMD(3006,"ne jelenjen meg listában"),
     new TCMD(3007,"delete connect","en"),new TCMD(3007,"delete link","en"),new TCMD(3007,"töröld a kapcsolatot"),new TCMD(3007,"kapcsolat törlése"),
     new TCMD(3008,"delete field","en"),new TCMD(3008,"töröld a mezőt"),new TCMD(3008,"mező törlése"),
     new TCMD(1001,"exit","en"),new TCMD(1001,"kilépés")
