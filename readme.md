@@ -1,8 +1,9 @@
-FlowDBEditor
-============
+FlowDBEditor (visual database creator with voice recognition)
+=============================================================
 
 Lightweight graphical database schema editor. Create database in air & use in air & upload structure and data to a real database like MySQL. 
 Working copy on Codepen.io (https://codepen.io/hgabor47/pen/XqezrX)
+Voice recognition (voice commands) in Hungarian and English
 
 
 Usage
@@ -17,6 +18,7 @@ You can create fields of tables with any kind of type.
 You can add records to the tables on air (stored to browsers' localstorage)
 Filling the records of table takes into account the relationships (contraints links).
 Write records with right click on created tables :)
+Voice recognition HUN and ENG
 
 So you can try a database without any preparation.
 
