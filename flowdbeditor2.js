@@ -263,6 +263,7 @@ var TTable = function(name){
     this.DOMGroup.appendChild(this.DOMContextmenu);
     
     this.refreshDOM();
+    this.setVisible(this.visible);
     return this.DOMGroup;
   };
   this.refreshDOM=function(){
