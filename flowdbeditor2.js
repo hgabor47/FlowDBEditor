@@ -217,6 +217,24 @@ var TTable = function(name){
     });
     return f;
   };
+  this.moveFieldBeforeByName=function(beforefieldname,anotherfieldname){
+    var a=-1;
+    var b=-1;
+    this.AFields.forEach(function(o,i){
+      if (o.name==beforefieldname) {a=i;}
+      if (o.name==anotherfieldname) {b=i;  }    
+    });
+    if ((a>-1) && (a!=b)){
+      var f= this.AFields[b];
+      this.AFields.splice(a,0,f);
+      if (a<b){
+        this.AFields.splice(b+1,1);
+      }else{
+        this.AFields.splice(b,1);
+      }
+    }
+  }
+
   this.setPosXY=function(x,y){
     this.posxy[0]=x;
     this.posxy[1]=y;
@@ -1133,8 +1151,12 @@ function refreshFieldsListDOM(){
       obj.className="flow_fields flow_fields_color1";
     else
       obj.className="flow_fields flow_fields_color2";
-
+    obj.field=e;
     obj.innerHTML=e.name;
+    obj.setAttribute("draggable","true");
+    obj.setAttribute("ondragstart","drag(event)");
+    obj.setAttribute("ondrop","drop(event)");
+    obj.setAttribute("ondragover","allowDrop(event)");
     l.appendChild(obj);
     if (e.link!=null){
       var f2=e.link;      
@@ -2475,8 +2497,33 @@ function ComboBoxDOM(value,field1,field2){
 
 //#endregion BROWSE functions (LIST) 
 
+//#region DRAG'n DROP
 
-//region SPEECH 
+function allowDrop(ev) {
+  ev.preventDefault();
+}
+
+function drag(ev) {
+  ev.dataTransfer.setData("text", ev.target.field.name);
+}
+
+function drop(ev) {  
+  ev.preventDefault();
+  if (SelectedTable!=null){
+    var fieldfrom = ev.dataTransfer.getData("text");
+    SelectedTable.moveFieldBeforeByName(ev.target.field.name,fieldfrom);    
+    SelectedTable.refreshDOM();
+    refreshFieldsListDOM();  
+    
+  }
+}
+
+
+
+//#endregion DRAG'n DROP
+
+
+//#region SPEECH 
 
 function AIHelp(lang="en"){
   var b = document.getElementById("AIHelp");
@@ -3231,4 +3278,5 @@ function SP_renamefield(idx,cmd,minv,minparams) {
   }
 }
 
-//endregion SPEECH 
+//#endregion SPEECH 
+
