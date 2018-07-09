@@ -14,12 +14,12 @@
       
         3. If no inbuilt> Load TEMP! localstorage
 
-  With the LOAD button you can load FLOW! localstorage.
+  With the LOAD button you can load FLOW! from localstorage.
   Difference beetween FLOW vs TEMP localstorage:
-    TEMP localstorage store automatically (all change and) the latest version without press button
+    TEMP localstorage are store automatically (all change and) the latest version (no need to push any button)
     FLOW localstorage store if you press SAVE button
 
-  so. if the next time you can continue editing where you abandoned. :)
+  so. in the next time you can continue editing where you abandoned. :)
 */
 
 var params = (new URL(document.location)).searchParams;
@@ -49,7 +49,7 @@ function flowdbeditor_onload(){
       if ( !flowdbinit.startsWith("<flow" )) {
         //TODO load serverside file to flowdbinit
         document.getElementById("loadserverdefault").style.display="flex";
-        LoadServerDefault();
+        LoadServerDefault(); //but.activ=true; in the function
       } else {
         LoadString(flowdbinit); 
         but.activ=true;     
@@ -59,7 +59,9 @@ function flowdbeditor_onload(){
   document.body.addEventListener("paste", PastePanel);
   newsdialog();
   addModules(document.getElementById("modules"));
+  sortTables();
 }
+
 
 var g = document.getElementsByName("table");
 var flowdbeditor = document.getElementById("flowdbeditor");
@@ -201,6 +203,7 @@ var TTable = function(name){
     this.name=name;
     if (this.DOMtitle!=null) 
       this.DOMtitle.innerHTML=name;
+    SortTables();
   };
   this.setName(name+(idTable++));
   this.addField = function(name,type){
@@ -799,8 +802,25 @@ var TField = function(table,name){
     if (this.link!=null) {
       changeCHKfilter(document.getElementById("edit_linkfilter"));
     }
+    
+    var ty = document.getElementById("edit_type");
+    if (ty!=null){
+      ty.onchange=this.onchange2;
+    }    
     return div;
   };
+  
+  this.onchange2=function(event){
+    var ty = document.getElementById("edit_type");
+    if (ty != null ) {
+      var deflen = AType[ty.value].defaultlength;
+      var l = document.getElementById("edit_length");
+      if ( l!=null){
+        l.value  = deflen;
+      }
+    }
+  };
+
   this.setType=function(value) {
     this.type=value;
     if (value!=0){
@@ -987,30 +1007,31 @@ var TField = function(table,name){
 //#region Arrays, Types -----------------------------
 
 var idTtype=0;
-var TType = function(name,sql,inputtype,mssql){
+var TType = function(name,sql,inputtype,mssql,deflen=0){
   this.id=idTtype++;
   this.name=name;
   this.sql=sql;
   this.inputtype=inputtype;
   this.mssql = mssql;
+  this.defaultlength=deflen;
 };
 
 var OpenEye = Object.freeze({"Open":"&#xf06e;&nbsp;","Close":"&#xf070;&nbsp;"});
 var FlowModes = Object.freeze({"Flow":1, "Constraint":2});
 //AType struct: displaytext,mysqltype,htmltype,| mssqltype,,,,
 //                     0        1         2         3  
-var AType = [new TType("String","varchar(%)","text","[nvarchar](%)"),
-       new TType("Integer","int(11)","number","[int]"),
-       new TType("Float","Float","number","[float]"),
-       new TType("Autoinc","int(11) not null","number","[int] PRIMARY KEY NOT NULL"),
-       new TType("Date","date","date","[date]"),
-       new TType("DateTime","datetime","datetime-local","[datetime2]"),
+var AType = [new TType("String","varchar(%)","text","[nvarchar](%)",43),
+       new TType("Integer","int(11)","number","[int]",0),
+       new TType("Float","Float","number","[float]",0),
+       new TType("Autoinc","int(11) not null","number","[int] PRIMARY KEY NOT NULL",0),
+       new TType("Date","date","date","[date]",0),
+       new TType("DateTime","datetime","datetime-local","[datetime2]",0),
        new TType("Time","time","time","[time]"),
        new TType("Bool","tinyint","checkbox","[tinyint]"),
-       new TType("Text","text","text","[nvarchar](max)"),
-       new TType("Image","mediumblob",'<img src="%0">',"[image]"),
-       new TType("URL","varchar(400)",'<a href="%0">%1</a>',"[nvarchar](400)"),
-       new TType("VideoLink","varchar(400)",'<a href="%0">%1</a>',"[nvarchar](400)")];
+       new TType("Text","text","text","[nvarchar](max)",2000),
+       new TType("Image","mediumblob",'<img src="%0">',"[image]",2000),
+       new TType("URL","varchar(400)",'<a href="%0">%1</a>',"[nvarchar](400)",400),
+       new TType("VideoLink","varchar(400)",'<a href="%0">%1</a>',"[nvarchar](400)",400)];
 var SearchTypeById = function(id){
   const result = AType.find( tab => tab.id === id );
   return result;
@@ -1028,6 +1049,11 @@ var SearchTableByName = function(tablename){
   const result = ATables.find( tab => tab.name.toLowerCase() === tablename );
   return result;
 };
+function SortTables(){
+  ATables.sort(function(a,b){
+    return a.name>b.name;
+  });
+}
 var ATablesclear=function(){
   for (let i = 0; i < ATables.length; i++) {
     const t = ATables[i];
@@ -1036,9 +1062,11 @@ var ATablesclear=function(){
   }
   ATables = [];ATables.clear=ATablesclear; 
   ATables.SearchTableByName=SearchTableByName;
+  ATables.Sort=SortTables;
 };
 ATables.clear=ATablesclear;
 ATables.SearchTableByName=SearchTableByName;
+ATables.Sort=SortTables;
 
 //#endregion Arrays
 
@@ -1538,6 +1566,9 @@ function setFocus(DOMname){
     }, 5);  
 }
 
+async function sleep(ms = 1000) {
+  return new Promise(r => setTimeout(r, ms));
+}
 
 function colourNameToHex(colour)
 {
@@ -1883,62 +1914,68 @@ function mySQL(linknode){
   USE `+SQLdb+`;`+LF;
 
   ATables.forEach(function(table,index){
-    source+=`DROP TABLE IF EXISTS `+table.name+`;`+LF+` 
-    CREATE TABLE `+table.name+` (`+LF;
-    var fields="";
-    table.AFields.forEach(function(field,index2){      
-      tip= AType.SearchTypeById(field.type);
-      source+='`'+field.name+'` '+tip.sql.replace("%",field.length)+','+LF ;
-      fields+='`'+field.name+'`,';
-    });
-    fields=fields.substring(0,fields.length-1);
-    source=source.substring(0,source.length-3)+LF; //utolso vesszo
-    source+=`) ENGINE=InnoDB DEFAULT CHARSET=utf8;`+LF ;
-
-    if (table.Records!=null && table.Records.length>1){
-      source+=`INSERT INTO `+table.name+` (`+fields+`) VALUES `;
-      table.Records.forEach(function(o,i){
-        if (i>0){
-            //content            
-            source+=`(`;
-            var value="";
-            o.forEach(function(o2,i2){
-              value+="'"+o2+"',";
-            });
-            source+=value.substring(0,value.length-1);
-            source+=`),`;
-        }
+    if (!table.readonly){
+      source+=`DROP TABLE IF EXISTS `+table.name+`;`+LF+` 
+      CREATE TABLE `+table.name+` (`+LF;
+      var fields="";
+      table.AFields.forEach(function(field,index2){      
+        tip= AType.SearchTypeById(field.type);
+        source+='`'+field.name+'` '+tip.sql.replace("%",field.length)+','+LF ;
+        fields+='`'+field.name+'`,';
       });
-      source=source.substring(0,source.length-1)+";"+LF;
+      fields=fields.substring(0,fields.length-1);
+      source=source.substring(0,source.length-3)+LF; //utolso vesszo
+      source+=`) ENGINE=InnoDB DEFAULT CHARSET=utf8;`+LF ;
+
+      if (table.Records!=null && table.Records.length>1){
+        source+=`INSERT INTO `+table.name+` (`+fields+`) VALUES `;
+        table.Records.forEach(function(o,i){
+          if (i>0){
+              //content            
+              source+=`(`;
+              var value="";
+              o.forEach(function(o2,i2){
+                value+="'"+o2+"',";
+              });
+              source+=value.substring(0,value.length-1);
+              source+=`),`;
+          }
+        });
+        source=source.substring(0,source.length-1)+";"+LF;
+      }
     }
   });
   //Autoinc primary key
   ATables.forEach(function(table,index){
-    var one=false;
-    var s="";
-    table.AFields.forEach(function(field,index2){      
-      if (field.type==3) {//autoinc
-        one=true;
-        s += 'MODIFY `'+field.name+'` int(11) NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (`'+field.name+'`);'+LF;
+    if (!table.readonly){
+      var one=false;
+      var s="";
+      table.AFields.forEach(function(field,index2){      
+        if (field.type==3) {//autoinc
+          one=true;
+          s += 'MODIFY `'+field.name+'` int(11) NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (`'+field.name+'`);'+LF;
+        }
+      });
+      if (one){
+        source+=`ALTER TABLE `+table.name+LF+s;
       }
-    });
-    if (one){
-      source+=`ALTER TABLE `+table.name+LF+s;
     }
   });
   //constraints
   ATables.forEach(function(table,index){
-    var one=false;
-    var s="";
-    table.AFields.forEach(function(field,index2){ 
-      if ( field.link!=null){
-        one=true;
-        s+='ADD CONSTRAINT `'+table.name+field.link.table.name+'` FOREIGN KEY (`'+field.name+'`) REFERENCES `'+field.link.table.name+'`('+field.link.name+'),'+LF;
+    if (!table.readonly){
+      var one=false;
+      var s="";
+      table.AFields.forEach(function(field,index2){ 
+        if ( field.link!=null){
+          one=true;
+          s+='ADD CONSTRAINT `'+table.name+field.link.table.name+'` FOREIGN KEY (`'+field.name+'`) REFERENCES `'+field.link.table.name+'`('+field.link.name+'),'+LF;
+        }
+      });
+      if (one){
+        s=s.substring(0,s.length-3)+";"+LF; //utolso vesszo
+        source+=`ALTER TABLE `+table.name+LF+s;
       }
-    });
-    if (one){
-      s=s.substring(0,s.length-3)+";"+LF; //utolso vesszo
-      source+=`ALTER TABLE `+table.name+LF+s;
     }
   });
 
@@ -1970,37 +2007,38 @@ function MSSQL(linknode,ver){
   USE `+SQLdb+LFGO+`BEGIN TRAN`+LFGO;
 
   ATables.forEach(function(table,index){
-    //source+=`DROP TABLE `+ifex+` [dbo].[`+table.name+`]`+LFGO; 
-    source+=`CREATE TABLE [dbo].[`+table.name+`] (`+LF;
-    var fields="";
-    table.AFields.forEach(function(field,index2){      
-      tip= AType.SearchTypeById(field.type);
-      source+='['+field.name+'] '+tip.mssql.replace("%",field.length)+','+LF ;
-      fields+='['+field.name+'],';
-    });
-    fields=fields.substring(0,fields.length-1);
-    source=source.substring(0,source.length-3)+LF; //utolso vesszo
-    source+=`) `+LFGO ;
-    
-    if (table.Records!=null && table.Records.length>1){
-      //source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] ON `+LF;
-      source+=`INSERT INTO [dbo].[`+table.name+`] (`+fields+`) VALUES `;
-      table.Records.forEach(function(o,i){
-        if (i>0){
-            //content            
-            source+=`(`;
-            value="";
-            o.forEach(function(o2,i2){
-              value+="'"+o2+"',";
-            });
-            source+=value.substring(0,value.length-1);
-            source+=`),`;
-        }
+    if (!table.readonly){
+      //source+=`DROP TABLE `+ifex+` [dbo].[`+table.name+`]`+LFGO; 
+      source+=`CREATE TABLE [dbo].[`+table.name+`] (`+LF;
+      var fields="";
+      table.AFields.forEach(function(field,index2){      
+        tip= AType.SearchTypeById(field.type);
+        source+='['+field.name+'] '+tip.mssql.replace("%",field.length)+','+LF ;
+        fields+='['+field.name+'],';
       });
-      source=source.substring(0,source.length-1)+LF;
-      //source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] OFF `+LF;
+      fields=fields.substring(0,fields.length-1);
+      source=source.substring(0,source.length-3)+LF; //utolso vesszo
+      source+=`) `+LFGO ;
+      
+      if (table.Records!=null && table.Records.length>1){
+        //source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] ON `+LF;
+        source+=`INSERT INTO [dbo].[`+table.name+`] (`+fields+`) VALUES `;
+        table.Records.forEach(function(o,i){
+          if (i>0){
+              //content            
+              source+=`(`;
+              value="";
+              o.forEach(function(o2,i2){
+                value+="'"+o2+"',";
+              });
+              source+=value.substring(0,value.length-1);
+              source+=`),`;
+          }
+        });
+        source=source.substring(0,source.length-1)+LF;
+        //source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] OFF `+LF;
+      }
     }
-    
   });
   //Autoinc primary key
 /*
@@ -2056,10 +2094,10 @@ function FlowDBSave(linknode) {
 }
 
 function FlowDBLoad(e) {
-  if (!e.activ){
+  /*if (!e.activ){
     alert("Please wait the autoload!");
     return;
-  }
+  }*/
 
   oncehints.hint("loadfromfile");
   var input = document.getElementById("filename");
@@ -3280,3 +3318,219 @@ function SP_renamefield(idx,cmd,minv,minparams) {
 
 //#endregion SPEECH 
 
+//#region printdocument
+
+function createdocument2(linknode){
+  if (ATables==null) return;
+  linknode=document.getElementById(linknode);
+  var source=`Táblák`+LF;  
+
+  ATables.forEach(function(table,index){
+    if (!table.readonly){
+      //source+=`DROP TABLE `+ifex+` [dbo].[`+table.name+`]`+LFGO; 
+      source+='Tábla: '+table.name+LF;
+      source+=table.description+LF;
+      source+='------'+LF;
+      var fields="";
+      table.AFields.forEach(function(field,index2){      
+        tip= AType.SearchTypeById(field.type);
+        source+=''+field.name+'\t'+tip.mssql.replace("%",field.length)+LF ;
+        //source+='\t'+field.description+LF;        
+      });
+/*      
+      if (table.Records!=null && table.Records.length>1){
+        //source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] ON `+LF;
+        source+=`Kivonat`+table.name+`] (`+fields+`) VALUES `;
+        table.Records.forEach(function(o,i){
+          if (i>0){
+              //content            
+              source+=`(`;
+              value="";
+              o.forEach(function(o2,i2){
+                value+="'"+o2+"',";
+              });
+              source+=value.substring(0,value.length-1);
+              source+=`),`;
+          }
+        });
+        source=source.substring(0,source.length-1)+LF;
+        //source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] OFF `+LF;
+      }
+      */
+    }
+  });
+  //Autoinc primary key
+
+  var url = "data:application/sql;charset=utf-8,"+encodeURIComponent(source);
+  linknode.href = url;
+  //linknode.style.visibility="visible";
+  linknode.setAttribute("download","flowdbdoc.txt");
+  linknode.innerHTML="RightClickforDownloadSQL";
+  linknode.click();
+}
+
+var PNG=null;
+async function createdocument(linknode){  
+  var xml= document.implementation.createDocument(null, "html");
+  var root = xml.getElementsByTagName("html")[0];
+  var head = xml.createElement("head");
+  var body = xml.createElement("body");
+  head.innerHTML=`
+  <title>Documentation</title>
+  <meta charset="UTF-8"/>
+  <style>
+        @import url('https://fonts.googleapis.com/css?family=Work+Sans:200,400');
+        * {
+            font-family: "Work Sans";   
+            font-size: 1rem;                                  
+        }
+        .tablename {
+          font-size: 1.2rem;
+          border-bottom: 1px gray solid;    
+          background-color:#ffa000;
+          padding:0;margin:0;
+        }
+        .tabledesc {
+          font-size: 0.7rem;          
+          font-style: italic; 
+          background-color:#ffc030;
+          padding:0;margin:0;
+        }
+        .fielddesc {
+          font-size: 0.7rem;          
+          font-style: italic;
+          color:gray; 
+        }
+        table {
+          border: 1px gray solid; 
+          min-width:600px;          
+        }
+        thead {
+          background-color:#cccccc;
+        }
+        td {
+          border: 1px gray dotted;
+          padding:0;
+          margin:0;         
+        }
+        tr {
+          padding:0;
+          margin:0;         
+        }
+  </style>
+  `;
+  root.appendChild(head);
+  body.innerHTML="<h1>Tables</h1>";
+  PNG=null;
+  svg2png(null,"flowdbeditor",asyncCreateDocument);
+  ATables.forEach(function(table,index){
+    if (!table.readonly){
+      body.innerHTML+="<p>..</p>";
+      var div = xml.createElement("div");
+      div.textContent=" "+table.name;
+      div.className="tablename";
+      body.appendChild(div);
+      
+      div = xml.createElement("div");
+      div.textContent=" "+table.description;
+      div.className="tabledesc";
+      body.appendChild(div);
+
+      var fields="";
+      var t = xml.createElement("table");
+      t.class
+      body.appendChild(t);      
+      t.innerHTML="<thead><tr><th>FIELDNAME</th><th>TYPE</th><th>INFO</th></tr></thead>";
+      var b=xml.createElement("tbody");
+      table.AFields.forEach(function(field,index2){
+        tip= AType.SearchTypeById(field.type);
+        try {
+          var r=xml.createElement("tr");
+          var c = xml.createElement("td");
+          c.innerHTML=field.name+" ";
+          r.appendChild(c);
+          c = xml.createElement("td");
+          c.textContent =tip.mssql.replace("%",field.length)+" ";
+          r.appendChild(c);
+          c = xml.createElement("td");
+          c.textContent=field.description+" ";
+          c.className="fielddesc";
+          r.appendChild(c);           
+          b.appendChild(r);
+        } catch (error) {
+          alert("DOC Build error");
+        }
+      });
+      t.appendChild(b);
+    }
+  });
+  var i=20;
+  while ((PNG==null) && (i>0)){
+    await sleep(1000);
+    i--;
+  }
+  if (PNG!=null){
+    var img = xml.createElement("img");
+    img.setAttribute("src",PNG);
+    body.appendChild(img); 
+  }
+  root.appendChild(body);
+  var source = new XMLSerializer().serializeToString(xml); 
+  source = '<!DOCTYPE html>'+source;   
+  savedoc(linknode,"flowdbdoc.html",source);  
+}
+
+function asyncCreateDocument(png){
+  PNG=png;
+  asyncready=true;
+}
+
+function savedoc(linknode,filename,source){ 
+  linknode=document.getElementById(linknode);
+  var url = "data:application/text;charset=utf-8,"+encodeURIComponent(source);
+  linknode.href = url;
+  //linknode.style.visibility="visible";
+  linknode.setAttribute("download","flowdbdoc.html");
+  linknode.innerHTML="RightClickforDownloadSQL";
+  linknode.click();
+}
+
+//http://bl.ocks.org/biovisualize/8187844 
+function svg2png(linknode,svgnodename="flowdbeditor",func=null){ //or func = function(png){}
+  var flw = document.getElementById(svgnodename);
+  var str = new XMLSerializer().serializeToString(flw);
+  str = str.replace(/class="flow_fields_color3"/g,'style="fill:grey;stroke-width:0;opacity:0.5"');
+  str = str.replace(/class="flow_fields_color4"/g,'style="fill:grey;stroke-width:0;opacity:0.3"');
+  str = str.replace(/class="flow_line"/g,'style="stroke:black;stroke-width:2;"');
+  str = str.replace(/class="flow_line_start"/g,'style="stroke:blue;stroke-width:4;"');
+  str = str.replace(/class="flow_line_end"/g,'style="stroke:orange;stroke-width:2;"');  
+  //var canvas = document.getElementById("canvas");
+  var canvas = document.createElement("canvas");
+  canvas.setAttribute("style","display:block");
+  canvas.width=flw.clientWidth;
+  canvas.height=flw.clientHeight;
+  var ctx = canvas.getContext("2d");
+  var DOMURL = self.URL || self.webkitURL || self;
+  var img = new Image();
+  var svg = new Blob([str], {type: "image/svg+xml;charset=utf-8"});
+  var url = DOMURL.createObjectURL(svg);
+  img.func=func;
+  img.onload = function() {
+      ctx.drawImage(img, 0, 0);
+      var png = canvas.toDataURL("image/png");
+      if (this.func==null){
+        linknode=document.getElementById(linknode);
+        var url = "data:image/png;charset=utf-8,"+png;
+        linknode.href = png;      
+        linknode.setAttribute("download","flowdbdoc.png");
+        linknode.innerHTML="RightClickforDownloadSQL";
+        linknode.click();
+        DOMURL.revokeObjectURL(png);
+      }else{
+        func(png);
+      }      
+  };
+  img.src = url;  
+}
+
+//#endregion printdocument

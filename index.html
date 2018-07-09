@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <script>
-        var vers="0.982";
-        var flowdbinit=null;    //can use content (XML) or file path on server side. On client side please use GET 
+        var vers="0.991";
+        var flowdbinit=null; //    //can use content (XML) or file path on server side. On client side please use GET 
                                 //example: copy tro clipbrd saved flowdb file content and paste to here among `` signs
         var imgs="";//for local
         //var imgs="https://raw.githubusercontent.com/hgabor47/FlowDBEditor/master/";
@@ -23,10 +23,13 @@
         @import url('https://fonts.googleapis.com/css?family=Work+Sans:200,400');
         * {
             font-family: "Work Sans";   
-            font-size: 1rem;    
-                              
+            font-size: 1rem;                               
+        }
+        test{
+            color:rgb(255, 182, 45);
         }
         #area {
+            
             display: flex;
         }
         #AIHelp {
@@ -281,13 +284,15 @@
     </style>
     <script>
         var news = [             
-            [112,"10.Control by VOICE :) Hungarian and English"]
-            ,[111,"9.Built in default flow load option"]
-            ,[109,"8.Filtered linked combobox able to setup by Field editor window"]
-            ,[108,"7. Touch is working on tablet or mobile and Zoom implemented by a button"]
-            ,[106,"6.Bug fixes (can't able to insert new record to table content."]
+        [114,"12.You can SAVE a documentation"]
+        ,[113,"11.You can export to PNG"]
+            ,[112,"10.Control by VOICE :) Hungarian and English"]
+            ,[111,"9.Built in default content load option"]
+            ,[109,"8.Filtered&linked combobox is able to setup by Field editor window"]
+            ,[108,"7.Touch is working on tablet or mobile and the Zoom implemented by a button"]
+            ,[106,"6.Bug fixes (can able to insert new records to table content."]
             ,[104,"5.Copy from Excel or another source to clipboard. Press CTRL+V on FlowDBEditor and create a new table or fill a table from clipboard."]
-            ,[103,"4.Press CopyToURL button for copy to clipboard link with data"]
+            ,[103,"4.Press CopyToURL button for copy to clipboard a link with inbuilt data"]
             ,[102,"3.You can export to SVG, MySQL"]
             ,[101,"2.You can Save to browser memory (and Load from)"]
             ,[100,"1.You can Save to file and load from file later"]
@@ -307,18 +312,22 @@
             }
         }
         window.onload=function(){            
-            v = document.getElementById("vers");
-            v.innerHTML="v"+vers;
-            document.title+="."+vers;
-            var img=document.getElementById("donateimg");
-            img.setAttribute("src",imgs+"donate.jpg");
-            img.style.height="2rem";
-            flowdbeditor_onload();
+            try{
+                v = document.getElementById("vers");
+                v.innerHTML="v"+vers;
+                document.title+="."+vers;
+                var img=document.getElementById("donateimg");
+                img.setAttribute("src",imgs+"donate.jpg");
+                img.style.height="2rem";
+                flowdbeditor_onload();
+            } catch (error) {
+    
+            }
         }
 
     </script>
 </head>
-<body>   
+<body >   
     <img id="smile" src="smile.gif" title="smile" />
     <div id="AIHelp">
         <div style="height:80%;overflow:auto;">
@@ -369,17 +378,18 @@
                     <button class="commandbutton" id="flowdbload" onclick="FlowDBLoad(this)" onmouseout="blur1()">LoadFromFile</button>
                     <button class="commandbutton" onclick="FlowDBCopy('print')">CopyToURL</button>                                        
                     <button class="commandbutton" onclick="savetosvgfile('print','flowdbeditor')">Download SVG</button>
+                    <button class="commandbutton" onclick="svg2png('print','flowdbeditor')">Download PNG</button>
                     <button class="commandbutton" onclick="mySQL('print')">Download MySQL</button>
                     <button class="commandbutton" onclick="MSSQL('print',0)">Download MSSQL</button>
                     <button class="commandbutton" onclick="newsdialog(true)">News</button>
                     <button class="commandbutton" onclick="zoom()">Zoom</button>                                        
-                    
+                    <button class="commandbutton" onclick="createdocument('print')">Doc</button>
                     <!-- <button class="commandbutton" onclick="{var cmd = prompt('Command','exit');setTimeout(function(){robot(cmd)},2000);}">A.I.TEST</button> -->
                     <div id="modules"></div>
                     <a target="_blank" style="visibility:hidden;" id="print" download="file.txt" href="">RightClickforDownload</a>
                 </div>
                 <div class="flex-column p-2"> 
-                    <span class="s100 display-6">Tables</span>
+                    <span class="s100 display-6">Tables  from hide:</span>
                     <button  onclick="sortTables()" style="font-size:16px" class="fa">&#xf036;</button>
                     <button class="s100" onclick="newTable()">New</button>
                     <div id="tables" class="s100">
@@ -387,7 +397,7 @@
                     </div>
                 </div>
                 <div class="flex-column p-2"> 
-                    <span class="s100 display-6">Fields</span>
+                    <span class="s100 display-6">Fields sort by drag'n drop</span>
                     <button class="s100" onclick="newField()">New</button>
                     <div id="fields" class="s100">                        
                     </div>
