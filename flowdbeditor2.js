@@ -247,7 +247,7 @@ var TTable = function(name){
   };
 
   this.setName=function(name){
-    this.name=name;
+    this.name=toAscii7(name);
     if (this.DOMtitle!=null) 
       this.DOMtitle.innerHTML=name;
     SortTables();
@@ -296,6 +296,8 @@ var TTable = function(name){
     this.DOMrect.setAttribute("name","table");
     //this.DOMrect.setAttribute("x",this.posxy[0]);
     //this.DOMrect.setAttribute("y",this.posxy[1]);
+
+    this.height=((2+this.AFields.length)*fieldRowHeight)+fieldRowPadding;
     this.DOMrect.setAttribute("rx",7);
     this.DOMrect.setAttribute("ry",7);
     this.DOMrect.setAttribute("width",this.width);
@@ -774,7 +776,7 @@ var TField = function(table,name){
   this.posrow=0;   //row 0,1,2,3...  
   this.DOMElement=null;  //to svg text
   this.DOMLink=null;  //Line to another field
-  this.name=name;
+  this.name=toAscii7(name);
   this.autoinc=AUTOINCTSTART;
   this.display=false; //if true then if the table is linked then this field is display 
   this.description="";//TODO
@@ -783,6 +785,7 @@ var TField = function(table,name){
     this.description=nullstring(value);
   };
   this.setName=function(name){
+    name=toAscii7(name);
     name=name.trim().replace(" ","_");
     if (name==""){
       name="Field"+(idField++);
@@ -1605,7 +1608,22 @@ function up(e){
 //#endregion  MOUSE MOVE TOUCH
 
 //#region TOOLS
-
+var asci7 = Object.freeze({"é":"e", "á":"a", "ű":"u","ő":"o","ú":"u","ö":"o","ü":"u","ó":"o","í":"i","É":"E","Á":"A","Ű":"U","Ő":"O","Ú":"U","Ö":"O","Ü":"U","Ó":"O","Í":"I"});
+var Asci7ON=false;
+function toAscii7(v=""){
+  if (!Asci7ON){return v};
+  var res="";
+  for (var i = 0; i<v.length; i++)
+  {
+    var e = v.charAt(i);
+    if (asci7[e]!=null){
+      res+=asci7[e];
+    } else {
+      res+=e;
+    } 
+  };
+  return res;
+}
 
 function setFocus(DOMname){
     var foc=document.getElementById(DOMname);
@@ -1912,6 +1930,7 @@ function LoadServerDefault(forceload){
 }
 
 function LoadString(xmlText){
+  Asci7ON=false;
   ATables.clear();
   flowdbeditor=document.getElementById("flowdbeditor");
   flowdbeditor.innerHTML=`
@@ -2747,6 +2766,8 @@ var commands = [
   new TCMD(18,"show table%","en"),new TCMD(18,"mutasd a%táblát"),new TCMD(18,"jelenítsd meg a%táblát"),
   new TCMD(19,"show datasheet of%table","en"),new TCMD(19,"datasheet","en"),new TCMD(19,"mutasd a%tábla adatlapját"),new TCMD(19,"mutasd a tábla adatlapját"),new TCMD(19,"adatlap"),
   new TCMD(20,"show datasheet of%field","en"),new TCMD(20,"field datasheet","en"),new TCMD(20,"mutasd a%mező adatlapját"),
+  new TCMD(21,"ékezet nélkül"),
+  new TCMD(22,"ékezetes"),
   ],
   [ ["enData entry commands samples","huAdatfelvételi parancs példák"],
     new TCMD(1000,"új sor"),new TCMD(1000,"new record","en"),new TCMD(1000,"új rekord"),
@@ -2981,6 +3002,12 @@ function processSpeech(idx,command,minv,minparams=null){
       break;
     case 20:
       SP_fielddatasheet(idx,command,minv,minparams);
+      break;
+    case 21: //ékezet nélkül
+      Asci7ON=true;
+      break;
+    case 22: //ékezetes
+      Asci7ON=false;
       break;
 
     //Browse
@@ -3510,7 +3537,7 @@ async function createdocument(linknode){
           var c = xml.createElement("td");
           c.innerHTML=field.name+" ";
           r.appendChild(c);
-
+ 
           c = xml.createElement("td");
           c.textContent =tip.mssql.replace("%",field.length)+" ";
           r.appendChild(c);
