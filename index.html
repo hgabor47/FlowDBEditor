@@ -25,8 +25,10 @@
             font-family: "Work Sans";   
             font-size: 1rem;                               
         }
-        test{
-            color:rgb(255, 182, 45);
+        .invisibleinput{
+            position: absolute;
+            top:-1000px;
+            left:0px;
         }
         #area {
             
@@ -368,25 +370,41 @@
                     <div class="flow_tables">CommandPanel
                         <i style="font-size:16px" class="fa">&#xf103;</i>
                     </div>
-                    <button class="commandbutton" onclick="{this.style.color='#ff0000';AI()}" class="fa" style="font-family: FontAwesome;" >&#xf130;<span class="micro">A.I.</span></button> 
-                    <button class="commandbutton" onclick="Save()">Save</button>
-                    <button class="commandbutton" onclick="Load()">Load</button>
-                    <button class="commandbutton" onclick="Load('alma')">Clear</button>
-                    <button id="loadserverdefault" class="commandbutton" style="display:none;" onclick="LoadServerDefault(true)">LoadServerDefault</button>
+                    <button class="commandbutton" onclick="{this.style.color='#ff0000';AI()}" class="fa" style="font-family: FontAwesome;" >&#xf130;<span class="micro">
+                        A.I.</span></button> 
+                    <button class="commandbutton" onclick="Save()">
+                        Save</button>
+                    <button class="commandbutton" onclick="Load()">
+                        Load</button>
+                    <button class="commandbutton" onclick="Load('alma')">
+                        Clear</button>
+                    <button id="loadserverdefault" class="commandbutton" style="display:none;" onclick="LoadServerDefault(true)">
+                        LoadServerDefault</button>
                     <form style="display:none;"><input id="filename" class="commandbutton" type='file' accept='text/plain' ></form>
-                    <button class="commandbutton" onclick="FlowDBSave('print')">SaveToFile</button>                                        
-                    <button class="commandbutton" id="flowdbload" onclick="FlowDBLoad(this)" onmouseout="blur1()">LoadFromFile</button>
-                    <button class="commandbutton" onclick="FlowDBCopy('print')">CopyToURL</button>                                        
-                    <button class="commandbutton" onclick="savetosvgfile('print','flowdbeditor')">Download SVG</button>
-                    <button class="commandbutton" onclick="svg2png('print','flowdbeditor')">Download PNG</button>
-                    <button class="commandbutton" onclick="mySQL('print')">Download MySQL</button>
-                    <button class="commandbutton" onclick="MSSQL('print',0)">Download MSSQL</button>
-                    <button class="commandbutton" onclick="newsdialog(true)">News</button>
-                    <button class="commandbutton" onclick="zoom()">Zoom</button>                                        
-                    <button class="commandbutton" onclick="createdocument('print')">Doc</button>
+                    <button class="commandbutton" onclick="FlowDBSave('print')">
+                        SaveToFile</button>                                        
+                    <button class="commandbutton" id="flowdbload" onclick="FlowDBLoad(this)" onmouseout="blur1()">
+                        LoadFromFile</button>
+                    <button class="commandbutton" onclick="FlowDBCopy('print')">
+                        CopyToURL</button>                                        
+                    <button class="commandbutton" onclick="savetosvgfile('print','flowdbeditor')">
+                        Download SVG</button>
+                    <button class="commandbutton" onclick="svg2png('print','flowdbeditor')">
+                        Download PNG</button>
+                    <button class="commandbutton" onclick="mySQL('print')">
+                        Download MySQL</button>
+                    <button class="commandbutton" onclick="MSSQL('print',0)">
+                        Download MSSQL</button>
+                    <button class="commandbutton" onclick="newsdialog(true)">
+                        News</button>
+                    <button class="commandbutton" onclick="zoom()">
+                        Zoom</button>                                        
+                    <button class="commandbutton" onclick="createdocument('print')">
+                        Doc</button>
                     <!-- <button class="commandbutton" onclick="{var cmd = prompt('Command','exit');setTimeout(function(){robot(cmd)},2000);}">A.I.TEST</button> -->
                     <div id="modules"></div>
                     <a target="_blank" style="visibility:hidden;" id="print" download="file.txt" href="">RightClickforDownload</a>
+                    <input id="copyinput" class="invisibleinput" value="">
                 </div>
                 <div class="flex-column p-2"> 
                     <span class="s100 display-6">Tables  from hide:</span>

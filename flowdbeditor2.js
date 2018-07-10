@@ -22,8 +22,55 @@
   so. in the next time you can continue editing where you abandoned. :)
 */
 
-var params = (new URL(document.location)).searchParams;
-var flowdbget = params.get("flowdb");     
+var TParams = function(loc) {  
+  this.o = new Object();
+  if (loc.length>0){
+    var start = loc.indexOf("?");
+    if (start>=0){
+      loc=loc.substring(start+1);
+      var p=loc.split("&");
+      for (let i = 0; i < p.length; i++) {
+        const o = p[i];
+        start = o.indexOf("=");
+        var b1 = o.substring(0,start);
+        var b2 = o.substring(start+1);
+        if (b1!=""){
+          this.o[b1]=UTF8.decode(unescape(b2));
+        }
+      }
+    }
+  }
+
+  this.get=function(name){
+    return this.o[name];
+  }
+};
+
+//+ Jonas Raoni Soares Silva
+//@ http://jsfromhell.com/geral/utf-8 [v1.0]
+UTF8 = {
+	encode: function(s){
+		for(var c, i = -1, l = (s = s.split("")).length, o = String.fromCharCode; ++i < l;
+			s[i] = (c = s[i].charCodeAt(0)) >= 127 ? o(0xc0 | (c >>> 6)) + o(0x80 | (c & 0x3f)) : s[i]
+		);
+		return s.join("");
+	},
+	decode: function(s){
+		for(var a, b, i = -1, l = (s = s.split("")).length, o = String.fromCharCode, c = "charCodeAt"; ++i < l;
+			((a = s[i][c](0)) & 0x80) &&
+			(s[i] = (a & 0xfc) == 0xc0 && ((b = s[i + 1][c](0)) & 0xc0) == 0x80 ?
+			o(((a & 0x03) << 6) + (b & 0x3f)) : o(128), s[++i] = "")
+		);
+		return s.join("");
+	}
+};
+
+
+var loc = new URL(document.location);
+var params = new TParams(loc.search);
+//var params = loc.searchParams;
+//var flowdbget = ppp.get("flowdb");     
+var flowdbget = params.get("flowdb");  
 var flowdbplayer = params.get("player");  //USERVIEW if exists
 var ViewModes = Object.freeze({"Developer":1, "User":2});
 var VIEWMODE=ViewModes.Developer;
@@ -59,7 +106,7 @@ function flowdbeditor_onload(){
   document.body.addEventListener("paste", PastePanel);
   newsdialog();
   addModules(document.getElementById("modules"));
-  sortTables();
+  SortTables();
 }
 
 
@@ -1558,6 +1605,8 @@ function up(e){
 //#endregion  MOUSE MOVE TOUCH
 
 //#region TOOLS
+
+
 function setFocus(DOMname){
     var foc=document.getElementById(DOMname);
     setTimeout(function(){
@@ -1758,6 +1807,14 @@ function decodeStr(str) {
     return str.replace(/&#(\d+);/g, function(match, dec) {
       return String.fromCharCode(dec);
     });
+}
+
+function encode_utf8(s) {
+  return decodeURIComponent(unescape(s));
+}
+
+function decode_utf8(s) {
+  return decodeURIComponent(escape(s));
 }
 //#endregion TOOLS
 
@@ -2129,15 +2186,19 @@ function FlowDBCopy(e){
   if (loc.indexOf("codepen")>0){
     loc = "https://codepen.io/hgabor47/full/XqezrX/";
   } 
-  navigator.clipboard.writeText(encodeURI(loc+'?flowdb='+xmlText))
-  .then(() => {
-    new URL(document.location);
-    console.log('Text copied to clipboard');
-  })
-  .catch(err => {
-    // This can happen if the user denies clipboard permissions:
-    console.error('Could not copy text: ', err);
-  });
+  var it = document.getElementById("copyinput");
+  if (it!=null){
+    var pos=loc.indexOf("?");
+    if (pos>=0){
+      loc = loc.substring(0,pos);
+    }
+    xmlText=escape(UTF8.encode(xmlText));
+    //xmlText=escape(encodeURI(xmlText));
+    //it.value=encodeURI(loc+'?flowdb='+xmlText);
+    it.value=loc+'?flowdb='+xmlText;
+    it.select();
+    document.execCommand("copy");  
+  }
 }
 //endregion LOAD/SAVE
 
@@ -3420,7 +3481,7 @@ async function createdocument(linknode){
   </style>
   `;
   root.appendChild(head);
-  body.innerHTML="<h1>Tables</h1>";
+  body.innerHTML="<a href='"+document.location+"'>FlowDBEditor indítása</a><h1>Tables</h1>";
   PNG=null;
   svg2png(null,"flowdbeditor",asyncCreateDocument);
   ATables.forEach(function(table,index){
@@ -3440,7 +3501,7 @@ async function createdocument(linknode){
       var t = xml.createElement("table");
       t.class
       body.appendChild(t);      
-      t.innerHTML="<thead><tr><th>FIELDNAME</th><th>TYPE</th><th>INFO</th></tr></thead>";
+      t.innerHTML="<thead><tr><th>FIELDNAME</th><th>TYPE</th><th>LINK</th><th>INFO</th></tr></thead>";
       var b=xml.createElement("tbody");
       table.AFields.forEach(function(field,index2){
         tip= AType.SearchTypeById(field.type);
@@ -3449,9 +3510,20 @@ async function createdocument(linknode){
           var c = xml.createElement("td");
           c.innerHTML=field.name+" ";
           r.appendChild(c);
+
           c = xml.createElement("td");
           c.textContent =tip.mssql.replace("%",field.length)+" ";
           r.appendChild(c);
+
+          c = xml.createElement("td");
+          c.textContent=" ";
+          if (field.link!=null){
+            if (field.link.table.visible){
+              c.textContent =field.link.table.name+". "+field.link.name;
+            }
+          }          
+          r.appendChild(c);
+
           c = xml.createElement("td");
           c.textContent=field.description+" ";
           c.className="fielddesc";
@@ -3534,3 +3606,9 @@ function svg2png(linknode,svgnodename="flowdbeditor",func=null){ //or func = fun
 }
 
 //#endregion printdocument
+
+//#region IETOOLS
+
+
+
+//#endregion IETOOLS
