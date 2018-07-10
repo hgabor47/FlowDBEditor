@@ -477,8 +477,7 @@ var TTable = function(name){
     div.style.left=Number(this.posxy[0]-30)+"px";
     div.innerHTML=
     `<label>Tablename</label><input type="text" id="edit_name" tabindex="0" autofocus value="`+this.name+`"><br>
-     <label>Width</label><input type="number" id="edit_width" step="30" value="`+this.width+`"><br>
-     <label>Height</label><input type="number" id="edit_height" step="30" value="`+this.height+`"><br>
+     <label>Width</label><input type="number" id="edit_width" step="30" value="`+this.width+`"><br>     
      <label>Color</label><input type="color" id="edit_color" value="`+this.color+`"><br>
      <label>Description</label><textarea id="edit_description" cols="40" rows="5">`+nullstring(this.description)+`</textarea>
      `;
@@ -1308,13 +1307,13 @@ function editTableOK(div){
   var panel = div.parentElement;
   var ename = document.getElementById('edit_name');
   var ewidth = document.getElementById('edit_width');
-  var eheight = document.getElementById('edit_height');
+  //var eheight = document.getElementById('edit_height');
   var ereadonly = document.getElementById('edit_readonly');
   var edescription = document.getElementById('edit_description');
   var ecolor = document.getElementById('edit_color');
   panel.table.setName(ename.value);
   panel.table.width=Number(ewidth.value);
-  panel.table.height=Number(eheight.value);
+  //panel.table.height=Number(eheight.value);
   panel.table.setReadOnly(ereadonly.checked);
   panel.table.setColor(ecolor.value);
   panel.table.setDescription(edescription.value);
@@ -2778,7 +2777,7 @@ var commands = [
   [ ["enTable's datasheet commands samples","huTábla adatlap példák"],
     new TCMD(2000,"tablename","en"),new TCMD(2000,"táblanév"),new TCMD(2000,"tábla neve"),
     new TCMD(2001,"width","en"),new TCMD(2001,"szélesség"),
-    new TCMD(2002,"height","en"),new TCMD(2002,"magasság"),
+    /*new TCMD(2002,"height","en"),new TCMD(2002,"magasság"),*/
     new TCMD(2003,"color","en"),new TCMD(2003,"szín"),
     new TCMD(2004,"description","en"),new TCMD(2004,"leírás"),
     new TCMD(2005,"readonly","en"),new TCMD(2005,"legyen csak olvasható"),new TCMD(2005,"csak olvasható"),
