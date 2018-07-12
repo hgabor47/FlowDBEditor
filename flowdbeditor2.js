@@ -265,6 +265,7 @@ var TTable = function(name){
         o.push(null);
       }
     });
+    this.refreshDOM();    
     return f;
   };
   this.moveFieldBeforeByName=function(beforefieldname,anotherfieldname){
@@ -336,15 +337,16 @@ var TTable = function(name){
     this.setVisible(this.visible);
     return this.DOMGroup;
   };
+
   this.refreshDOM=function(){
     this.setName(this.name);
-    this.DOMrect.setAttribute("width",this.width);
-    this.DOMrect.setAttribute("height",this.height);
-    this.DOMGroup.setAttribute("transform","translate("+this.posxy[0]+","+this.posxy[1]+")");
-    this.refreshFields();
-  };
-
-  this.refreshFields=function(){
+    this.height=((2+this.AFields.length)*fieldRowHeight)+fieldRowPadding;
+    if (this.DOMrect!=null){
+      this.DOMrect.setAttribute("width",this.width);
+      this.DOMrect.setAttribute("height",this.height);
+      this.DOMGroup.setAttribute("transform","translate("+this.posxy[0]+","+this.posxy[1]+")");
+    }
+    if (this.DOMFieldsGroup==null) return;
     var el=this.DOMFieldsGroup;    
     while (el.firstChild) {
       el.removeChild(el.firstChild);
@@ -389,7 +391,7 @@ var TTable = function(name){
       el.appendChild(fi2); 
       el.appendChild(fi3); 
     }
-    this.refreshConstraints();
+    this.refreshConstraints();    
   };
 
   this.refreshConstraints=function(){
@@ -792,7 +794,7 @@ var TField = function(table,name){
     this.name=name;
     if (this.table!=null){
       this.table.refreshRecordFields();
-      this.table.refreshFields();
+      this.table.refreshDOM();
     }
     refreshFieldsListDOM();    
   };
@@ -1042,9 +1044,9 @@ var TField = function(table,name){
         o.splice(index, 1);
       });
 
-      this.table.refreshFields();
+      this.table.refreshDOM();
       refreshFieldsListDOM();
-
+      this.table.refreshDOM();
     }
   };
 
@@ -1069,7 +1071,7 @@ var OpenEye = Object.freeze({"Open":"&#xf06e;&nbsp;","Close":"&#xf070;&nbsp;"});
 var FlowModes = Object.freeze({"Flow":1, "Constraint":2});
 //AType struct: displaytext,mysqltype,htmltype,| mssqltype,,,,
 //                     0        1         2         3  
-var AType = [new TType("String","varchar(%)","text","[nvarchar](%)",43),
+var AType = [new TType("String","varchar(%)","text","[varchar](%)",43),
        new TType("Integer","int(11)","number","[int]",0),
        new TType("Float","Float","number","[float]",0),
        new TType("Autoinc","int(11) not null","number","[int] PRIMARY KEY NOT NULL",0),
@@ -1077,10 +1079,10 @@ var AType = [new TType("String","varchar(%)","text","[nvarchar](%)",43),
        new TType("DateTime","datetime","datetime-local","[datetime2]",0),
        new TType("Time","time","time","[time]"),
        new TType("Bool","tinyint","checkbox","[tinyint]"),
-       new TType("Text","text","text","[nvarchar](max)",2000),
+       new TType("Text","text","text","[varchar](max)",2000),
        new TType("Image","mediumblob",'<img src="%0">',"[image]",2000),
-       new TType("URL","varchar(400)",'<a href="%0">%1</a>',"[nvarchar](400)",400),
-       new TType("VideoLink","varchar(400)",'<a href="%0">%1</a>',"[nvarchar](400)",400)];
+       new TType("URL","varchar(400)",'<a href="%0">%1</a>',"[varchar](400)",400),
+       new TType("VideoLink","varchar(400)",'<a href="%0">%1</a>',"[varchar](400)",400)];
 var SearchTypeById = function(id){
   const result = AType.find( tab => tab.id === id );
   return result;
@@ -1204,7 +1206,7 @@ function hidetable(button){
 function newField(){
   if (SelectedTable!=null){
     SelectedTable.addField("Field"+(idField++),0);
-    SelectedTable.refreshFields();
+    SelectedTable.refreshDOM();    
     refreshFieldsListDOM();
   } else {
     alert("Please select a table!");
@@ -1411,7 +1413,7 @@ function onPaste(div,startidx){
           list_addrecordheader(SelectedTable);                                
           SelectedTable.Records.push(row);        
         }
-        SelectedTable.refreshFields();
+        SelectedTable.refreshDOM();
         SelectedTable.recalcAutoincFields();
         refreshTablesListDOM();
       }
@@ -1459,7 +1461,7 @@ function editFieldOK(div){
   panel.field.setDescription(edescription.value);
   removePanelDOM(div);
   panel.field.table.refreshRecordFields();
-  panel.field.table.refreshFields();
+  panel.field.table.refreshDOM();
   refreshFieldsListDOM();
   Save(temp);
 }
@@ -3230,11 +3232,11 @@ function SP_link(idx,command,minv,minparams){
       var f2 = t2.AFields.SearchFieldByName(id2);
       if (f1==null){ //null??
         f1 = t1.addField(id1,1);
-        t1.refreshFields();
+        t1.refreshDOM();
       }
       if (f2==null){ //null??
         f2 = t2.addField(id2,3);
-        t2.refreshFields();
+        t2.refreshDOM();
       }
       f1.addLink(f2);
       t1.refreshConstraints();
@@ -3266,7 +3268,7 @@ function SP_makefields(num){
         SelectedField=f;//first field selected
       } 
     }
-    SelectedTable.refreshFields();
+    SelectedTable.refreshDOM();
     refreshFieldsListDOM();
     return num;
   }
@@ -3292,7 +3294,7 @@ function SP_addfield(idx,command){
     f.length=0;
   } 
   SelectedField=f;
-  SelectedTable.refreshFields();
+  SelectedTable.refreshDOM();
   refreshFieldsListDOM();
 }
 
