@@ -1071,18 +1071,18 @@ var OpenEye = Object.freeze({"Open":"&#xf06e;&nbsp;","Close":"&#xf070;&nbsp;"});
 var FlowModes = Object.freeze({"Flow":1, "Constraint":2});
 //AType struct: displaytext,mysqltype,htmltype,| mssqltype,,,,
 //                     0        1         2         3  
-var AType = [new TType("String","varchar(%)","text","[varchar](%)",43),
-       new TType("Integer","int(11)","number","[int]",0),
-       new TType("Float","Float","number","[float]",0),
-       new TType("Autoinc","int(11) not null","number","[int] PRIMARY KEY NOT NULL",0),
-       new TType("Date","date","date","[date]",0),
-       new TType("DateTime","datetime","datetime-local","[datetime2]",0),
-       new TType("Time","time","time","[time]"),
-       new TType("Bool","tinyint","checkbox","[tinyint]"),
-       new TType("Text","text","text","[varchar](max)",2000),
-       new TType("Image","mediumblob",'<img src="%0">',"[image]",2000),
-       new TType("URL","varchar(400)",'<a href="%0">%1</a>',"[varchar](400)",400),
-       new TType("VideoLink","varchar(400)",'<a href="%0">%1</a>',"[varchar](400)",400)];
+var AType = [new TType("String","varchar(%)","text","[varchar](%) NULL",43),
+       new TType("Integer","int(11)","number","[int] NULL",0),
+       new TType("Float","Float","number","[float] NULL",0),
+       new TType("Autoinc","int(11) not null","number","[int] IDENTITY(1,1) PRIMARY KEY NOT NULL",0),
+       new TType("Date","date","date","[date] NULL",0),
+       new TType("DateTime","datetime","datetime-local","[datetime2] NULL",0),
+       new TType("Time","time","time","[time] NULL"),
+       new TType("Bool","tinyint","checkbox","[tinyint] NULL"),
+       new TType("Text","text","text","[varchar](max) NULL",2000),
+       new TType("Image","mediumblob",'<img src="%0">',"[image] NULL",2000),
+       new TType("URL","varchar(400)",'<a href="%0">%1</a>',"[varchar](400) NULL",400),
+       new TType("VideoLink","varchar(400)",'<a href="%0">%1</a>',"[varchar](400) NULL",400)];
 var SearchTypeById = function(id){
   const result = AType.find( tab => tab.id === id );
   return result;
@@ -2263,7 +2263,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
       combo=[];
       table.AFields.forEach(function(o,i){
         if (o.link!=null){
-          combo.push( getTable(o.link.table) ); //0,1  idx,name
+          combo.push( getTable(o.link.table,null,o.link.posrow) ); //0,1  idx,name
         } else {
           combo.push(null);
         }
@@ -2326,7 +2326,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
 
 //0,1,......  [idx,name]
 //lookup table with concatenated names 
-function getTable(table,filterfieldname) {
+function getTable(table,filterfieldname=null,keyfieldindex=0) {
   var filtidx=null;
   var records=[];    
   var displayidx=[]; //displayfield if was set  [ [1,null],[3.null],.... ]
@@ -2339,7 +2339,7 @@ function getTable(table,filterfieldname) {
         displayidx.push([i,null]);
       } else {
         displayidx.push([i,
-          getTable(table.AFields[i].link.table,filterfieldname)
+          getTable(table.AFields[i].link.table,filterfieldname,table.AFields[i].link.posrow)
         ]);
       }
     }
@@ -2348,7 +2348,7 @@ function getTable(table,filterfieldname) {
     Array.prototype.forEach.call(table.Records,function(o,i){
         if (i>0){
           var sor=Array(2);
-          sor[0]=o[0];
+          sor[0]=o[keyfieldindex];
           sor[1]="";
           if (filtidx!=null){
             sor.filtervalue=o[filtidx];
@@ -2527,7 +2527,7 @@ function ComboBoxYesNoDOM(value,field1) {
   return (opt+=`value="1">Igen</option></select><br>`);
 };
 
-function ComboBoxDOM(value,field1,field2){    
+function ComboBoxDOM(value,field1,field2){  //value field linkedfield  
   var filtered=field1.linkfilter[0];
   var min=field1.linkfilter[1];
   var max=field1.linkfilter[2];
@@ -2547,33 +2547,35 @@ function ComboBoxDOM(value,field1,field2){
   var opt = `<label>`+field1.name+`</label><select id="`+field1.table.name+field1.name+`">`;
   var t=null;
   if (filtered){
-    t = getTable(field2.table,filterfield);
+    t = getTable(field2.table,filterfield,field2.posrow);
   } else {
-    t = getTable(field2.table);
+    t = getTable(field2.table,null,field2.posrow);
   }
-  for (let i = 0; i < t.length; i++) {    
-    const e = t[i];
-    var id = e[0];
-    var filt=e.filtervalue;
-    if(num){
-      try {
-        filt=Number(filt);
-      } catch (error) {
+  if (t!=null){
+    for (let i = 0; i < t.length; i++) {    
+      const e = t[i];
+      var id = e[0];  //0. index gettable miatt ID
+      var filt=e.filtervalue;
+      if(num){
+        try {
+          filt=Number(filt);
+        } catch (error) {
+        }
       }
-    }
-    if ((!filtered) ||                          //if no filter = all values
-        ((filtered) && (                        //if filter,
-          (num && (filt<=max) && (filt>=min)) ||      //and numeric = interval
-          (!num && ((filt==min) || (filt==max)))      //and string = val1 or val2
-        ))
-      ) 
-    {
-      if (value==id){        
-        opt+=`<option selected `;  
-      }else {
-        opt+=`<option `;  
+      if ((!filtered) ||                          //if no filter = all values
+          ((filtered) && (                        //if filter,
+            (num && (filt<=max) && (filt>=min)) ||      //and numeric = interval
+            (!num && ((filt==min) || (filt==max)))      //and string = val1 or val2
+          ))
+        ) 
+      {
+        if (value==id){        
+          opt+=`<option selected `;  
+        }else {
+          opt+=`<option `;  
+        }
+        opt+=`value="`+id+`">`+e[1]+`</option>`;
       }
-      opt+=`value="`+id+`">`+e[1]+`</option>`;
     }
   }
   return (opt+`</select><br>`);

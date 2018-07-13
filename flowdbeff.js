@@ -241,12 +241,19 @@ function EFFMSSQL(linknode,ver){
         //source+=`DROP TABLE `+ifex+` [dbo].[`+table.name+`]`+LFGO; 
         source+=`CREATE TABLE [dbo].[`+table.name+`] (`+LF;
         var fields="";        
-        table.AFields.forEach(function(field,index2){      
-          if ((field.name!="id") && (field.name!="deleted")) {
-            tip= AType.SearchTypeById(field.type);
-            source+='['+field.name+'] '+tip.mssql.replace("%",field.length)+','+LF ;
-            fields+='['+field.name+'],';
+        table.AFields.forEach(function(field,index2){   
+          var fin=field.name;
+          if (fin.toLowerCase()=="id") {
+            fin=table.name+"ID"
+          } 
+          if (fin.toLowerCase()=="deleted"){
+            fin="Deleted";
           }
+          
+          tip= AType.SearchTypeById(field.type);
+          source+='['+fin+'] '+tip.mssql.replace("%",field.length)+','+LF ;
+          fields+='['+fin+'],';
+          
         });
         fields=fields.substring(0,fields.length-1);
         source=source.substring(0,source.length-3)+LF; //utolso vesszo
