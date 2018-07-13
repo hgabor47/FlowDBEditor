@@ -23,6 +23,7 @@ function flowdbeff(button){
         s += `<button onclick=''>Screens</button>`;
         s += `<button onclick=''>Designs</button>`;
         s += `<button onclick=''>Create files</button>`;
+        s += `<button onclick="EFFMSSQL('print',0)">Effector MSSQL</button>`;
         effmenu.innerHTML=s;
     } 
     flowdbeffdiv.style.display="inline";    
@@ -223,4 +224,62 @@ TDesign = function(typeindex,screensarray){
 
 
 
+function EFFMSSQL(linknode,ver){
+    var ifex="";
+    var ifnex="";
+    if (ver>0) {
+      ifex='IF EXISTS ';
+      ifnex='IF NOT EXISTS ';
+    }
+  
+    if (ATables==null) return;
+    linknode=document.getElementById(linknode);
+    var source=`USE `+SQLdb+LFGO+`BEGIN TRAN`+LFGO;
+  
+    ATables.forEach(function(table,index){
+      if ((!table.readonly) && ( table.name.startsWith("msk_kex"))) {
+        //source+=`DROP TABLE `+ifex+` [dbo].[`+table.name+`]`+LFGO; 
+        source+=`CREATE TABLE [dbo].[`+table.name+`] (`+LF;
+        var fields="";        
+        table.AFields.forEach(function(field,index2){      
+          if ((field.name!="id") && (field.name!="deleted")) {
+            tip= AType.SearchTypeById(field.type);
+            source+='['+field.name+'] '+tip.mssql.replace("%",field.length)+','+LF ;
+            fields+='['+field.name+'],';
+          }
+        });
+        fields=fields.substring(0,fields.length-1);
+        source=source.substring(0,source.length-3)+LF; //utolso vesszo
+        source+=`) `+LFGO ;
+        if (false){
+          if (table.Records!=null && table.Records.length>1){
+            //source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] ON `+LF;
+            source+=`INSERT INTO [dbo].[`+table.name+`] (`+fields+`) VALUES `;
+            table.Records.forEach(function(o,i){
+              if (i>0){
+                  //content            
+                  source+=`(`;
+                  value="";
+                  o.forEach(function(o2,i2){
+                    value+="'"+o2+"',";
+                  });
+                  source+=value.substring(0,value.length-1);
+                  source+=`),`;
+              }
+            });
+            source=source.substring(0,source.length-1)+LF;
+          }
+          //source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] OFF `+LF;
+        }
+      }
+    });
+    //Autoinc primary key  
+    source += 'COMMIT TRAN;'+LF ;
+    var url = "data:application/sql;charset=utf-8,"+encodeURIComponent(source);
+    linknode.href = url;
+    //linknode.style.visibility="visible";
+    linknode.setAttribute("download","flowdbeffms.sql");
+    linknode.innerHTML="RightClickforDownloadSQL";
+    linknode.click();
+  }
 

@@ -310,7 +310,7 @@ var TTable = function(name){
     this.DOMGroup.addEventListener("mousemove",move);
     this.DOMGroup.addEventListener("touchmove",touchmove);
     this.DOMGroup.addEventListener("mouseup",up);
-    this.DOMGroup.setAttribute("class","flow_tablegroup") ; 
+    this.DOMGroup.setAttribute("class","flow_tablegroup");
     this.DOMGroup.setAttribute("transform","translate("+this.posxy[0]+","+this.posxy[1]+")");
     this.DOMtitle = document.createElementNS("http://www.w3.org/2000/svg","text");      
     this.DOMtitle.setAttribute("transform","translate(30,"+fieldRowHeight+")");
@@ -2039,14 +2039,15 @@ function mySQL(linknode){
     }
   });
   //constraints
+  idc=1;
   ATables.forEach(function(table,index){
     if (!table.readonly){
       var one=false;
       var s="";
       table.AFields.forEach(function(field,index2){ 
-        if ( field.link!=null){
+        if ( field.link!=null && (!field.link.table.readonly)){
           one=true;
-          s+='ADD CONSTRAINT `'+table.name+field.link.table.name+'` FOREIGN KEY (`'+field.name+'`) REFERENCES `'+field.link.table.name+'`('+field.link.name+'),'+LF;
+          s+='ADD CONSTRAINT `'+table.name+field.link.table.name+(idc++)+'` FOREIGN KEY (`'+field.name+'`) REFERENCES `'+field.link.table.name+'`('+field.link.name+'),'+LF;
         }
       });
       if (one){
@@ -2087,18 +2088,16 @@ function MSSQL(linknode,ver){
     if (!table.readonly){
       //source+=`DROP TABLE `+ifex+` [dbo].[`+table.name+`]`+LFGO; 
       source+=`CREATE TABLE [dbo].[`+table.name+`] (`+LF;
-      var fields="";
-      table.AFields.forEach(function(field,index2){      
-        tip= AType.SearchTypeById(field.type);
-        source+='['+field.name+'] '+tip.mssql.replace("%",field.length)+','+LF ;
-        fields+='['+field.name+'],';
+      var fields="";      
+      table.AFields.forEach(function(field,index2){              
+          tip= AType.SearchTypeById(field.type);
+          source+='['+field.name+'] '+tip.mssql.replace("%",field.length)+','+LF ;
+          fields+='['+field.name+'],';        
       });
       fields=fields.substring(0,fields.length-1);
       source=source.substring(0,source.length-3)+LF; //utolso vesszo
       source+=`) `+LFGO ;
-      
       if (table.Records!=null && table.Records.length>1){
-        //source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] ON `+LF;
         source+=`INSERT INTO [dbo].[`+table.name+`] (`+fields+`) VALUES `;
         table.Records.forEach(function(o,i){
           if (i>0){
@@ -2113,42 +2112,10 @@ function MSSQL(linknode,ver){
           }
         });
         source=source.substring(0,source.length-1)+LF;
-        //source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] OFF `+LF;
       }
     }
   });
   //Autoinc primary key
-/*
-  ATables.forEach(function(table,index){
-    var one=false;
-    var s="";
-    table.AFields.forEach(function(field,index2){      
-      if (field.type==3) {//autoinc
-        one=true;
-        s += 'MODIFY `'+field.name+'` int(11) NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (`'+field.name+'`);'+LF;
-      }
-    });
-    if (one){
-      source+=`ALTER TABLE `+table.name+LF+s;
-    }
-  });
-
-  //constraints
-  ATables.forEach(function(table,index){
-    var one=false;
-    var s="";
-    table.AFields.forEach(function(field,index2){ 
-      if ( field.link!=null){
-        one=true;
-        s+='ADD CONSTRAINT `'+table.name+field.link.table.name+'` FOREIGN KEY (`'+field.name+'`) REFERENCES `'+field.link.table.name+'`('+field.link.name+'),'+LF;
-      }
-    });
-    if (one){
-      s=s.substring(0,s.length-3)+";"+LF; //utolso vesszo
-      source+=`ALTER TABLE `+table.name+LF+s;
-    }
-  });
-*/
   source += 'COMMIT TRAN;'+LF ;
   var url = "data:application/sql;charset=utf-8,"+encodeURIComponent(source);
   linknode.href = url;
