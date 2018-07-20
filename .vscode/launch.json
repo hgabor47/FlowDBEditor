@@ -5,6 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "edge",
+            "request": "launch",
+            "name": "Flow Edge index.html",
+            "url": "http://localhost/html/flowdbeditor/index.html",
+            "webRoot": "c:/xampp/htdocs"
+        },
+    {
+        "type": "chrome",
+        "request": "launch",
+        "name": "Flow  index.html",
+        "url": "http://localhost/html/flowdbeditor/index.html",
+        "webRoot": "c:/xampp/htdocs"
+    },
+        {
             "type": "chrome",
             "request": "launch",
             "name": "Launch Chrome",

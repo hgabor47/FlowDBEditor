@@ -4,7 +4,7 @@
     localstorage, 
     local file, 
     server file, 
-    inbuilt
+    inbuilt 
 
   Flowdbeditor start process
   1. If has flowdbeditor GET (flowdb) then load from     
@@ -112,13 +112,14 @@ function flowdbeditor_onload(){
 
 var g = document.getElementsByName("table");
 var flowdbeditor = document.getElementById("flowdbeditor");
+var isdown=false;
+flowdbeditor.addEventListener("mousemove",move);
+flowdbeditor.addEventListener("mouseup",up);
 
 for (let i = 0; i < g.length; i++) {
   const obj = g[i];
   obj.setAttribute("transform","translate(100,100)");
   obj.addEventListener("mousedown",down);
-  obj.addEventListener("mousemove",move);
-  obj.addEventListener("mouseup",up);
 }
 
 var zooms=[1200,2400,3200];
@@ -307,9 +308,9 @@ var TTable = function(name){
     this.DOMGroup.addEventListener("contextmenu",contextmenu);
     this.DOMGroup.addEventListener("mousedown",down);
     this.DOMGroup.addEventListener("touchstart",down);
-    this.DOMGroup.addEventListener("mousemove",move);
+    //flowdbeditor.addEventListener("mousemove",move);
     this.DOMGroup.addEventListener("touchmove",touchmove);
-    this.DOMGroup.addEventListener("mouseup",up);
+    //this.DOMGroup.addEventListener("mouseup",up);
     this.DOMGroup.setAttribute("class","flow_tablegroup");
     this.DOMGroup.setAttribute("transform","translate("+this.posxy[0]+","+this.posxy[1]+")");
     this.DOMtitle = document.createElementNS("http://www.w3.org/2000/svg","text");      
@@ -1275,10 +1276,12 @@ function newConstraint(b,nohint){
 
 
 function titleClick(e){
+  isdown=false;
   this.table.edit(document.getElementById("area"));
 }
 
 function fieldClick(e){
+  isdown=false;
   if (flowMode==FlowModes.Flow){    
     this.field.edit(document.getElementById("area"));
     SelectedField=this.field;
@@ -1520,9 +1523,10 @@ var grab=0;
 function down(e){
   //var t = this;
   var b = event.buttons;
-
+  if (stateEdit) return;
   if (flowMode==FlowModes.Flow){
     if (b==1){
+      isdown=true;
       /*
       var s = this.getAttribute("transform");
       var o =tool_getTransformPure(s);
@@ -1550,6 +1554,7 @@ function down(e){
 }
 //right mouse down
 function contextmenu(e){
+    isdown=false;
     e.preventDefault();
     e.currentTarget.table.browse(document.getElementById("area"));      
     //this.table.browse(document.getElementById("area"));      
@@ -1583,22 +1588,26 @@ function touchmove(e){
 function move(e){
   var b = event.buttons;
   if (flowMode==FlowModes.Flow){
-    if ((b & 1)==1){
-      this.parentElement.appendChild(this);
+    if (isdown){
+    //if ((b & 1)==1){
+      //this.parentElement.appendChild(this);
+      //var th = this;
+      var th = SelectedTable.DOMGroup;
       dX = event.clientX -cX;  
       dY = event.clientY -cY;  
       cX = event.clientX-grab;  
       cY = event.clientY-grab;
-      var s = this.getAttribute("transform");
+      var s = th.getAttribute("transform");
       var o =tool_getTransform(s);
       s = "translate("+o[0]+","+o[1]+")";
-      this.setAttribute("transform",s);
-      this.table.setPosXY(o[0],o[1]);
-      this.table.refreshConstraints();
+      th.setAttribute("transform",s);
+      th.table.setPosXY(o[0],o[1]);
+      th.table.refreshConstraints();
     }
   }  
 }
 function up(e){
+  isdown=false;
   if (flowMode==FlowModes.Flow){
     //this.table.refreshConstraints();
     
@@ -2451,15 +2460,15 @@ function list_edit(e,tableidx,id) {
   fi.forEach(function(f,idx){
     if (f.link==null){
       if (f.type==7){ //bool
-        div.innerHTML+=ComboBoxYesNoDOM(rec[idx],f);
+        div.innerHTML+=ComboBoxYesNoDOM(rec[idx],f)+`<button onclick="editfieldNULL('`+f.table.name+f.name+`')">X</button><br>`;
       } else if (f.type==3){ //autoinc
         div.innerHTML+=`<label>`+f.name+`</label><div>`+rec[idx]+`</div>`;
       } else {
         var typ=AType.SearchTypeById(f.type);                
-        div.innerHTML+=`<label>`+f.name+`</label><input type="`+typ.inputtype+`" id="`+t.name+f.name+`" value="`+rec[idx]+`"><br>`;
+        div.innerHTML+=`<label>`+f.name+`</label><input type="`+typ.inputtype+`" id="`+t.name+f.name+`" value="`+rec[idx]+`"><button onclick="editfieldNULL('`+t.name+f.name+`')">X</button><br>`;
       }
     } else {
-      div.innerHTML+=ComboBoxDOM(rec[idx],f,f.link);
+      div.innerHTML+=ComboBoxDOM(rec[idx],f,f.link)+`<button onclick="editfieldNULL('`+f.table.name+f.name+`')">X</button><br>`;
     }
   });
     div.innerHTML+=`<button onclick="listEditOK(this)">OK</button>
@@ -2503,6 +2512,12 @@ function list_del(e,tableidx,id) {
   });
   //const rec = t.Records.find( fi => fi[0] == id );
 }
+function editfieldNULL(name){
+  var f=document.getElementById(name);
+  if (f!=null){
+    f.value="";
+  }
+}
 function editTableClear(tableidx){
   var t = ATables[tableidx];
   if (t){
@@ -2515,16 +2530,21 @@ function editTableClear(tableidx){
 
 function ComboBoxYesNoDOM(value,field1) {
   var opt = `<label>`+field1.name+`</label><select id="`+field1.table.name+field1.name+`">`;
-  opt+=`<option `;
-  if (value==0) {
-    opt+=`selected `;
+  //opt+=`<option value=""></option><option `;
+  if (value==""){
+    opt+=`<option selected value=""></option><option `;
+  }else {
+    opt+=`<option value=""></option><option `;
+    if (value==0) {
+      opt+=`selected `;
+    }
   }
   opt+=`value="0">Nem</option>`;
   opt+=`<option `;
   if (value==1) {
     opt+=`selected `;
   }
-  return (opt+=`value="1">Igen</option></select><br>`);
+  return (opt+=`value="1">Igen</option></select>`);
 };
 
 function ComboBoxDOM(value,field1,field2){  //value field linkedfield  
@@ -2544,7 +2564,7 @@ function ComboBoxDOM(value,field1,field2){  //value field linkedfield
     default:
       break;
   }
-  var opt = `<label>`+field1.name+`</label><select id="`+field1.table.name+field1.name+`">`;
+  var opt = `<label>`+field1.name+`</label><select id="`+field1.table.name+field1.name+`"><option selected value=""></option>`;
   var t=null;
   if (filtered){
     t = getTable(field2.table,filterfield,field2.posrow);
@@ -2578,7 +2598,7 @@ function ComboBoxDOM(value,field1,field2){  //value field linkedfield
       }
     }
   }
-  return (opt+`</select><br>`);
+  return (opt+`</select>`);
 };
 
 

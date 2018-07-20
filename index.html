@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <script>
-        var vers="0.995";
+        var vers="0.997";
         var flowdbinit=null; //    //can use content (XML) or file path on server side. On client side please use GET 
                                 //example: copy tro clipbrd saved flowdb file content and paste to here among `` signs
         var imgs="";//for local
@@ -25,6 +25,20 @@
             font-family: "Work Sans";   
             font-size: 1rem;                               
         }
+        svg text {
+            -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none; /* Safari */
+            -khtml-user-select: none; /* Konqueror HTML */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                        supported by Chrome and Opera */
+        }
+        svg text::selection {
+            background:none;
+        }
+
+
         .invisibleinput{
             position: absolute;
             top:-1000px;
