@@ -2460,15 +2460,15 @@ function list_edit(e,tableidx,id) {
   fi.forEach(function(f,idx){
     if (f.link==null){
       if (f.type==7){ //bool
-        div.innerHTML+=ComboBoxYesNoDOM(rec[idx],f)+`<button onclick="editfieldNULL('`+f.table.name+f.name+`')">X</button><br>`;
+        div.innerHTML+=ComboBoxYesNoDOM(rec[idx],f)+`<button class="btn_x" onclick="editfieldNULL('`+f.table.name+f.name+`')">X</button><br>`;
       } else if (f.type==3){ //autoinc
         div.innerHTML+=`<label>`+f.name+`</label><div>`+rec[idx]+`</div>`;
       } else {
         var typ=AType.SearchTypeById(f.type);                
-        div.innerHTML+=`<label>`+f.name+`</label><input type="`+typ.inputtype+`" id="`+t.name+f.name+`" value="`+rec[idx]+`"><button onclick="editfieldNULL('`+t.name+f.name+`')">X</button><br>`;
+        div.innerHTML+=`<label>`+f.name+`</label><input type="`+typ.inputtype+`" id="`+t.name+f.name+`" value="`+rec[idx]+`"><button class="btn_x" onclick="editfieldNULL('`+t.name+f.name+`')">X</button><br>`;
       }
     } else {
-      div.innerHTML+=ComboBoxDOM(rec[idx],f,f.link)+`<button onclick="editfieldNULL('`+f.table.name+f.name+`')">X</button><br>`;
+      div.innerHTML+=ComboBoxDOM(rec[idx],f,f.link)+`<button class="btn_x" onclick="editfieldNULL('`+f.table.name+f.name+`')">X</button><br>`;
     }
   });
     div.innerHTML+=`<button onclick="listEditOK(this)">OK</button>
