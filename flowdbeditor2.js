@@ -2448,7 +2448,6 @@ function list_edit(e,tableidx,id) {
   if ((tableidx<0) || (tableidx>=ATables.length)) 
     return ;
   var t = ATables[tableidx];
-  //var rec = t.Records.find()
   const rec = t.Records.find( fi => fi[0] == id );
   
   var div = document.createElement("div");
