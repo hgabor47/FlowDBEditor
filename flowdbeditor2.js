@@ -1907,6 +1907,9 @@ function SavetoString(){
   var setup = xml.createElement("setup");
   setup.setAttribute("idField",idField);
   setup.setAttribute("idTable",idTable);
+  try{
+    setup.setAttribute("name",document.getElementById("title").value);
+  } catch (error) {};
   root.appendChild(setup);
   for (let i = 0; i < ATables.length; i++) {
     const table = ATables[i];
@@ -1983,7 +1986,13 @@ function LoadString(xmlText){
      v = setup.getAttribute("idTable");
      if (v!=null) 
         idTable = Number(v);
-
+     try{
+        v="Unknown title";
+        document.getElementById("title").value = v;
+        v = setup.getAttribute("name");
+        if ((v=="") || (v==null)) v="Unknown title";
+        document.getElementById("title").value = v;
+     }catch(error){};
   }
 }
 
@@ -1992,6 +2001,7 @@ var SQLdb="flowdbeditor";
 var LF='\r\n';
 function mySQL(linknode){
   if (ATables==null) return;
+  try { SQLdb=document.getElementById("title").value; } catch (error) {};
   linknode=document.getElementById(linknode);
   var source=`START TRANSACTION;`+LF+` 
   SET time_zone = "+00:00";`+LF ;
@@ -2087,6 +2097,7 @@ function MSSQL(linknode,ver){
   }
 
   if (ATables==null) return;
+  try { SQLdb=document.getElementById("title").value; } catch (error) {};
   linknode=document.getElementById(linknode);
   var source=`USE [master];`+LFGO;  
   source+=`drop database `+ifex+SQLdb+LFGO+`;

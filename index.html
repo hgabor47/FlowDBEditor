@@ -25,6 +25,10 @@
             font-family: "Work Sans";   
             font-size: 1rem;                               
         }
+        #title {
+            font-size: 2rem;
+            border: black 0 solid;
+        }
         svg text {
             -webkit-touch-callout: none; /* iOS Safari */
             -webkit-user-select: none; /* Safari */
@@ -382,7 +386,7 @@
         <button  onclick='{this.parentElement.style.visibility="hidden"}'>OK</button>
     </div>
     <div id="mainarea" class="container-fluid">
-        <span class="display-5" >FlowDBEditor4</span><b id="vers"></b><i> for CHROME and SVG compatible browsers</i>
+        <span class="display-5" >FlowDBEditor4</span><b id="vers"></b><i> for SVG compatible browsers</i>
         <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=hgabor47%40gmail%2ecom&lc=AL&item_number=flowdbeditor&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted"><span id="donate"><img src="" id="donateimg">...for new features</span></a>
         <div id="help" onclick="this.innerHTML=''">Write records with right click on created tables :)</div>
         <div id="area" class="row">    
@@ -451,6 +455,7 @@
             </div>
             
             <div class="col-10">
+                <input type="text" id="title" value="Unknown title">
                 <svg id="flowdbeditor" style="background-color: white" width="2400" height="2400" viewBox="0 0 2400 2400">
                     <defs>
                         <linearGradient id="e" x1="40" y1="210" x2="460" y2="210" gradientUnits="objectBoundingBox">
