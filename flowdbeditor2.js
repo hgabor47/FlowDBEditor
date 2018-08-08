@@ -1081,7 +1081,7 @@ var AType = [new TType("String","varchar(%)","text","[varchar](%) NULL",43),
        new TType("Time","time","time","[time] NULL"),
        new TType("Bool","tinyint","checkbox","[tinyint] NULL"),
        new TType("Text","text","text","[varchar](max) NULL",2000),
-       new TType("Image","mediumblob",'<img src="%0">',"[image] NULL",2000),
+       new TType("Image","mediumblob",'text',"[image] NULL",2000),   //<img src="%0">
        new TType("URL","varchar(400)",'<a href="%0">%1</a>',"[varchar](400) NULL",400),
        new TType("VideoLink","varchar(400)",'<a href="%0">%1</a>',"[varchar](400) NULL",400)];
 var SearchTypeById = function(id){
@@ -2329,7 +2329,11 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
             var c= document.createElement("td");
             r.appendChild(c);
             if (cell==null) { cell = ""};
-            c.innerHTML=cell;
+            if ((i>0) && (table.AFields[j].type==9)){
+              c.innerHTML="<img src='"+cell+"' height='100px'>";
+            }else {
+              c.innerHTML=cell;
+            }
         }          
         if ((!browsebuttonleft) && (i>0)){
             var c= document.createElement("td");
@@ -2474,7 +2478,7 @@ function list_edit(e,tableidx,id) {
       } else if (f.type==3){ //autoinc
         div.innerHTML+=`<label>`+f.name+`</label><div>`+rec[idx]+`</div>`;
       } else {
-        var typ=AType.SearchTypeById(f.type);                
+        var typ=AType.SearchTypeById(f.type);          
         div.innerHTML+=`<label>`+f.name+`</label><input type="`+typ.inputtype+`" id="`+t.name+f.name+`" value="`+rec[idx]+`"><button class="btn_x" onclick="editfieldNULL('`+t.name+f.name+`')">X</button><br>`;
       }
     } else {
