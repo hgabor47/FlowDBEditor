@@ -80,7 +80,26 @@ if (flowdbplayer!=null){
 //var flowdbinit=null; //if exists please remove this line flowdbinit is a innercircle start flowdb if you want
 var temp="flowdbeditor_temp";        
 var AUTOINCTSTART=1;
+var g=null;
+var flowdbeditor=null;
+var isdown=false;
+var zooms=[1200,2400,3200];
+var zoomvalue=1;
+
+
 function flowdbeditor_onload(){
+  g = document.getElementsByName("table");
+  flowdbeditor = document.getElementById("flowdbeditor");
+  
+  flowdbeditor.addEventListener("mousemove",move);
+  flowdbeditor.addEventListener("mouseup",up);
+
+  for (let i = 0; i < g.length; i++) {
+    const obj = g[i];
+    obj.setAttribute("transform","translate(100,100)");
+    obj.addEventListener("mousedown",down);
+  }
+
   var but=document.getElementById("flowdbload");
   but.activ=false; //TODO!!! for prevent to double load in same time
   if (flowdbget!=null){
@@ -109,21 +128,6 @@ function flowdbeditor_onload(){
   SortTables();
 }
 
-
-var g = document.getElementsByName("table");
-var flowdbeditor = document.getElementById("flowdbeditor");
-var isdown=false;
-flowdbeditor.addEventListener("mousemove",move);
-flowdbeditor.addEventListener("mouseup",up);
-
-for (let i = 0; i < g.length; i++) {
-  const obj = g[i];
-  obj.setAttribute("transform","translate(100,100)");
-  obj.addEventListener("mousedown",down);
-}
-
-var zooms=[1200,2400,3200];
-var zoomvalue=1;
 function zoom(){
   if ((zoomvalue++)>2) zoomvalue=0;  
   flowdbeditor.setAttribute("viewBox","0 0 "+zooms[zoomvalue]+" "+zooms[zoomvalue]);
@@ -384,6 +388,7 @@ var TTable = function(name){
       e.DOMElement=fi;
       e.posrow=i;
       fi.innerHTML=e.name;
+      if (e.display) fi.innerHTML+="*";
       fi2.innerHTML=AType.SearchTypeById(e.type).name;
       fi3.innerHTML=e.length;
       
