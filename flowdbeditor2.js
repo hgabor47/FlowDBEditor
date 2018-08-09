@@ -201,6 +201,15 @@ var TTable = function(name){
   this.visible=true;
   this.description="";
   this.color="#888888";  
+  
+  this.initSQL = function(){
+    this.sql=Array(SQLModes.length+1); //sql , triggers, functions etc  // SQLModes.MySQL or SQLModes.MSSQL  (0,1)
+    this.sql[0]=false;                 //  (enabled)false, (1)mysql, (2)mssql,...
+    for (var i = 1; i < this.sql.length; i++) {
+      this.sql[i]=new TSQLCMD(SQLModes[i-1],"");    
+    }
+  };
+  this.initSQL();
 
   this.DOMGroup=null; //teljese Table
     this.DOMtitle=null;
@@ -495,6 +504,24 @@ var TTable = function(name){
       div.innerHTML+=`<input type="checkbox" id="edit_readonly" checked >`;
     else  
       div.innerHTML+=`<input type="checkbox" id="edit_readonly" >`;
+
+    div.innerHTML+=`<label>SQL Specific commands</label>`;
+    if (this.sql[0]) {
+      div.innerHTML+=`<input type="checkbox" linked="DOMSQLDIV" onchange="changeCHKfilter(this)" id="edit_tablesql" checked>`;
+    }else {
+      div.innerHTML+=`<input type="checkbox" linked="DOMSQLDIV" onchange="changeCHKfilter(this)" id="edit_tablesql">`;
+    }    
+    var s="";
+    for (var i = 1; i < this.sql.length; i++) {
+      const e = this.sql[i];
+      if (i==1){
+        s+=`<span class="tab_selected" onclick="changeTAB('DOMSQLDIV',this)">`+e.title+`</span>`;
+      } else {
+        s+=`<span class="tabs" onclick="changeTAB('DOMSQLDIV',this)">`+e.title+`</span>`;
+      }
+    }    
+    div.innerHTML+=`<br><span id="DOMSQLDIV">`+s+`<br><textarea id="edit_sql" cols="70" rows="5" onchange="changeSQL(this)">`+nullstring(this.sql[1].text)+`</textarea></span>`;
+
     div.innerHTML+=`<br>
      <button onclick="{commandgroup=0;editTableOK(this);}">OK</button>
      <button onclick="{commandgroup=0;editCancel(this);}">Cancel</button>
@@ -502,6 +529,10 @@ var TTable = function(name){
     `;
     div.table=this;
     parent.appendChild(div);
+    
+    changeCHKfilter(document.getElementById("edit_tablesql"));
+    var sql = document.getElementById('edit_sql');
+    sql.sqlindex = 1;
     setFocus("edit_name");
     return div;
   };
@@ -554,6 +585,20 @@ var TTable = function(name){
     t.setAttribute("visible",this.visible);
     t.setAttribute("color",this.color);
     t.setAttribute("description",this.description);
+
+    if (this.sql[0])
+      t.setAttribute("sql",1);
+    else
+      t.setAttribute("sql",0);    
+    var sqls = xml.createElement("sqls");t.appendChild(sqls);
+    this.sql.forEach(function(item,index){
+      if (index>0){
+        var onesql = xml.createElement("sql");sqls.appendChild(onesql);
+        onesql.setAttribute("title",item.title);
+        onesql.innerHTML=item.text;  //encodeStr(item.text);
+      }
+    });
+    
     for (let i = 0; i < this.AFields.length; i++) {
       const f = this.AFields[i];
       f.getXML(xml,t);
@@ -611,8 +656,30 @@ var TTable = function(name){
       Rec.push(bc);
     });
     
-    
-
+    this.initSQL();
+    this.sql[0] = node.getAttribute("sql");
+    if (this.sql[0]=='1') 
+      this.sql[0] = true;
+    else
+      this.sql[0] = false;
+    try { //for load old versions
+      var sqls = node.getElementsByTagName("sqls");
+      if (sqls!=null) 
+        sqls = sqls[0];      
+      var onesql = sqls.getElementsByTagName("sql");
+      var SS=this.sql;
+      Array.prototype.forEach.call(onesql,function(c,cidx){ 
+        var title=c.getAttribute("title");
+        if (cidx<SS.length-1)
+        {
+          SS[cidx+1].title=title;
+          SS[cidx+1].text=decodeStr(c.innerHTML);
+        }
+        else {   
+          SS.push(new TSQLCMD(title,decodeStr(c.innerHTML)));
+        }
+      });
+    } catch (error){} 
   };
   this.setLinksFromTemp = function(){    
     for (let i = 0; i < this.AFields.length; i++) {
@@ -778,7 +845,8 @@ var TField = function(table,name){
   this.type=0;  //TType
   this.length=45;
   this.link=null; //null or TField constraint
-  this.linkfilter=[false,null,null,null]; //TODOif link attached: enabled, from, to: false,null,null;   true,1,5,idgroup;    true,4,4,idgroup
+  this.linkfilter=[false,null,null,null]; //TODOif link attached: enabled, from, to, field: false,null,null,null;   true,1,5,idgroup;    true,4,4,idgroup
+  this.linkconstraint=true; //neew SQL constraint for this link
   this.table=table; //TTable parent
   this.posrow=0;   //row 0,1,2,3...  
   this.DOMElement=null;  //to svg text
@@ -803,7 +871,7 @@ var TField = function(table,name){
       this.table.refreshDOM();
     }
     refreshFieldsListDOM();    
-  };
+  }
   this.edit=function(parent){
     if (stateEdit) return;
     stateEdit=true;
@@ -839,6 +907,12 @@ var TField = function(table,name){
      <button onclick="editFieldLink(this)">LinkTo</button>
      <button onclick="editFieldLinkDelete(this)">DeleteLink</button>`;
      if (this.link!=null){
+        div.innerHTML+=`<label>Need constraint with SQL export</label>`;
+        if (this.linkconstraint) {
+          div.innerHTML+=`<input type="checkbox" id="edit_needconstraint" checked>`;
+        }else {
+          div.innerHTML+=`<input type="checkbox" id="edit_needconstraint">`;
+        }
         div.innerHTML+=`<label>Link filtered values range:</label>`;
         if (this.linkfilter[0]) {
           div.innerHTML+=`<input type="checkbox" linked="DOMfilterDIV" onchange="changeCHKfilter(this)" id="edit_linkfilter" checked>`;
@@ -989,7 +1063,11 @@ var TField = function(table,name){
     if (this.display)
       f.setAttribute("display",1);
     else
-    f.setAttribute("display",0);
+      f.setAttribute("display",0);
+    if (this.linkconstraint)
+      f.setAttribute("linkconstraint",1);
+    else
+      f.setAttribute("linkconstraint",0);
     if (this.link!=null){
       f.setAttribute("link",[this.link.table.name,this.link.name]);
     }    
@@ -1001,12 +1079,18 @@ var TField = function(table,name){
     this.length=Number(node.getAttribute("length")); 
     this.linktext = node.getAttribute("link");
     this.display = node.getAttribute("display");
+    this.linkconstraint = node.getAttribute("linkconstraint");
     var linkfilt = node.getAttribute("linkfilter");
     this.setDescription(nullstring(node.getAttribute("description")));
     if (this.display=='0') 
       this.display = false;
     else
       this.display = true;
+    if (this.linkconstraint=='0') 
+      this.linkconstraint = false;
+    else
+      this.linkconstraint = true;
+
     if (linkfilt=='0') 
       this.linkfilter[0] = false;
     else
@@ -1061,6 +1145,10 @@ var TField = function(table,name){
   };
 };
 
+var TSQLCMD = function(title,text){
+  this.title=title;
+  this.text=text;
+}
 //#region Arrays, Types -----------------------------
 
 var idTtype=0;
@@ -1075,6 +1163,7 @@ var TType = function(name,sql,inputtype,mssql,deflen=0){
 
 var OpenEye = Object.freeze({"Open":"&#xf06e;&nbsp;","Close":"&#xf070;&nbsp;"});
 var FlowModes = Object.freeze({"Flow":1, "Constraint":2});
+var SQLModes = ["MySQL", "MSSQL"];
 //AType struct: displaytext,mysqltype,htmltype,| mssqltype,,,,
 //                     0        1         2         3  
 var AType = [new TType("String","varchar(%)","text","[varchar](%) NULL",43),
@@ -1300,7 +1389,7 @@ function fieldClick(e){
       constraintField  = null;
       if (automodeLink==false){
         var b= document.getElementById("newconstraint");
-        newConstraint(b,true); 
+        newConstraint(b,true);
       }
     }
   }
@@ -1317,7 +1406,7 @@ function editTableOK(div){
   var panel = div.parentElement;
   var ename = document.getElementById('edit_name');
   var ewidth = document.getElementById('edit_width');
-  //var eheight = document.getElementById('edit_height');
+  var esql = document.getElementById('edit_tablesql');
   var ereadonly = document.getElementById('edit_readonly');
   var edescription = document.getElementById('edit_description');
   var ecolor = document.getElementById('edit_color');
@@ -1327,6 +1416,7 @@ function editTableOK(div){
   panel.table.setReadOnly(ereadonly.checked);
   panel.table.setColor(ecolor.value);
   panel.table.setDescription(edescription.value);
+  panel.table.sql[0]=esql.checked;
 
   removePanelDOM(div);
   panel.table.refreshDOM();
@@ -1440,6 +1530,7 @@ function editFieldOK(div){
   var edisplay = document.getElementById('edit_display');
   var edescription = document.getElementById('edit_description');
   
+  var elinkconstraint = document.getElementById('edit_needconstraint');
   var elinkfilter = document.getElementById('edit_linkfilter');
   var elinkfilter1 = document.getElementById('edit_linkfilter1');
   var elinkfilter2 = document.getElementById('edit_linkfilter2');  
@@ -1457,6 +1548,10 @@ function editFieldOK(div){
     } catch (error) {
       
     }
+  }
+
+  if (elinkconstraint!=null){
+    panel.field.linkconstraint=elinkconstraint.checked;
   }
   panel.field.name = ename.value;
   //change type than records
@@ -1511,6 +1606,34 @@ function changeCHKfilter(chk){
   } else {
     DOMfilterDIV.style.visibility="hidden";
     DOMfilterDIV.style.display="none";
+  }
+}
+
+function changeSQL(textarea){
+   var div = document.getElementById('flow_edit');  
+   var sql = document.getElementById('edit_sql');
+   div.table.sql[sql.sqlindex].text=textarea.value;
+}
+
+function changeTAB(DOMtabs,uj){
+  var t = document.getElementById(DOMtabs);  
+  var tab=t.getElementsByTagName('span');
+  var idx=-1;
+  for (let i = 0; i < tab.length; i++) {
+    if (tab[i]==uj) {
+      tab[i].setAttribute("class","tab_selected");
+      idx=i+1;
+    } else {
+      tab[i].setAttribute("class","tabs");
+    }    
+  }
+  var sql = document.getElementById('edit_sql');
+  var div = document.getElementById('flow_edit');
+  try {
+    sql.sqlindex=idx;
+    sql.value=nullstring(div.table.sql[idx].text);
+  } catch (error) {
+    
   }
 }
 
@@ -1842,6 +1965,26 @@ function decodeStr(str) {
     });
 }
 
+var decodeEntities = (function() {
+  // this prevents any overhead from creating the object each time
+  var element = document.createElement('div');
+
+  function decodeHTMLEntities (str) {
+    if(str && typeof str === 'string') {
+      // strip script/html tags
+      str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, '');
+      str = str.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, '');
+      element.innerHTML = str;
+      str = element.textContent;
+      element.textContent = '';
+    }
+
+    return str;
+  }
+
+  return decodeHTMLEntities;
+})();
+
 function encode_utf8(s) {
   return decodeURIComponent(unescape(s));
 }
@@ -2070,8 +2213,10 @@ function mySQL(linknode){
       var s="";
       table.AFields.forEach(function(field,index2){ 
         if ( field.link!=null && (!field.link.table.readonly)){
-          one=true;
-          s+='ADD CONSTRAINT `'+table.name+field.link.table.name+(idc++)+'` FOREIGN KEY (`'+field.name+'`) REFERENCES `'+field.link.table.name+'`('+field.link.name+'),'+LF;
+          if (field.linkconstraint) {
+            one=true;
+            s+='ADD CONSTRAINT `'+table.name+field.link.table.name+(idc++)+'` FOREIGN KEY (`'+field.name+'`) REFERENCES `'+field.link.table.name+'`('+field.link.name+'),'+LF;
+          }
         }
       });
       if (one){
@@ -2081,7 +2226,22 @@ function mySQL(linknode){
     }
   });
 
+
+  source+='DELIMITER $$'+LF;
+  ATables.forEach(function(table,index){
+    if (!table.readonly){
+      try {
+        if (table.sql[1].text!="")
+          source+=decodeEntities(decodeStr(table.sql[1].text));  //1 = mysql
+      } catch (error) {}
+    }
+  });
+  source+='DELIMITER ;'+LF;
   source += 'COMMIT;'+LF ;
+
+
+
+
   var url = "data:application/sql;charset=utf-8,"+encodeURIComponent(source);
   linknode.href = url;
   //linknode.style.visibility="visible";
