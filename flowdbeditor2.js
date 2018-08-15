@@ -520,7 +520,21 @@ var TTable = function(name){
         s+=`<span class="tabs" onclick="changeTAB('DOMSQLDIV',this)">`+e.title+`</span>`;
       }
     }    
-    div.innerHTML+=`<br><span id="DOMSQLDIV">`+s+`<br><textarea id="edit_sql" cols="70" rows="5" onchange="changeSQL(this)">`+nullstring(this.sql[1].text)+`</textarea></span>`;
+    div.innerHTML+=`<br><span id="DOMSQLDIV">`+s+`<br><textarea id="edit_sql" cols="70" rows="5" placeholder="/*Placeholder MySQL+MSSQL*/
+CREATE TRIGGER A1 
+  BEFORE INSERT ON table1
+  FOR EACH ROW 
+BEGIN
+    declare a int;
+END$$
+
+/*MSSQL*/
+CREATE TRIGGER A1 ON table1
+AFTER INSERT
+AS
+  IF (@@ROWCOUNT_BIG  = 0)
+    RETURN;    
+" onchange="changeSQL(this)">`+nullstring(this.sql[1].text)+`</textarea></span>`;
 
     div.innerHTML+=`<br>
      <button onclick="{commandgroup=0;editTableOK(this);}">OK</button>
