@@ -40,5 +40,13 @@
             "url": "http://localhost/html/flowdbeditor/index.html",//"url": "http://localhost/html/flowdbeditor/${relativeFile}",
             "webRoot": "c:/xampp/htdocs"
         },
+        {
+            "name": "SONO",
+            "type": "chrome",
+            "request": "launch",
+            "sourceMaps": true,
+            "url": "http://localhost/sono/index.html",//"url": "http://localhost/html/flowdbeditor/${relativeFile}",
+            "webRoot": "c:/xampp/htdocs"
+        },
     ]
 }
