@@ -11,6 +11,13 @@
             "url": "http://localhost/html/flowdbeditor/index.html",
             "webRoot": "c:/xampp/htdocs"
         },
+        {
+            "type": "edge",
+            "request": "launch",
+            "name": "FLOWindex.html",
+            "url": "file://xampp/htdocs/html/flowdbeditor/index.html",
+            "webRoot": "c:/xampp/htdocs"
+        },
     {
         "type": "chrome",
         "request": "launch",
