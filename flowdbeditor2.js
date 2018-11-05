@@ -85,7 +85,7 @@ var flowdbeditor=null;
 var isdown=false;
 var zooms=[1200,2400,3200];
 var zoomvalue=1;
-
+var WorkflowStart=null;
 
 function flowdbeditor_onload(){
   g = document.getElementsByName("table");
@@ -94,11 +94,14 @@ function flowdbeditor_onload(){
   flowdbeditor.addEventListener("mousemove",move);
   flowdbeditor.addEventListener("mouseup",up);
 
+ 
+
   for (let i = 0; i < g.length; i++) {
     const obj = g[i];
     obj.setAttribute("transform","translate(100,100)");
     obj.addEventListener("mousedown",down);
   }
+  addModules(document.getElementById("modules"));
 
   var but=document.getElementById("flowdbload");
   but.activ=false; //TODO!!! for prevent to double load in same time
@@ -124,8 +127,10 @@ function flowdbeditor_onload(){
   }
   document.body.addEventListener("paste", PastePanel);
   newsdialog();
-  addModules(document.getElementById("modules"));
+  
   SortTables();
+
+  
 }
 
 function zoom(){
@@ -196,11 +201,16 @@ var TTable = function(name){
   this.width=200;
   this.height=200;
   this.AFields = []; //Tfield  
-  this.Records = [];  //realtime upfill
+  this.Records = [];  //realtime upfill  
   this.readonly = false;
   this.visible=true;
   this.description="";
-  this.color="#888888";  
+  this.color="#888888";
+  this.id=-1;
+  this.properties=new TProperty();
+  this.properties.Add("wfstart","Workflow start","L",false);
+  this.properties.Add("wfend","Workflow end","L",false);
+
   
   this.initSQL = function(){
     this.sql=Array(SQLModes.length+1); //sql , triggers, functions etc  // SQLModes.MySQL or SQLModes.MSSQL  (0,1)
@@ -208,12 +218,14 @@ var TTable = function(name){
     for (var i = 1; i < this.sql.length; i++) {
       this.sql[i]=new TSQLCMD(SQLModes[i-1],"");    
     }
+    this.id=idTable++;
   };
   this.initSQL();
 
   this.DOMGroup=null; //teljese Table
     this.DOMtitle=null;
     this.DOMContextmenu=null;
+    this.DOMWorkflow=null;
     this.DOMrect=null;
     this.DOMFieldsGroup=null; //fields    
   
@@ -266,7 +278,7 @@ var TTable = function(name){
       this.DOMtitle.innerHTML=name;
     SortTables();
   };
-  this.setName(name+(idTable++));
+  this.setName(name+(this.id));
   this.addField = function(name,type){
     var f = new TField(this,name);    
     f.type=type;
@@ -326,8 +338,9 @@ var TTable = function(name){
     //this.DOMGroup.addEventListener("mouseup",up);
     this.DOMGroup.setAttribute("class","flow_tablegroup");
     this.DOMGroup.setAttribute("transform","translate("+this.posxy[0]+","+this.posxy[1]+")");
+
     this.DOMtitle = document.createElementNS("http://www.w3.org/2000/svg","text");      
-    this.DOMtitle.setAttribute("transform","translate(30,"+fieldRowHeight+")");
+    this.DOMtitle.setAttribute("transform","translate(50,"+fieldRowHeight+")");
     this.DOMtitle.table=this; 
     this.DOMtitle.setAttribute("class","flow_tables") ; 
     this.DOMtitle.addEventListener("mousedown",titleClick);
@@ -339,6 +352,13 @@ var TTable = function(name){
     this.DOMContextmenu.addEventListener("mousedown",contextmenu);
     this.DOMContextmenu.innerHTML="&#xf040;";
 
+    this.DOMWorkflow = document.createElementNS("http://www.w3.org/2000/svg","text");      
+    this.DOMWorkflow.setAttribute("transform","translate(20,"+fieldRowHeight+")");
+    this.DOMWorkflow.table=this; 
+    this.DOMWorkflow.setAttribute("class","flow_context") ; 
+    this.DOMWorkflow.addEventListener("mousedown",workflowmenu);
+    this.DOMWorkflow.innerHTML="&#xf0e8;";
+
     this.DOMFieldsGroup=document.createElementNS("http://www.w3.org/2000/svg","g");       
     this.DOMFieldsGroup.setAttribute("transform","translate(3,32)"); 
     
@@ -346,6 +366,7 @@ var TTable = function(name){
     this.DOMGroup.appendChild(this.DOMtitle);
     this.DOMGroup.appendChild(this.DOMFieldsGroup);
     this.DOMGroup.appendChild(this.DOMContextmenu);
+    this.DOMGroup.appendChild(this.DOMWorkflow);
     
     this.refreshDOM();
     this.setVisible(this.visible);
@@ -436,6 +457,8 @@ var TTable = function(name){
         }      
       }
     }
+    //FWLinks
+    TWFLink.refreshAll(AWFLinks);
   };
 
   this.refreshRecordFields=function(){ //if the fields are change
@@ -482,7 +505,7 @@ var TTable = function(name){
     this.setReadOnly(this.readonly);    
     refreshFieldsListDOM();
   };
-
+  //TTable
   this.edit=function(parent){
     if (stateEdit) return;
     stateEdit=true;
@@ -497,8 +520,8 @@ var TTable = function(name){
      <label>Width</label><input type="number" id="edit_width" step="30" value="`+this.width+`"><br>     
      <label>Color</label><input type="color" id="edit_color" value="`+this.color+`"><br>
      <label>Description</label><textarea id="edit_description" cols="40" rows="5">`+nullstring(this.description)+`</textarea>
-     `;
-     
+     <div id="editproperties"></div>`;
+
     div.innerHTML+=`<label>Readonly mean will no export to SQL file</label>`;
     if (this.readonly)
       div.innerHTML+=`<input type="checkbox" id="edit_readonly" checked >`;
@@ -520,21 +543,7 @@ var TTable = function(name){
         s+=`<span class="tabs" onclick="changeTAB('DOMSQLDIV',this)">`+e.title+`</span>`;
       }
     }    
-    div.innerHTML+=`<br><span id="DOMSQLDIV">`+s+`<br><textarea id="edit_sql" cols="70" rows="5" placeholder="/*Placeholder MySQL+MSSQL*/
-CREATE TRIGGER A1 
-  BEFORE INSERT ON table1
-  FOR EACH ROW 
-BEGIN
-    declare a int;
-END$$
-
-/*MSSQL*/
-CREATE TRIGGER A1 ON table1
-AFTER INSERT
-AS
-  IF (@@ROWCOUNT_BIG  = 0)
-    RETURN;    
-" onchange="changeSQL(this)">`+nullstring(this.sql[1].text)+`</textarea></span>`;
+    div.innerHTML+=`<br><span id="DOMSQLDIV">`+s+`<br><textarea id="edit_sql" cols="70" rows="5" onchange="changeSQL(this)">`+nullstring(this.sql[1].text)+`</textarea></span>`;
 
     div.innerHTML+=`<br>
      <button onclick="{commandgroup=0;editTableOK(this);}">OK</button>
@@ -543,6 +552,10 @@ AS
     `;
     div.table=this;
     parent.appendChild(div);
+
+    //ITT, mert így megmarad az input-on a properties tulajdonság
+    this.properties.refresh(); 
+    this.properties.connectUI(document.getElementById("editproperties"));
     
     changeCHKfilter(document.getElementById("edit_tablesql"));
     var sql = document.getElementById('edit_sql');
@@ -567,7 +580,6 @@ AS
     return div;
   };
 
-
   this.destroy = function(){
     var linksto=this.getLinksTo();
     var linksfrom=this.getLinksFrom();
@@ -589,6 +601,13 @@ AS
     }*/
   };
 
+  this.addWF = function(anothertable){
+    if (!TWFLink.search(AWFLinks,this,anothertable))
+      n = new TWFLink(this,anothertable);
+      AWFLinks.push(n); 
+      n.indexOfArray=AWFLinks.length-1;
+  }
+  //TTable
   this.getXML = function(xml,root){
     var t = xml.createElement("table");root.appendChild(t);    
     t.setAttribute("name",this.name);
@@ -599,6 +618,7 @@ AS
     t.setAttribute("visible",this.visible);
     t.setAttribute("color",this.color);
     t.setAttribute("description",this.description);
+    t.setAttribute("id",this.id);
 
     if (this.sql[0])
       t.setAttribute("sql",1);
@@ -612,6 +632,8 @@ AS
         onesql.innerHTML=item.text;  //encodeStr(item.text);
       }
     });
+
+    this.properties.getXML(xml,t);
     
     for (let i = 0; i < this.AFields.length; i++) {
       const f = this.AFields[i];
@@ -639,6 +661,7 @@ AS
       const p = Number(this.posxy[i]);
       this.posxy[i]=p;
     }
+    
     this.width=Number(node.getAttribute("width"));
     this.height=Number(node.getAttribute("height"));
     this.setReadOnly(node.getAttribute("readonly")=="true");  
@@ -651,6 +674,12 @@ AS
       var f = new TField(this,"fieldx");      
       f.setFromXML(xmlfield);
       this.AFields.push(f);
+    }
+    var xmlproperty = node.getElementsByTagName("property");
+    //this.properties.Clear();
+    for (let i = 0; i < xmlproperty.length; i++) {
+      const xmlprop = xmlproperty[i];      
+      this.properties.setFromXML(xmlprop);
     }
 
     var rec = node.getElementsByTagName("records");
@@ -671,6 +700,9 @@ AS
     });
     
     this.initSQL();
+    try {
+      this.id=Number(node.getAttribute("id"));
+    } catch (error) {}
     this.sql[0] = node.getAttribute("sql");
     if (this.sql[0]=='1') 
       this.sql[0] = true;
@@ -1061,6 +1093,7 @@ var TField = function(table,name){
     //Table  
     //return [this.table.posxy[0],this.table.posxy[1]];
   };
+  //TField
   this.getXML = function(xml,root){
     var f = xml.createElement("field");root.appendChild(f);    
     f.setAttribute("name",this.name);
@@ -1087,6 +1120,7 @@ var TField = function(table,name){
     }    
     f.setAttribute("autoinc",[this.autoinc]);
   };
+
   this.setFromXML = function(node){
     this.name=node.getAttribute("name");
     this.type=Number(node.getAttribute("type"));
@@ -1159,6 +1193,134 @@ var TField = function(table,name){
   };
 };
 
+class TWFLink{
+  constructor(fromtable,table){
+    this.indexOfArray=-1;
+    this.next=table;
+    this.prev=fromtable;       
+    this.DOMLink =document.createElementNS("http://www.w3.org/2000/svg","line");
+    this.DOMLink.setAttribute("x1",100);
+    this.DOMLink.setAttribute("y1",100);
+    this.DOMLink.setAttribute("x2",300);
+    this.DOMLink.setAttribute("y2",200);
+    this.DOMLink.setAttribute("marker-end","url(#arrow)");
+    this.DOMLink.addEventListener("mousedown",TWFClick);    
+    this.DOMLink.wflink=this;
+    //this.DOMLink.setAttribute("class","flow_line");
+    //flowdbeditor.insertBefore(this.DOMLink,document.getElementById("flowbackground"));
+    flowdbeditor.appendChild(this.DOMLink);
+    this.refresh();
+  }
+  static search(tomb,tableprev,tablenext){
+    for (let i = 0; i < tomb.length; i++) {
+      const e = tomb[i]; //TWFLink
+      if ((e.next==tablenext)&&(e.prev==tableprev))
+        return true; 
+    }
+    return false;
+  }
+  static searchNext(tablenext){
+    var tomb=AWFLinks;
+    var res=[];
+    for (let i = 0; i < tomb.length; i++) {
+      const e = tomb[i]; //TWFLink
+      if ((e.next==tablenext))
+        res.push(e);  //link!!! e.prev = table
+    }
+    return res; //array with table refs.
+  }
+
+  static hasFlow(table){
+    var tomb=AWFLinks;
+    for (let i = 0; i < tomb.length; i++) {
+      const e = tomb[i]; //TWFLink
+      if ((e.next==table) || (e.prev==table))
+        return true;  //table
+    }
+    return false; //array with table refs.
+  }
+
+  refresh(){
+    this.DOMLink.setAttribute("class","wf_line");
+    var a=[0,0];
+    var b=[0,0];
+    a[0]=this.prev.posxy[0];
+    a[1]=this.prev.posxy[1];
+    b[0]=this.next.posxy[0];
+    b[1]=this.next.posxy[1];
+    
+    if ((a[0]+(this.prev.width))<(b[0])){
+      a[0]+=this.prev.width;
+    } else {
+      if ((b[0]+(this.next.width))<(a[0])){
+        b[0]+=this.next.width;
+      } else 
+      {
+        a[0]+=this.prev.width/2;
+        b[0]+=this.next.width/2;
+      }
+    }
+
+    if ((a[1]+(this.prev.height))<(b[1])){
+      a[1]+=this.prev.height;
+    } else {
+      if ((b[1]+(this.next.height))<(a[1])){
+        b[1]+=this.next.height;
+      } else 
+      {
+        a[1]+=this.prev.height/2;
+        b[1]+=this.next.height/2;
+      }
+    }
+    this.DOMLink.setAttribute("x1",a[0]);
+    this.DOMLink.setAttribute("y1",a[1]);
+    this.DOMLink.setAttribute("x2",b[0]);
+    this.DOMLink.setAttribute("y2",b[1]);
+  }
+  static refreshAll(tomb){
+    for (let i = 0; i < AWFLinks.length; i++) {
+      const e = AWFLinks[i];
+      e.refresh();
+    }
+  }
+  static getXML(tomb,xml,root){
+    var t = xml.createElement("wflinks");     
+    t.setAttribute("id","this.name");
+    t.setAttribute("caption","caption");
+    root.appendChild(t);   
+    tomb.forEach(function(item,index){
+        var one = xml.createElement("wflink");t.appendChild(one);
+        one.setAttribute("prev",item.prev.id);
+        one.setAttribute("next",item.next.id);
+        one.setAttribute("mode",item.prop_triggermode);
+        one.innerHTML="test";  //encodeStr(item.text);
+    });
+  }
+  static setFromXML(tomb,node){
+    try {
+      //this.caption=node.getAttribute("caption");
+      //this.id=node.getAttribute("id");
+      var xmlwfs = node[0].getElementsByTagName("wflink");
+      for (let i = 0; i < xmlwfs.length; i++) {
+          var o=xmlwfs[i];
+          var p=o.getAttribute("prev");
+          var n=o.getAttribute("next");
+          var m=o.getAttribute("mode");
+          var a1 = ATables.SearchTableById(p);
+          var a2=ATables.SearchTableById(n);
+          var w=new TWFLink(a1,a2);
+          w.prop_triggermode=m;
+          tomb.push( w);
+          w.indexOfArray=tomb.length-1;
+
+      }
+      refreshAll(tomb);
+    } catch (error) {
+        
+    }
+  }
+}
+
 var TSQLCMD = function(title,text){
   this.title=title;
   this.text=text;
@@ -1176,7 +1338,7 @@ var TType = function(name,sql,inputtype,mssql,deflen=0){
 };
 
 var OpenEye = Object.freeze({"Open":"&#xf06e;&nbsp;","Close":"&#xf070;&nbsp;"});
-var FlowModes = Object.freeze({"Flow":1, "Constraint":2});
+var FlowModes = Object.freeze({"Flow":1, "Constraint":2,"Workflow":3});
 var SQLModes = ["MySQL", "MSSQL"];
 //AType struct: displaytext,mysqltype,htmltype,| mssqltype,,,,
 //                     0        1         2         3  
@@ -1203,10 +1365,15 @@ var flowMode = FlowModes.Flow;
 var SelectedField = null;//SPRcog only TODO
 var constraintField =null; //starting field
 
+var AWFLinks = []; //TWFLink
 var ATables = [];
 var SearchTableByName = function(tablename){
   tablename=tablename.toLowerCase();
   const result = ATables.find( tab => tab.name.toLowerCase() === tablename );
+  return result;
+};
+var SearchTableById = function(id){  
+  const result = ATables.find( tab => tab.id == id );
   return result;
 };
 function SortTables(){
@@ -1223,10 +1390,15 @@ var ATablesclear=function(){
   ATables = [];ATables.clear=ATablesclear; 
   ATables.SearchTableByName=SearchTableByName;
   ATables.Sort=SortTables;
+  ATables.SearchTableById=SearchTableById;
+  AWFLinks = [];
 };
 ATables.clear=ATablesclear;
 ATables.SearchTableByName=SearchTableByName;
 ATables.Sort=SortTables;
+ATables.SearchTableById=SearchTableById;
+
+
 
 //#endregion Arrays
 
@@ -1385,7 +1557,15 @@ function newConstraint(b,nohint){
 
 function titleClick(e){
   isdown=false;
-  this.table.edit(document.getElementById("area"));
+  if (flowMode==FlowModes.Flow){
+    this.table.edit(document.getElementById("area"));
+  }else{
+    if (WorkflowStart!=null){
+      flowMode=FlowModes.Flow;
+      WorkflowStart.addWF(this.table);
+      WorkflowStart=null;
+    }
+  }
 }
 
 function fieldClick(e){
@@ -1407,6 +1587,40 @@ function fieldClick(e){
       }
     }
   }
+}
+
+function TWFClick(e){  //.target == DOMLink
+  var d = document.getElementById("workflowedit"); //DIV  
+  d.wflink=e.target.wflink;
+  if (d.wflink.prop_triggermode!=null){
+    document.getElementById("wfe_trigger_mode").value=d.wflink.prop_triggermode;
+  }
+  d.style.top=Number(d.wflink.next.posxy[1]+40)+"px";
+  d.style.left=Number(d.wflink.next.posxy[0]+40)+"px";
+  d.style.visibility='visible';
+}
+function wflink_delete(div){
+  if (confirm("DELETE Workflow LINK! Sure?")) {
+    var panel = div.parentElement; //DIV.wflink
+    try {
+      AWFLinks.splice(panel.wflink.indexOfArray,1);
+      if (panel.wflink.DOMLink!=null)
+        flowdbeditor.removeChild(panel.wflink.DOMLink);
+      Save(temp);
+      panel.style.visibility='hidden';
+    } catch (error) {    }    
+  }    
+}
+function wflink_ok(div){
+  var panel = div.parentElement; //DIV.wflink
+  try {
+    if (panel.wflink.prop_triggermode==null){
+      panel.wflink.prop_triggermode="";
+    }
+    panel.wflink.prop_triggermode=document.getElementById("wfe_trigger_mode").value;
+    Save(temp);
+    panel.style.visibility='hidden';
+  } catch (error) {    }
 }
 
 
@@ -1454,6 +1668,7 @@ function editTableDelete(div){
     }
   }  
 }
+
 //endregion
 
 function PastePanel(e){
@@ -1702,6 +1917,13 @@ function contextmenu(e){
     //this.table.browse(document.getElementById("area"));      
 }
 
+function workflowmenu(e){
+  isdown=false;
+  e.preventDefault();
+  WorkflowStart=this.table;
+  flowMode = FlowModes.Workflow;
+}
+
 var dX=0;
 var dY=0;
 
@@ -1903,9 +2125,10 @@ function LoadContentFromServer(file,fuggveny){
 
 function URLExists(url)
 {
-    var http = new XMLHttpRequest();
-    http.open('HEAD', url, false);
-    try {
+  try {
+      var http = new XMLHttpRequest();
+      http.open('HEAD', url, false);
+    
       http.send();
       return http.status!=404;        
     } catch (error) {
@@ -1914,7 +2137,11 @@ function URLExists(url)
 }
 
 var  hasModules=false;
+var moduleSave=[];
+var moduleLoad=[];
 function addModules(div){
+  moduleSave=[];
+  moduleLoad=[];
   addModule("flowdbeff",div);
   addModule("flowdbplayer",div);  
 }
@@ -1926,9 +2153,13 @@ function loadModule(jsname,div){
   var script = document.createElement('script');
   script.onload = function () {
       var b = document.createElement("button");
+      b.className="btn-warning commandbutton";
       b.setAttribute('onclick',jsname+"(this)");
-      b.innerHTML=jsname;
+      b.innerHTML=jsname;      
       div.appendChild(b);
+      moduleSave.push(jsname+"Save");
+      moduleLoad.push(jsname+"Load");    
+      Load();  
   };
   script.src = jsname+".js";
   document.head.appendChild(script); 
@@ -2043,9 +2274,9 @@ function savetosvgfile(linknode,svgnode){  // print , flowdbeditor
 }
 
 var xmlroot="flowdbeditor";
-function Save(variable){
+function Save(variable,moduleFunc=null){
   oncehints.hint("save");
-  var xmlText = SavetoString();
+  var xmlText = SavetoString(moduleFunc);
   if (variable!=null){
     //alert(variable);
     localStorage.setItem(variable,xmlText);
@@ -2053,7 +2284,7 @@ function Save(variable){
     localStorage.setItem("flowdbeditor",xmlText);
   }
 }
-function Load(variable){
+function Load(variable,moduleFunc=null){
   var xmlText="";
   if (variable!=null){ 
     xmlText  = localStorage.getItem(variable);
@@ -2061,9 +2292,9 @@ function Load(variable){
     xmlText  = localStorage.getItem("flowdbeditor");
   }
   oncehints.hint("load");
-  LoadString(xmlText);
+  LoadString(xmlText,moduleFunc);
 }
-function SavetoString(){  
+function SavetoString(moduleFunc=null){  
   var xml= document.implementation.createDocument(null, xmlroot);
   var root = xml.getElementsByTagName(xmlroot)[0];
   var setup = xml.createElement("setup");
@@ -2077,6 +2308,16 @@ function SavetoString(){
     const table = ATables[i];
     table.getXML(xml,root);
   }
+  TWFLink.getXML(AWFLinks,xml,root);
+  if (moduleFunc!=null){
+    moduleFunc(xml,root,setup);
+  }
+  for(i=0;i<moduleSave.length;i++){
+    try{
+      eval(moduleSave[i]+"(xml,root,setup);"); //pl. flowdbeffSave(xml,root,setup)
+    }catch (err){};
+  }
+
   return new XMLSerializer().serializeToString(xml);    
 }
 
@@ -2104,16 +2345,19 @@ function LoadServerDefault(forceload){
 
 }
 
-function LoadString(xmlText){
+function LoadString(xmlText,moduleFunc=null){
   Asci7ON=false;
   ATables.clear();
   flowdbeditor=document.getElementById("flowdbeditor");
-  flowdbeditor.innerHTML=`
+  flowdbeditor.innerHTML=`      
       <defs>
           <linearGradient id="e" x1="40" y1="210" x2="460" y2="210" gradientUnits="objectBoundingBox">
               <stop stop-color="steelblue" offset="0" />
               <stop stop-color="red" offset="1" />
           </linearGradient>
+          <marker id="arrow" markerWidth="3" markerHeight="3" refX="0" refY="1" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,2 L3,1 z" fill="#ffa020" />
+          </marker>
       </defs>`; 
   if (xmlText==null){
     SelectedTable=null;
@@ -2125,6 +2369,17 @@ function LoadString(xmlText){
   var oParser = new DOMParser();
   var xml = oParser.parseFromString(xmlText, "text/xml");
   var root = xml.getElementsByTagName(xmlroot)[0];
+  var setup = root.getElementsByTagName("setup");
+  if ((setup!=null && setup.length>0)) 
+    setup=setup[0];
+  else 
+    setup=null;
+
+  if (moduleFunc!=null){
+    if (!moduleFunc(root,setup)) 
+      return;
+  }
+
   var tables = root.getElementsByTagName("table");
   for (let i = 0; i < tables.length; i++) {
     const xmltable = tables[i];
@@ -2138,10 +2393,12 @@ function LoadString(xmlText){
     const table = ATables[i];    
     table.setLinksFromTemp();
   }
+
+
+
   refreshTablesListDOM();
-  var setup = root.getElementsByTagName("setup");
-  if ((setup!=null && setup.length>0)){     
-     setup=setup[0];
+  
+  if (setup!=null){          
      var v = setup.getAttribute("idField");
      if (v!=null) 
         idField = Number(v);
@@ -2156,6 +2413,19 @@ function LoadString(xmlText){
         document.getElementById("title").value = v;
      }catch(error){};
   }
+
+    //WORKFLOW
+  
+    var wf = root.getElementsByTagName("wflinks");
+    if (wf!=null)
+      TWFLink.setFromXML(AWFLinks,wf);
+
+  for(i=0;i<moduleLoad.length;i++){
+    try{
+      eval(moduleLoad[i]+"(root,setup);");
+    }catch (err){};
+  }
+
 }
 
 //SQL
@@ -2171,13 +2441,16 @@ function mySQL(linknode){
   CREATE DATABASE IF NOT EXISTS `+SQLdb+` DEFAULT CHARACTER SET utf8 COLLATE utf8_hungarian_ci;`+LF+`
   USE `+SQLdb+`;`+LF;
 
+  var autoidx=1;
   ATables.forEach(function(table,index){
     if (!table.readonly){
       source+=`DROP TABLE IF EXISTS `+table.name+`;`+LF+` 
       CREATE TABLE `+table.name+` (`+LF;
       var fields="";
+      var autoinc=-1;
       table.AFields.forEach(function(field,index2){      
         tip= AType.SearchTypeById(field.type);
+        if (field.type==3){autoinc=index2;}
         source+='`'+field.name+'` '+tip.sql.replace("%",field.length)+','+LF ;
         fields+='`'+field.name+'`,';
       });
@@ -2193,6 +2466,9 @@ function mySQL(linknode){
               source+=`(`;
               var value="";
               o.forEach(function(o2,i2){
+                if (i2==autoinc){
+                  o2=autoidx++;
+                }
                 value+="'"+o2+"',";
               });
               source+=value.substring(0,value.length-1);
@@ -2794,9 +3070,170 @@ function ComboBoxDOM(value,field1,field2){  //value field linkedfield
   return (opt+`</select>`);
 };
 
+function showhint(obj,yesno01) {
+  const showhint="showhint";
+  if (yesno01==1){
+    var h=obj.getAttribute("hint");
+    var d= document.createElement("div");
+    d.setAttribute("id",showhint);    
+    d.innerHTML=h;
+    var p=objpos(obj);
+    d.style.top=p.y+50+"px";
+    var left=p.x-100;
+    if (left<10){
+      left=10;
+    }
+    d.style.left=left+"px";
+    document.body.appendChild(d);
+  }else{
+    var o= document.getElementById(showhint);
+    document.body.removeChild(o);
+  }
+}
 
+function objpos(obj) {
+  var p = {};
+  p.x = obj.offsetLeft;
+  p.y = obj.offsetTop;
+  while (obj.offsetParent) {
+      p.x = p.x + obj.offsetParent.offsetLeft;
+      p.y = p.y + obj.offsetParent.offsetTop;
+      if (obj == document.getElementsByTagName("body")[0]) {
+          break;
+      }
+      else {
+          obj = obj.offsetParent;
+      }
+  }
+  return p;
+}
 
 //#endregion BROWSE functions (LIST) 
+
+
+class TProperty{  
+  constructor(){
+    this.parent=null;
+    this.properties=[];
+    this.DOMProp =document.createElement("div");
+    this.DOMList =document.createElement("table"); 
+    this.DOMProp.setAttribute("class","properties");
+    this.DOMProp.appendChild(this.DOMList);
+  }
+  connectUI(obj){
+    if (this.parent!=null){
+      this.parent.parentElement.removeChild(this.parent);      
+    }
+    obj.appendChild(this.DOMProp);
+    this.parent=obj;
+  }
+  Add(id,name,typ,newvalue=""){    
+    this.properties.push([id,name,typ,newvalue]);    
+  }
+  Del(id){
+    const idx = this.properties.findIndex( fi => fi[0] === id );
+    this.splice(idx,1);    
+  }
+  Clear(){
+    this.properties=[];
+  }
+  Get(id){
+    const idx = this.properties.findIndex( fi => fi[0] === id );
+    return this.properties[idx][3];    
+  }
+  Value(id,newvalue){
+    const idx = this.properties.findIndex( fi => fi[0] === id );
+    this.properties[idx][3]=newvalue;    
+  }
+  getProperties(){
+    return this.properties;
+  }  
+  refresh(){
+    this.DOMList.innerHTML="";
+    var dom=this.DOMList;
+    var own = this;
+    this.properties.forEach(function(oneprop,i){
+      var p="";
+      switch (oneprop[2]) {
+        case 'N':
+          p="<tr><td id='propname'><label>"+oneprop[1]+"</label></td><td><input type='number' id='prop"+oneprop[0]+"' onchange='TProperty.editDOMvalue(this,"+i+")' value='"+oneprop[3]+"'></td></tr>";
+          break;
+        case 'L':     
+          if (oneprop[3]){
+            p="<tr><td id='propname'><label>"+oneprop[1]+"</label></td><td><input type='checkbox' checked id='prop"+oneprop[0]+"' onchange='TProperty.editDOMLvalue(this,"+i+")' ></td></tr>";
+          } else {    
+            p="<tr><td id='propname'><label>"+oneprop[1]+"</label></td><td><input type='checkbox' id='prop"+oneprop[0]+"' onchange='TProperty.editDOMLvalue(this,"+i+")' ></td></tr>";
+          }
+          break;
+        default:
+          p="<tr><td id='propname'><label>"+oneprop[1]+"</label></td><td><input type='text' id='prop"+oneprop[0]+"' onchange='TProperty.editDOMvalue(this,"+i+")' value='"+oneprop[3]+"'></td></tr>";
+      }       
+      dom.innerHTML+=p;
+    });
+
+    //mert elveszti az objektum jellegét a += miatt itt lehet betenni objektumként
+    this.properties.forEach(function(oneprop,i){
+      var inp = dom.querySelector('#prop'+oneprop[0]);
+      inp.properties=own;      
+    });
+
+  }
+  load(tomb){
+    tomb.forEach(function(t,i){
+      Add(t[0],t[1],t[2],t[3]);
+    });
+  }
+
+  static editDOMvalue(obj,idx){
+    obj.properties.getProperties()[idx][3]=obj.value;
+  }
+  static editDOMLvalue(obj,idx){
+    var a=obj.properties.getProperties();    
+    a[idx][3]=obj.checked;
+  }
+  getXML(xml,root){    
+    this.properties.forEach(function(oneprop,i){
+      var f = xml.createElement("property");
+      f.setAttribute("id",oneprop[0]);
+      f.setAttribute("n",oneprop[1]);
+      f.setAttribute("t",oneprop[2]);
+      switch (oneprop[2]){
+        case 'L':
+          if (oneprop[3])
+            f.setAttribute("value",1);
+          else
+            f.setAttribute("value",0); 
+          break;
+        default:
+        f.setAttribute("value",oneprop[3]);
+      }
+      
+      root.appendChild(f);
+    });
+  }
+  setFromXML(node){
+    var id=node.getAttribute("id");
+    var n=node.getAttribute("n");
+    var t=node.getAttribute("t");
+    var value=node.getAttribute("value");
+    switch (t){
+      case 'L':
+        if (value=='0') 
+          value = false;
+        else
+          value = true;
+      break;
+      case 'N':
+          value=Number(value);
+      break;
+    }
+
+    //this.Add(id,n,t,value);
+    this.Value(id,value);
+  }
+}
+
+
 
 //#region DRAG'n DROP
 
