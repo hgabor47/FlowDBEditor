@@ -1730,6 +1730,9 @@ function move(e){
       cX = event.clientX-grab;  
       cY = event.clientY-grab;
       var s = th.getAttribute("transform");
+      if (s==null){
+        s = th.style.transform;
+      }
       var o =tool_getTransform(s);
       s = "translate("+o[0]+","+o[1]+")";
       th.setAttribute("transform",s);
@@ -1943,6 +1946,9 @@ function tool_getTransform(s){
   s = s.substring(10,999);
   s= s.substring(0,s.length-1);
   s =s.split(",");
+  if (s.length<2){
+    s =s[0].split(" ");
+  }
   return [Number(s[0])-grab+dX,Number(s[1])-grab+dY];  
 }
 function tool_getTransformPure(s){
