@@ -491,7 +491,11 @@ var TTable = function(name){
     div.setAttribute("id","flow_edit");
     div.className="flow_edit";
     div.style.top=Number(this.posxy[1]+20)+"px";
-    div.style.left=Number(this.posxy[0]-30)+"px";
+    var c=Number(this.posxy[0])-30;
+    if (c<300) {
+      c=300;
+    }
+    div.style.left=c+"px";
     div.innerHTML=
     `<label>Tablename</label><input type="text" id="edit_name" tabindex="0" autofocus value="`+this.name+`"><br>
      <label>Width</label><input type="number" id="edit_width" step="30" value="`+this.width+`"><br>     
