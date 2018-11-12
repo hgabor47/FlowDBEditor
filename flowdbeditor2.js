@@ -2484,7 +2484,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
           var c= document.createElement("td");
           r.appendChild(c);
           var s3 = "'"+sor[0]+"'";
-          c.innerHTML='<button onclick="list_edit(this,'+tableidx+','+s3+')">Edit</button><button onclick="list_del(this,'+tableidx+','+s3+')">Delete</button>';      
+          c.innerHTML='<button onclick="list_edit(this,'+tableidx+','+s3+','+(Number(window.pageXOffset)+20)+','+(Number(window.pageYOffset)+20)+')">Edit</button><button onclick="list_del(this,'+tableidx+','+s3+')">Delete</button>';      
         }
 
         //r.setAttribute("sqlid",sor[0]);
@@ -2514,7 +2514,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
             var c= document.createElement("td");
             r.appendChild(c);
             var s3 = "'"+sor[0]+"'";
-            c.innerHTML='<button onclick="list_edit(this,'+tableidx+','+s3+')">Edit</button><button onclick="list_del(this,'+tableidx+','+s3+')">Delete</button>';      
+            c.innerHTML='<button onclick="list_edit(this,'+tableidx+','+s3+','+(Number(window.pageXOffset)+20)+','+(Number(window.pageYOffset)+20)+')">Edit</button><button onclick="list_del(this,'+tableidx+','+s3+')">Delete</button>';      
         }
     }
   }  
@@ -2633,7 +2633,7 @@ function list_new(tableidx) {
   list(tableidx,null);
   return sor[0];
 }
-function list_edit(e,tableidx,id) {
+function list_edit(e,tableidx,id,x=0,y=0) {
   //var r = e.parentElement;
   if ((tableidx<0) || (tableidx>=ATables.length)) 
     return ;
@@ -2643,6 +2643,8 @@ function list_edit(e,tableidx,id) {
   var div = document.createElement("div");
   div.id=t.name+id;
   div.className="flow_edit";
+  div.style.left=x+20+"px";
+  div.style.top=y+20+"px";
   div.innerHTML="";
 
   var fi = t.AFields;
