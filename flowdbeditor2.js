@@ -514,7 +514,11 @@ var TTable = function(name){
     div.setAttribute("id","flow_edit");
     div.className="flow_edit";
     div.style.top=Number(this.posxy[1]+20)+"px";
-    div.style.left=Number(this.posxy[0]-30)+"px";
+    var c=Number(this.posxy[0])-30;
+    if (c<300) {
+      c=300;
+    }
+    div.style.left=c+"px";
     div.innerHTML=
     `<label>Tablename</label><input type="text" id="edit_name" tabindex="0" autofocus value="`+this.name+`"><br>
      <label>Width</label><input type="number" id="edit_width" step="30" value="`+this.width+`"><br>     
@@ -1962,6 +1966,9 @@ function move(e){
       cX = event.clientX-grab;  
       cY = event.clientY-grab;
       var s = th.getAttribute("transform");
+      if (s==null){
+        s = th.style.transform;
+      }
       var o =tool_getTransform(s);
       s = "translate("+o[0]+","+o[1]+")";
       th.setAttribute("transform",s);
@@ -2184,6 +2191,9 @@ function tool_getTransform(s){
   s = s.substring(10,999);
   s= s.substring(0,s.length-1);
   s =s.split(",");
+  if (s.length<2){
+    s =s[0].split(" ");
+  }
   return [Number(s[0])-grab+dX,Number(s[1])-grab+dY];  
 }
 function tool_getTransformPure(s){
@@ -2764,7 +2774,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
           var c= document.createElement("td");
           r.appendChild(c);
           var s3 = "'"+sor[0]+"'";
-          c.innerHTML='<button onclick="list_edit(this,'+tableidx+','+s3+')">Edit</button><button onclick="list_del(this,'+tableidx+','+s3+')">Delete</button>';      
+          c.innerHTML='<button onclick="list_edit(this,'+tableidx+','+s3+','+(Number(window.pageXOffset)+20)+','+(Number(window.pageYOffset)+20)+')">Edit</button><button onclick="list_del(this,'+tableidx+','+s3+')">Delete</button>';      
         }
 
         //r.setAttribute("sqlid",sor[0]);
@@ -2794,7 +2804,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
             var c= document.createElement("td");
             r.appendChild(c);
             var s3 = "'"+sor[0]+"'";
-            c.innerHTML='<button onclick="list_edit(this,'+tableidx+','+s3+')">Edit</button><button onclick="list_del(this,'+tableidx+','+s3+')">Delete</button>';      
+            c.innerHTML='<button onclick="list_edit(this,'+tableidx+','+s3+','+(Number(window.pageXOffset)+20)+','+(Number(window.pageYOffset)+20)+')">Edit</button><button onclick="list_del(this,'+tableidx+','+s3+')">Delete</button>';      
         }
     }
   }  
@@ -2913,7 +2923,7 @@ function list_new(tableidx) {
   list(tableidx,null);
   return sor[0];
 }
-function list_edit(e,tableidx,id) {
+function list_edit(e,tableidx,id,x=0,y=0) {
   //var r = e.parentElement;
   if ((tableidx<0) || (tableidx>=ATables.length)) 
     return ;
@@ -2923,6 +2933,8 @@ function list_edit(e,tableidx,id) {
   var div = document.createElement("div");
   div.id=t.name+id;
   div.className="flow_edit";
+  div.style.left=x+20+"px";
+  div.style.top=y+20+"px";
   div.innerHTML="";
 
   var fi = t.AFields;

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <script>
-        var vers="0.9987";
+        var vers="1.0023";
         var flowdbinit=null; //    //can a use content (XML) or file path on server side. On client side please use GET 
                                 //example: copy tro clipbrd saved flowdb file content and paste to here among `` signs
         var imgs="";//for local
@@ -24,6 +24,53 @@
         * {
             font-family: "Work Sans";   
             font-size: 1rem;                               
+        }
+        ::-webkit-scrollbar {
+            width: 20px;
+        }
+
+        /* Track */
+        ::-webkit-scrollbar-track {
+            box-shadow: inset 0 0 5px grey; 
+            border-radius: 10px;
+        }
+        
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+            background: #ddd; 
+            border-radius: 10px;
+        }
+
+        /* Handle on hover */
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ccc; 
+        }
+        #area {
+            
+            display: flex;
+        }
+      #menu{        
+        z-index:300;        
+        height:auto;
+
+      }
+        #menupanel{
+          background-color:rgba(255,255,255,0.8);
+          position: -webkit-sticky;
+          position: sticky;
+          direction: rtl;
+          overflow-x:hidden;
+          overflow-y:auto;
+          z-index:301;
+          top:0px;
+          left:16px;
+          max-height:95vh;
+          /* height:auto; */
+          width:20%;
+          
+        }
+        .item_direction {
+          direction:ltr;
         }
         .properties {
             width: 100%;            
@@ -214,6 +261,7 @@
             left:100px;         
             background-color: rgba(233, 233, 233, 0.89);
             border: 1px rgb(88, 88, 88) dotted;
+            z-index: 320;
         }
         .flow_browse{
             position: absolute;
@@ -225,6 +273,7 @@
             overflow: auto;
             background-color: rgba(233, 233, 233, 0.89);
             border: 1px rgb(88, 88, 88) dotted;
+            z-index: 310;
         }
         .flow_context {
             font-size: 1.3rem;
@@ -395,7 +444,7 @@
             a.style.height="auto";
         }
         function cmdout(a){
-            a.style.height="4rem";
+            a.style.height="6.7rem";
         }
         function blur1(){
             var but=document.getElementById("flowdbload");
@@ -454,46 +503,49 @@
         <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=hgabor47%40gmail%2ecom&lc=AL&item_number=flowdbeditor&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted"><span id="donate"><img src="" id="donateimg">...for new features & modules</span></a>
         <div id="help" onclick="this.innerHTML=''">Write records with right click on created tables :)</div>
         <div id="area" class="row">    
-            <div class="col-2">   
-                <div id="menu" class="flex-column p-2" style='min-width:200px;overflow:hidden;height:auto;' onmouseover="cmdin(this)" onmouseout="cmdout(this)">
-                    <div class="flow_tables">CommandPanel
-                        <i style="font-size:16px" class="fa">&#xf103;</i>
+            <div id="menupanel" class="col-2">   
+                <div id="menu" class="flex-column" style='min-width:200px;overflow:hidden;' onmouseover="cmdin(this)" onmouseout="cmdout(this)">
+                    <input type="text" id="title" value="Unknown title">
+                    <div style="direction:ltr;">
+                        <div class="flow_tables">CommandPanel
+                            <i style="font-size:16px" class="fa">&#xf103;</i>
+                        </div>
+                        <button class="commandbutton" onclick="{this.style.color='#ff0000';AI()}" class="fa" style="font-family: FontAwesome;" >&#xf130;<span class="micro">
+                            A.I.</span></button> 
+                        <button class="commandbutton" onclick="Save()">
+                            Save</button>
+                        <button class="commandbutton" onclick="Load()">
+                            Load</button>
+                        <button class="commandbutton" onclick="Load('alma')">
+                            Clear</button>
+                        <button id="loadserverdefault" class="commandbutton" style="display:none;" onclick="LoadServerDefault(true)">
+                            LoadServerDefault</button>
+                        <form style="display:none;"><input id="filename" class="commandbutton" type='file' accept='text/plain' ></form>
+                        <button class="commandbutton" onclick="FlowDBSave('print')">
+                            SaveToFile</button>                                        
+                        <button class="commandbutton" id="flowdbload" onclick="FlowDBLoad(this)" onmouseout="blur1()">
+                            LoadFromFile</button>
+                        <button class="commandbutton" onclick="FlowDBCopy('print')">
+                            CopyToURL</button>                                        
+                        <button class="commandbutton" onclick="savetosvgfile('print','flowdbeditor')">
+                            Download SVG</button>
+                        <button class="commandbutton" onclick="svg2png('print','flowdbeditor')">
+                            Download PNG</button>
+                        <button class="commandbutton" onclick="mySQL('print')">
+                            Download MySQL</button>
+                        <button class="commandbutton" onclick="MSSQL('print',0)">
+                            Download MSSQL</button>
+                        <button class="commandbutton" onclick="newsdialog(true)">
+                            News</button>
+                        <button class="commandbutton" onclick="zoom()">
+                            Zoom</button>                                        
+                        <button class="commandbutton" onclick="createdocument('print')">
+                            Doc</button>
+                        <!-- <button class="commandbutton" onclick="{var cmd = prompt('Command','exit');setTimeout(function(){robot(cmd)},2000);}">A.I.TEST</button> -->
+                        <div id="modules"></div>
+                        <a target="_blank" style="visibility:hidden;" id="print" download="file.txt" href="">RightClickforDownload</a>
+                        <input id="copyinput" class="invisibleinput" value="">
                     </div>
-                    <button class="commandbutton" onclick="{this.style.color='#ff0000';AI()}" class="fa" style="font-family: FontAwesome;" >&#xf130;<span class="micro">
-                        A.I.</span></button> 
-                    <button class="commandbutton" onclick="Save()">
-                        Save</button>
-                    <button class="commandbutton" onclick="Load()">
-                        Load</button>
-                    <button class="commandbutton" onclick="Load('alma')">
-                        Clear</button>
-                    <button id="loadserverdefault" class="commandbutton" style="display:none;" onclick="LoadServerDefault(true)">
-                        LoadServerDefault</button>
-                    <form style="display:none;"><input id="filename" class="commandbutton" type='file' accept='text/plain' ></form>
-                    <button class="commandbutton" onclick="FlowDBSave('print')">
-                        SaveToFile</button>                                        
-                    <button class="commandbutton" id="flowdbload" onclick="FlowDBLoad(this)" onmouseout="blur1()">
-                        LoadFromFile</button>
-                    <button class="commandbutton" onclick="FlowDBCopy('print')">
-                        CopyToURL</button>                                        
-                    <button class="commandbutton" onclick="savetosvgfile('print','flowdbeditor')">
-                        Download SVG</button>
-                    <button class="commandbutton" onclick="svg2png('print','flowdbeditor')">
-                        Download PNG</button>
-                    <button class="commandbutton" onclick="mySQL('print')">
-                        Download MySQL</button>
-                    <button class="commandbutton" onclick="MSSQL('print',0)">
-                        Download MSSQL</button>
-                    <button class="commandbutton" onclick="newsdialog(true)">
-                        News</button>
-                    <button class="commandbutton" onclick="zoom()">
-                        Zoom</button>                                        
-                    <button class="commandbutton" onclick="createdocument('print')">
-                        Doc</button>
-                    <!-- <button class="commandbutton" onclick="{var cmd = prompt('Command','exit');setTimeout(function(){robot(cmd)},2000);}">A.I.TEST</button> -->
-                    <div id="modules"></div>
-                    <a target="_blank" style="visibility:hidden;" id="print" download="file.txt" href="">RightClickforDownload</a>
-                    <input id="copyinput" class="invisibleinput" value="">
                 </div>
                 <div class="flex-column p-2"> 
                     <span class="s100 display-6">Tables  from hide:</span>
@@ -518,9 +570,8 @@
                 </div>
             </div>
             
-            <div class="col-10">
-                <input type="text" id="title" value="Unknown title">
-                <svg id="flowdbeditor" style="background-color: white" width="2400" height="2400" viewBox="0 0 2400 2400">                    
+            <div class="col-10">                
+                <svg id="flowdbeditor" style="background-color: white" width="2400" height="2400" viewBox="0 0 2400 2400">
                     <defs>
                         <linearGradient id="e" x1="40" y1="210" x2="460" y2="210" gradientUnits="objectBoundingBox">
                             <stop stop-color="steelblue" offset="0" />
