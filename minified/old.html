@@ -1,4 +1,604 @@
-/*jshint esversion: 6 */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        var vers="0.9986";
+        var flowdbinit=null; //    //can a use content (XML) or file path on server side. On client side please use GET 
+                                //example: copy tro clipbrd saved flowdb file content and paste to here among `` signs
+        //var imgs="";//for local
+        var imgs="https://raw.githubusercontent.com/hgabor47/FlowDBEditor/master/";
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.7">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>FlowDBEditor4</title>
+     <!-- Bootstrap CSS -->
+     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+     <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <style>
+
+        @import url('https://fonts.googleapis.com/css?family=Work+Sans:200,400');
+        * {
+            font-family: "Work Sans";   
+            font-size: 1rem;                               
+        }
+      /* width */
+::-webkit-scrollbar {
+    width: 20px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey; 
+    border-radius: 10px;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #ddd; 
+    border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #ccc; 
+}
+        #area {
+            
+            display: flex;
+        }
+      #menu{        
+        z-index:300;        
+        height:auto;
+
+      }
+        #menupanel{
+
+          background-color:rgba(255,255,255,0.8);
+          position: -webkit-sticky;
+          position: sticky;
+          direction: rtl;
+          overflow-x:hidden;
+          overflow-y:auto;
+          z-index:300;
+          top:0px;
+          left:10px;
+          height:95vh;
+          width:20%;
+        }
+        .item_direction {
+          direction:ltr;
+        }
+        .properties {
+            width: 100%;            
+            border: gray dotted 1px;            
+        }
+        .properties table {        
+            width:100%;
+        }
+        .properties table tr #propname {
+            background-color: rgba(189, 189, 189, 0);
+            border-right: rgb(128, 128, 128) dotted 2px;
+        }
+        .properties table tr td input {            
+            width:100%;
+            border: none;
+        }
+
+        nav {
+            width:90%;
+            height:3rem;
+        }
+        #showhint{
+            background-color: rgba(0, 128, 0, 0.7);
+            color: white;
+            position: absolute;
+            top:100px;
+            left:100px;
+            padding:12px;
+        }
+        .borderYellow{
+            padding:12px;
+            border: rgb(255, 225, 142) solid 1px;
+        }
+        .borderGray{
+            padding:12px;
+            border: rgb(194, 194, 194) solid 1px;
+        }
+        .addoninfo{
+            padding:10px;
+            border:gray dotted 1px;
+            background-color: rgb(237, 237, 237);
+            max-width:120px;
+        }
+        .addoninfo:hover{
+            background-color: rgb(216, 209, 185);
+        }
+        #title {
+            font-size: 2rem;
+            border: black 0 solid;
+        }
+        svg text {
+            -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none; /* Safari */
+            -khtml-user-select: none; /* Konqueror HTML */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                        supported by Chrome and Opera */
+        }
+        svg text::selection {
+            background:none;
+        }
+        .btn_x {
+            margin:0.3rem;
+            width:1.2rem;
+            height:1.2rem;
+            font-size: 0.8rem;
+            padding:0;
+        }
+        .tabs {
+            margin-right: 2px;
+            border-bottom: 2px rgba(0, 0, 255, 0) solid; 
+            padding-right:20px;
+            background-color: rgba(128, 128, 128, 0.26);  
+            cursor:pointer;          
+        }
+        .tab_selected {
+            margin-right: 2px;
+            border-bottom: 2px blue solid;
+            padding-right:20px;
+            background-color: rgba(128, 128, 128, 0.63);   
+            cursor:pointer;         
+        }
+
+        .invisibleinput{
+            position: absolute;
+            top:-1000px;
+            left:0px;
+        }
+        #AIHelp {
+            z-index: 200;
+            position: absolute;
+            padding:16px;
+            top:10%;
+            left:10%;
+            height:60%;
+            width:70%;
+            background-color: rgba(255, 231, 166, 0.7);
+            border:black 1px dotted;
+            color: rgb(0, 29, 29);
+            visibility: hidden;
+        }
+        .AITitle {
+            color: rgb(153, 105, 0);
+            font-weight: 800;
+            font-size: 1.4rem;            
+        }
+        .AIText {
+            color:rgb(44, 30, 0);
+            font-size: 1rem;
+        }
+        #news {
+            z-index: 200;
+            position: absolute;
+            padding:16px;
+            top:10%;
+            left:10%;
+            height:50%;
+            width:50%;
+            background-color: rgba(204, 204, 204, 0.897);
+            border:black 1px dotted;
+            color: rgb(0, 29, 29);
+            visibility: hidden;
+        }
+        #defaultcontent {
+            z-index: 200;
+            position: absolute;
+            padding:16px;
+            top:10%;
+            left:10%;
+            
+            width:50%;
+            background-color: rgba(209, 196, 180, 0.897);
+            border:black 2px dotted;
+            color: rgb(0, 29, 29);
+            visibility: hidden;
+            cursor:pointer;
+        }
+        button {
+            height:1.8rem;
+            margin:0.1rem;
+            width:inherit;            
+        }
+        label {
+            font-size: 0.6rem;
+            height:0.6rem;
+            width:100%;
+        }
+        .display-5 {
+            font-size: 2.7rem;
+            font-weight: 300;
+            line-height: 1.4;
+        }
+        .display-6 {
+            font-size: 1.5rem;
+            font-weight: 300;
+            line-height: 1;
+        }
+        #flowdbeditor {
+            width:2400px;
+            height:2400px;            
+            padding: 0; margin: 0;
+        }
+        .flow_flowmode{
+            color: black;
+        }
+        .flow_constraintmode{
+            color:rgb(32, 0, 173);
+        }
+
+        .modeContraint {
+            background-color: blue;
+        }
+        .green {
+            background-color: greenyellow;
+        }
+        .s100{
+            width:100%;
+        }
+        .flow_edit{
+            position: absolute;
+            padding:16px;
+            top:100px;
+            left:100px;         
+            background-color: rgba(233, 233, 233, 0.89);
+            border: 1px rgb(88, 88, 88) dotted;
+        }
+        .flow_browse{
+            position: absolute;
+            padding:16px;
+            top:100px;
+            left:100px;
+            height:80%;
+            width:90%;
+            overflow: auto;
+            background-color: rgba(233, 233, 233, 0.89);
+            border: 1px rgb(88, 88, 88) dotted;
+        }
+        .flow_context {
+            font-size: 1.3rem;
+            font-family: FontAwesome;
+            font-weight: 400;
+            cursor:pointer;   
+            height:1.5rem;                  
+        }
+        .red {
+            color: red;
+        }
+        .flow_tables {
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor:pointer;   
+            height:1.5rem;                  
+        }
+        .flow_browse_header {
+            position: relative;
+            top:0px;    
+            padding:16px;
+            background-color: rgba(105, 105, 148, 0.322);        
+        }
+        
+        .flow_tables_color1 {
+            background-color: rgb(192, 192, 192);
+            
+        }
+        .flow_tables_color2 {
+            background-color: rgb(175, 175, 175);
+        }
+        .flow_tablegroup {
+            cursor: all-scroll;
+        }
+        .flow_fields {
+            font-size: 1rem;
+            cursor:pointer;
+        }
+        .flow_fields_noevent {
+            cursor: all-scroll;
+            font-size: 1rem;            
+        }
+        .flow_fields_color1 {
+            background-color:rgb(160, 160, 160);
+            fill:rgb(156, 156, 156);
+        }
+        .flow_fields_color2 {
+            background-color:rgb(207, 207, 207);
+            fill:rgb(192, 192, 192);
+        }
+        .flow_fields_color3 {
+            fill:rgba(127, 127, 127,0.3);
+        }
+        .flow_fields_color4 {
+            fill:rgba(127, 127, 127,0.0);
+        }
+        .flow_constraints{
+            font-size: 0.7rem;
+        }
+        .flow_constraints_color1{
+            background-color:rgb(161, 161, 161);                        
+        }
+        .flow_constraints_color2{
+            background-color:rgb(204, 204, 204);                      
+        }
+        
+        .flow_line {
+            stroke: rgb(59, 60, 68);
+            stroke-width: 2;
+        }
+        .wf_line {
+            stroke: rgba(255, 157, 0, 0.3);
+            stroke-width: 6;
+        }
+        .flow_line_hidden {
+            stroke: rgba(59, 60, 68,0);
+            stroke-width: 0;
+        }
+        .flow_line_start {
+            stroke: rgb(29, 40, 126);
+            stroke-width: 4;
+        }
+        .flow_line_end {
+            stroke: rgb(255, 174, 0);
+            stroke-width: 2;
+        }
+        .flow_line_start_hidden {
+            stroke: rgba(29, 40, 126,0);
+            stroke-width: 0;
+        }
+        .flow_line_end_hidden {
+            stroke: rgba(255, 174, 0,0);
+            stroke-width: 0;
+        }
+        .flow_rec_header{
+            font-weight: 900;
+        }
+        .flow_clipboard {
+            background-color: rgb(255, 219, 174);           
+            position: absolute;
+            padding:16px;
+            top:100px;
+            left:100px;            
+            border: 1px rgb(88, 88, 88) dotted;
+        }
+
+        .commandbutton {
+            
+            height:2rem;
+            cursor:pointer;
+        }
+        #help {
+            color: green;
+            height:1.8rem;
+        }
+        #yesno {
+            visibility: hidden;
+            z-index: 300;
+            position: absolute;
+            padding:32px;
+            top:200px;
+            left:200px;  
+            width:300px;
+            height:180px;       
+            background-color: rgba(113, 170, 96, 0.89);
+            border: 1px rgb(88, 197, 74) solid;            
+            font-size: 2.2rem;
+        }
+        #donate {
+            color:black;
+            font-weight: 500;
+            font-size: 0.6rem;
+            padding-left:60px;
+            padding-right:60px;
+            background-color: rgba(211, 211, 211, 0.472);
+        }
+        .micro {
+            font-size:0.6rem;
+        }
+        #smile {
+            visibility: hidden;
+            opacity:0.5;
+            z-index: 310;
+            left:300px;
+            position: absolute;            
+        }
+    </style>
+    <script>
+        var news = [
+        [118,"16.You can create soft link (link without export the constraint)"]    
+        ,[117,"15.You can write triggers and functions for MySQL export (MSSQL in progress)"]
+        ,[116,"14.(HUN)Ékezetes tábla és mezőnév átalakítása ékezet nélkülire (hangparanccsal)"]
+        ,[115,"12.You can create documentation with autodoc HTML (with inbuilt PNG)"]
+        ,[113,"11.You can export to PNG"]
+            ,[112,"10.Control by VOICE :) Hungarian and English"]
+            ,[111,"9.Built in default content load option"]
+            ,[109,"8.Filtered&linked combobox is able to setup by Field editor window"]
+            ,[108,"7.Touch is working on tablet or mobile and the Zoom implemented by a button"]
+            ,[106,"6.Bug fixes (can able to insert new records to table content."]
+            ,[104,"5.Copy from Excel or another source to clipboard. Press CTRL+V on FlowDBEditor and create a new table or fill a table from clipboard."]
+            ,[103,"4.Press CopyToURL button for copy to clipboard a link with inbuilt data"]
+            ,[102,"3.You can export to SVG, MySQL"]
+            ,[101,"2.You can Save to browser memory (and Load from)"]
+            ,[100,"1.You can Save to file and load from file later"]
+            ];
+
+        function cmdin(a){
+            a.style.height="auto";
+        }
+        function cmdout(a){
+            a.style.height="4.2rem";
+        }
+        function blur1(){
+            var but=document.getElementById("flowdbload");
+            if (but.activ){
+                //document.getElementById("help").innerHTML="blur";
+                FlowDBLoad(but);
+            }
+        }
+        window.onload=function(){            
+            try{
+                v = document.getElementById("vers");
+                v.innerHTML="v"+vers;
+                document.title+="."+vers;                
+                flowdbeditor_onload();
+            } catch (error) {
+                
+            }
+        }
+//Codepen insert point
+
+    </script>
+</head>
+<body >   
+    <img id="smile" src="smile.gif" title="smile" />
+    <div id="AIHelp">
+        <div style="height:80%;overflow:auto;">
+            <h1>A.I. Help</h1>
+            <button onclick="AIHelp('en')">English</button>
+            <button onclick="AIHelp('hu')">Hungarian</button>
+            <ul id="aiul">
+                
+            </ul>
+        </div>
+        <button  onclick='{this.parentElement.style.visibility="hidden"}'>OK</button>        
+    </div>
+    <div id="defaultcontent" onclick="{this.style.visibility='hidden'}">
+        <div class="display-3">Default content changed on server and loaded.</div>
+        <div class="display-5">Your last saved content not modified!</div>
+        <br>
+        <div>Please use LOAD for access your last stored flow or store this with SAVE (and overwrite your last flow).</div>
+        <div>If you MODIFY this default loaded content this will automatically store to TEMP (and didn't overwrite last SAVEd).</div>
+        <div>If you press F5 then reload the latest TEMP flow (and this content will disapear and if you'd like then use LoadDefault button for view it)</div>
+    </div>
+    <div id="yesno" onclick="{speechlevel=0;this.style.visibility='hidden';}">YES or NO?</div>
+    <div id="news">
+        <div style="height:80%;overflow:auto;">
+            <h1>News</h1>
+            <ul id="newsul">
+            
+            </ul>
+        </div>
+        <button  onclick='{this.parentElement.style.visibility="hidden"}'>OK</button>
+    </div>
+    <div id="mainarea" class="container-fluid">
+        <span class="display-5" >FlowDBEditor4</span><b id="vers"></b><i>(C)GaborHorvath</i><span id="moreinfo"></span>
+        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=hgabor47%40gmail%2ecom&lc=AL&item_number=flowdbeditor&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted"><span id="donate"><img src="" id="donateimg">...for new features & modules</span></a>
+        <div id="help" onclick="this.innerHTML=''">Write records with right click on created tables :)</div>
+      
+        <div id="area" class="row">    
+            
+            <div id="menupanel" class="col-2">   
+                <div id="menu" class="flex-column" style='min-width:200px;overflow:hidden;' >
+                    <input type="text" id="title" value="Unknown title">
+                    <div style="direction:ltr;">
+                    <button class="commandbutton" onclick="{this.style.color='#ff0000';AI()}" class="fa" style="font-family: FontAwesome;" >&#xf130;<span class="micro">
+                        A.I.</span></button> 
+                    <button class="commandbutton" onclick="Save()">
+                        Save</button>
+                    <button class="commandbutton" onclick="Load()">
+                        Load</button>
+                    <button class="commandbutton" onclick="Load('alma')">
+                        Clear</button>
+                    <button id="loadserverdefault" class="commandbutton" style="display:none;" onclick="LoadServerDefault(true)">
+                        LoadServerDefault</button>
+                    <form style="display:none;"><input id="filename" class="commandbutton" type='file' accept='text/plain' ></form>
+                    <button class="commandbutton" onclick="FlowDBSave('print')">
+                        SaveToFile</button>                                        
+                    <button class="commandbutton" id="flowdbload" onclick="FlowDBLoad(this)" onmouseout="blur1()">
+                        LoadFromFile</button>
+                    <button class="commandbutton" onclick="FlowDBCopy('print')">
+                        CopyToURL</button>                                        
+                    <button class="commandbutton" onclick="savetosvgfile('print','flowdbeditor')">
+                        Download SVG</button>
+                    <button class="commandbutton" onclick="svg2png('print','flowdbeditor')">
+                        Download PNG</button>
+                    <button class="commandbutton" onclick="mySQL('print')">
+                        Download MySQL</button>
+                    <button class="commandbutton" onclick="MSSQL('print',0)">
+                        Download MSSQL</button>
+                    <button class="commandbutton" onclick="newsdialog(true)">
+                        News</button>
+                    <button class="commandbutton" onclick="zoom()">
+                        Zoom</button>                                        
+                    <button class="commandbutton" onclick="createdocument('print')">
+                        Doc</button>
+                    <!-- <button class="commandbutton" onclick="{var cmd = prompt('Command','exit');setTimeout(function(){robot(cmd)},2000);}">A.I.TEST</button> -->
+                    <div id="modules"></div>
+                    <a target="_blank" style="visibility:hidden;" id="print" download="file.txt" href="">RightClickforDownload</a>
+                    <input id="copyinput" class="invisibleinput" value="">
+                    </div>  
+                </div>
+                <div class="flex-column p-2"> 
+                    <span class="s100 display-6">Tables  from hide:</span>
+                    <button  onclick="sortTables()" style="font-size:16px" class="fa">&#xf036;</button>
+                    <button class="s100" onclick="newTable()">New</button>
+                    <div id="tables" class="s100">
+
+                    </div>
+                </div>
+                <div class="flex-column p-2"> 
+                    <span class="s100 display-6">Fields sort by drag'n drop</span>
+                    <button class="s100" onclick="newField()">New</button>
+                    <div id="fields" class="s100">                        
+                    </div>
+                </div>
+                <div class="flex-column p-2"> 
+                        <span class="s100 display-6">Constraints</span>
+                        <button id="newconstraint" class="s100 flow_flowmode" onclick="newConstraint(this)">Start link</button>
+                        <div id="constraints" class="s100">
+                            
+                        </div>
+                </div>
+            </div>
+            
+            <div class="col-10">
+                
+                <svg id="flowdbeditor" style="background-color: white" width="2400" height="2400" viewBox="0 0 2400 2400">                    
+                    <defs>
+                        <linearGradient id="e" x1="40" y1="210" x2="460" y2="210" gradientUnits="objectBoundingBox">
+                            <stop stop-color="steelblue" offset="0" />
+                            <stop stop-color="red" offset="1" />
+                        </linearGradient>
+                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
+                        </marker>
+                    </defs>                    
+                </svg>  
+            </div>
+        </div>   
+        <!-- workflowedit -->
+        <div id="workflowedit" class="flow_edit" style="visibility:hidden;">
+            <div>Functional contact type (without any effect)</div>
+            <select id="wfe_trigger_mode">
+                <option value="0">None</option>                
+                <option value="1">AND</option>
+                <option value="2">OR</option>
+            </select>
+            <button onclick="wflink_ok(this)">OK</button>
+            <button onclick="this.parentElement.style.visibility='hidden';">Cancel</button>
+            <button onclick="wflink_delete(this)">Delete</button>
+        </div>
+    </div>
+        <!-- jQuery first, then Popper.js, then Bootstrap JS 
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>    
+    -->
+    <script>
+  /*jshint esversion: 6 */
 /* FlowDBEditor content can load from (maybe automatically)
     GET parameter, 
     localstorage, 
@@ -21,6 +621,8 @@
 
   so. in the next time you can continue editing where you abandoned. :)
 */
+      
+
 
 var TParams = function(loc) {  
   this.o = new Object();
@@ -182,7 +784,6 @@ var oncehints = [];
 oncehints.NewLinkFromPanel="Please select an another field name.";
 oncehints.NewLink="Please select first a field name and after click an another field name.";
 oncehints.outside="Reposition missed tables.";
-oncehints.move="Move all tables";
 oncehints.save="Save to browsers' local storage.\nIn the next time you can load this.";
 oncehints.load="Loaded latest stored database from localstorage.";
 oncehints.loadfromfile="Loaded database from file.";
@@ -191,8 +792,6 @@ oncehints.hint = function(hint){
   if (oncehints[hint]!=""){
     document.getElementById("help").innerHTML=oncehints[hint];
     oncehints[hint]="";
-  }else{
-    document.getElementById("help").innerHTML='';
   }
 };
 
@@ -200,7 +799,7 @@ oncehints.hint = function(hint){
 
 var idTable=0;
 var TTable = function(name){  
-  this.posxy=[300,100]; //in px  
+  this.posxy=[100,100]; //in px  
   this.width=200;
   this.height=200;
   this.AFields = []; //Tfield  
@@ -517,11 +1116,7 @@ var TTable = function(name){
     div.setAttribute("id","flow_edit");
     div.className="flow_edit";
     div.style.top=Number(this.posxy[1]+20)+"px";
-    var c=Number(this.posxy[0])-30;
-    if (c<300) {
-      c=300;
-    }
-    div.style.left=c+"px";
+    div.style.left=Number(this.posxy[0]-30)+"px";
     div.innerHTML=
     `<label>Tablename</label><input type="text" id="edit_name" tabindex="0" autofocus value="`+this.name+`"><br>
      <label>Width</label><input type="number" id="edit_width" step="30" value="`+this.width+`"><br>     
@@ -1411,7 +2006,7 @@ ATables.SearchTableById=SearchTableById;
 
 //#region HIGH
 
-function getOutsideTables(){
+function sortTables(){
   oncehints.hint("outside");
   if (ATables!=null){
     ATables.forEach(function(table,idx){
@@ -1421,17 +2016,6 @@ function getOutsideTables(){
       if (!ok){
         table.refreshDOM();
       }
-    });    
-    Save(temp);
-  }
-}
-function toMoveTables(x,y){
-  oncehints.hint("move");
-  if (ATables!=null){
-    ATables.forEach(function(table,idx){
-      table.posxy[0]+=x;
-      table.posxy[0]+=y;
-      table.refreshDOM();      
     });    
     Save(temp);
   }
@@ -1702,7 +2286,7 @@ function PastePanel(e){
   if ((content!="") && (content!=null)){
     var div=document.createElement("div");
     div.className="flow_clipboard";
-    document.getElementById('screen').appendChild(div);
+    document.body.appendChild(div);
     div.clipboard=content;
     div.innerHTML=`<input id="pasteheader" type="checkbox">The clipboard data has header in first row<br>`;
     div.innerHTML+=`<input id="pastenewtable" type="checkbox" >Create new table instead of fill selected table<br>`;
@@ -1980,9 +2564,6 @@ function move(e){
       cX = event.clientX-grab;  
       cY = event.clientY-grab;
       var s = th.getAttribute("transform");
-      if (s==null){
-        s = th.style.transform;
-      }
       var o =tool_getTransform(s);
       s = "translate("+o[0]+","+o[1]+")";
       th.setAttribute("transform",s);
@@ -2299,7 +2880,7 @@ function savetosvgfile(linknode,svgnode){  // print , flowdbeditor
 
 var xmlroot="flowdbeditor";
 function Save(variable,moduleFunc=null){
-  // oncehints.hint("save");
+  oncehints.hint("save");
   var xmlText = SavetoString(moduleFunc);
   if (variable!=null){
     //alert(variable);
@@ -2315,7 +2896,7 @@ function Load(variable,moduleFunc=null){
   } else {
     xmlText  = localStorage.getItem("flowdbeditor");
   }
-  // oncehints.hint("load");
+  oncehints.hint("load");
   LoadString(xmlText,moduleFunc);
 }
 function SavetoString(moduleFunc=null){  
@@ -2788,7 +3369,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
           var c= document.createElement("td");
           r.appendChild(c);
           var s3 = "'"+sor[0]+"'";
-          c.innerHTML='<button onclick="list_edit(this,'+tableidx+','+s3+','+(Number(window.pageXOffset)+20)+','+(Number(window.pageYOffset)+20)+')">Edit</button><button onclick="list_del(this,'+tableidx+','+s3+')">Delete</button>';      
+          c.innerHTML='<button onclick="list_edit(this,'+tableidx+','+s3+')">Edit</button><button onclick="list_del(this,'+tableidx+','+s3+')">Delete</button>';      
         }
 
         //r.setAttribute("sqlid",sor[0]);
@@ -2818,7 +3399,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
             var c= document.createElement("td");
             r.appendChild(c);
             var s3 = "'"+sor[0]+"'";
-            c.innerHTML='<button onclick="list_edit(this,'+tableidx+','+s3+','+(Number(window.pageXOffset)+20)+','+(Number(window.pageYOffset)+20)+')">Edit</button><button onclick="list_del(this,'+tableidx+','+s3+')">Delete</button>';      
+            c.innerHTML='<button onclick="list_edit(this,'+tableidx+','+s3+')">Edit</button><button onclick="list_del(this,'+tableidx+','+s3+')">Delete</button>';      
         }
     }
   }  
@@ -2937,7 +3518,7 @@ function list_new(tableidx) {
   list(tableidx,null);
   return sor[0];
 }
-function list_edit(e,tableidx,id,x=0,y=0) {
+function list_edit(e,tableidx,id) {
   //var r = e.parentElement;
   if ((tableidx<0) || (tableidx>=ATables.length)) 
     return ;
@@ -2947,8 +3528,6 @@ function list_edit(e,tableidx,id,x=0,y=0) {
   var div = document.createElement("div");
   div.id=t.name+id;
   div.className="flow_edit";
-  div.style.left=x+20+"px";
-  div.style.top=y+20+"px";
   div.innerHTML="";
 
   var fi = t.AFields;
@@ -4285,3 +4864,7 @@ function svg2png(linknode,svgnodename="flowdbeditor",func=null){ //or func = fun
 
 
 //#endregion IETOOLS
+  </script>
+    
+</body>
+</html>

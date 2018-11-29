@@ -28,7 +28,9 @@
         ::-webkit-scrollbar {
             width: 20px;
         }
-
+        button.fa {
+            font-size:16px;
+        }
         /* Track */
         ::-webkit-scrollbar-track {
             box-shadow: inset 0 0 5px grey; 
@@ -53,6 +55,10 @@
             z-index:300;        
             height:auto;
             width:200pt; 
+            /* min-width:200px; */
+            overflow:hidden;
+            position: relative;
+            left:13pt;
         }
         #menupanel{
           background-color:rgba(255,255,255,0.8);
@@ -66,7 +72,7 @@
           max-height:95vh;
           /* height:auto; */
           width:200pt;
-          
+          -webkit-backface-visibility: hidden;
         }
         .item_direction {
           direction:ltr;
@@ -227,6 +233,10 @@
             height:0.6rem;
             width:100%;
         }
+        .label {
+            font-size: 0.6rem;
+            height:0.6rem;
+        }
         .display-5 {
             font-size: 2.7rem;
             font-weight: 300;
@@ -377,13 +387,14 @@
         }
         .flow_clipboard {
             background-color: rgb(255, 219, 174);           
-            display: fixed;
+            position: fixed;
             padding:16px;
             top:16px;
             left:16px; 
             width:600px;
             z-index: 350;           
             border: 1px rgb(88, 88, 88) dotted;
+            -webkit-backface-visibility: hidden;
         }
 
         .commandbutton {
@@ -433,6 +444,7 @@
             z-index: 350;
             width: auto;
             height: auto;
+            -webkit-backface-visibility: hidden;
         }
     </style>
     <script>
@@ -458,7 +470,7 @@
             a.style.height="auto";
         }
         function cmdout(a){
-            a.style.height="6.7rem";
+            a.style.height="3.7rem";
         }
         function blur1(){
             var but=document.getElementById("flowdbload");
@@ -515,7 +527,7 @@
     </div>
     <div id="menupanel" > 
                       
-            <div id="menu" class="flex-column" style='min-width:200px;overflow:hidden;' onmouseover="cmdin(this)" onmouseout="cmdout(this)">
+            <div id="menu" class="flex-column"  onmouseover="cmdin(this)" onmouseout="cmdout(this)">
                 
                 <div style="direction:ltr;">
                     <div class="flow_tables">CommandPanel
@@ -523,9 +535,9 @@
                     </div>
                     <button class="commandbutton" onclick="{this.style.color='#ff0000';AI()}" class="fa" style="font-family: FontAwesome;" >&#xf130;<span class="micro">
                         A.I.</span></button> 
-                    <button class="commandbutton" onclick="Save()">
+                    <button class="commandbutton" onclick="oncehints.hint('save');Save()">
                         Save</button>
-                    <button class="commandbutton" onclick="Load()">
+                    <button class="commandbutton" onclick="oncehints.hint('load');Load()">
                         Load</button>
                     <button class="commandbutton" onclick="Load('alma')">
                         Clear</button>
@@ -559,21 +571,25 @@
                 </div>
             </div>
             <div class="flex-column p-2"> 
-                <span class="s100 display-6">Tables  from hide:</span>
-                <button  onclick="sortTables()" style="font-size:16px" class="fa">&#xf036;</button>
+                <span class="display-6">Tables</span>
+                <button onclick="getOutsideTables()"  class="fa">&#xf036;</button>
+                <button onclick="toMoveTables(200,0)" class="fa">&#xf050;</button>               
+                <button onclick="toMoveTables(-200,0)" class="fa">&#xf049;</button>               
                 <button class="s100" onclick="newTable()">New</button>
                 <div id="tables" class="s100">
 
                 </div>
             </div>
             <div class="flex-column p-2"> 
-                <span class="s100 display-6">Fields sort by drag'n drop</span>
+                <span class="display-6">Fields</span>
+                <span class="label">sort by drag'n drop</span>
                 <button class="s100" onclick="newField()">New</button>
                 <div id="fields" class="s100">                        
                 </div>
             </div>
             <div class="flex-column p-2"> 
-                    <span class="s100 display-6">Constraints</span>
+                    <span class="display-6">Constraints</span>
+                    <span class="label">click 2 fieldnames</span>
                     <button id="newconstraint" class="s100 flow_flowmode" onclick="newConstraint(this)">Start link</button>
                     <div id="constraints" class="s100">
                         
@@ -625,6 +641,7 @@
     -->
     <script src="./flowdbeditor2.js"></script>
     <!--Codepen insert point , delete line below-->
+    <script></script>
     
 </body>
 </html>
