@@ -49,24 +49,23 @@
             
             display: flex;
         }
-      #menu{        
-        z-index:300;        
-        height:auto;
-
-      }
+        #menu{        
+            z-index:300;        
+            height:auto;
+            width:200pt; 
+        }
         #menupanel{
           background-color:rgba(255,255,255,0.8);
-          position: -webkit-sticky;
-          position: sticky;
+          position: fixed;
           direction: rtl;
           overflow-x:hidden;
           overflow-y:auto;
           z-index:301;
-          top:0px;
+          top:12%;
           left:16px;
           max-height:95vh;
           /* height:auto; */
-          width:20%;
+          width:200pt;
           
         }
         .item_direction {
@@ -120,6 +119,11 @@
         #title {
             font-size: 2rem;
             border: black 0 solid;
+            left:20%;
+            position: absolute;
+            top:5rem;
+            width:300px;
+            z-index: 180; 
         }
         svg text {
             -webkit-touch-callout: none; /* iOS Safari */
@@ -169,10 +173,10 @@
             position: absolute;
             padding:16px;
             top:10%;
-            left:10%;
+            left:20%;
             height:60%;
             width:70%;
-            background-color: rgba(255, 231, 166, 0.7);
+            background-color: rgba(255, 231, 166, 0.9);
             border:black 1px dotted;
             color: rgb(0, 29, 29);
             visibility: hidden;
@@ -191,7 +195,7 @@
             position: absolute;
             padding:16px;
             top:10%;
-            left:10%;
+            left:20%;
             height:50%;
             width:50%;
             background-color: rgba(204, 204, 204, 0.897);
@@ -204,7 +208,7 @@
             position: absolute;
             padding:16px;
             top:10%;
-            left:10%;
+            left:20%;
             
             width:50%;
             background-color: rgba(209, 196, 180, 0.897);
@@ -216,7 +220,7 @@
         button {
             height:1.8rem;
             margin:0.1rem;
-            width:inherit;            
+            width:auto;            
         }
         label {
             font-size: 0.6rem;
@@ -373,10 +377,12 @@
         }
         .flow_clipboard {
             background-color: rgb(255, 219, 174);           
-            position: absolute;
+            display: fixed;
             padding:16px;
-            top:100px;
-            left:100px;            
+            top:16px;
+            left:16px; 
+            width:600px;
+            z-index: 350;           
             border: 1px rgb(88, 88, 88) dotted;
         }
 
@@ -419,6 +425,14 @@
             z-index: 310;
             left:300px;
             position: absolute;            
+        }
+        #screen{
+            position: fixed;
+            top:0px;
+            left:0px;
+            z-index: 350;
+            width: auto;
+            height: auto;
         }
     </style>
     <script>
@@ -467,7 +481,8 @@
 
     </script>
 </head>
-<body >   
+<body > 
+    <div id="screen"></div>  
     <img id="smile" src="smile.gif" title="smile" />
     <div id="AIHelp">
         <div style="height:80%;overflow:auto;">
@@ -498,77 +513,82 @@
         </div>
         <button  onclick='{this.parentElement.style.visibility="hidden"}'>OK</button>
     </div>
+    <div id="menupanel" > 
+                      
+            <div id="menu" class="flex-column" style='min-width:200px;overflow:hidden;' onmouseover="cmdin(this)" onmouseout="cmdout(this)">
+                
+                <div style="direction:ltr;">
+                    <div class="flow_tables">CommandPanel
+                        <i style="font-size:16px" class="fa">&#xf103;</i>
+                    </div>
+                    <button class="commandbutton" onclick="{this.style.color='#ff0000';AI()}" class="fa" style="font-family: FontAwesome;" >&#xf130;<span class="micro">
+                        A.I.</span></button> 
+                    <button class="commandbutton" onclick="Save()">
+                        Save</button>
+                    <button class="commandbutton" onclick="Load()">
+                        Load</button>
+                    <button class="commandbutton" onclick="Load('alma')">
+                        Clear</button>
+                    <button id="loadserverdefault" class="commandbutton" style="display:none;" onclick="LoadServerDefault(true)">
+                        LoadServerDefault</button>
+                    <form style="display:none;"><input id="filename" class="commandbutton" type='file' accept='text/plain' ></form>
+                    <button class="commandbutton" onclick="FlowDBSave('print')">
+                        SaveToFile</button>                                        
+                    <button class="commandbutton" id="flowdbload" onclick="FlowDBLoad(this)" onmouseout="blur1()">
+                        LoadFromFile</button>
+                    <button class="commandbutton" onclick="FlowDBCopy('print')">
+                        CopyToURL</button>                                        
+                    <button class="commandbutton" onclick="savetosvgfile('print','flowdbeditor')">
+                        Download SVG</button>
+                    <button class="commandbutton" onclick="svg2png('print','flowdbeditor')">
+                        Download PNG</button>
+                    <button class="commandbutton" onclick="mySQL('print')">
+                        Download MySQL</button>
+                    <button class="commandbutton" onclick="MSSQL('print',0)">
+                        Download MSSQL</button>
+                    <button class="commandbutton" onclick="newsdialog(true)">
+                        News</button>
+                    <button class="commandbutton" onclick="zoom()">
+                        Zoom</button>                                        
+                    <button class="commandbutton" onclick="createdocument('print')">
+                        Doc</button>
+                    <!-- <button class="commandbutton" onclick="{var cmd = prompt('Command','exit');setTimeout(function(){robot(cmd)},2000);}">A.I.TEST</button> -->
+                    <div id="modules"></div>
+                    <a target="_blank" style="visibility:hidden;" id="print" download="file.txt" href="">RightClickforDownload</a>
+                    <input id="copyinput" class="invisibleinput" value="">
+                </div>
+            </div>
+            <div class="flex-column p-2"> 
+                <span class="s100 display-6">Tables  from hide:</span>
+                <button  onclick="sortTables()" style="font-size:16px" class="fa">&#xf036;</button>
+                <button class="s100" onclick="newTable()">New</button>
+                <div id="tables" class="s100">
+
+                </div>
+            </div>
+            <div class="flex-column p-2"> 
+                <span class="s100 display-6">Fields sort by drag'n drop</span>
+                <button class="s100" onclick="newField()">New</button>
+                <div id="fields" class="s100">                        
+                </div>
+            </div>
+            <div class="flex-column p-2"> 
+                    <span class="s100 display-6">Constraints</span>
+                    <button id="newconstraint" class="s100 flow_flowmode" onclick="newConstraint(this)">Start link</button>
+                    <div id="constraints" class="s100">
+                        
+                    </div>
+            </div>
+        </div>
     <div id="mainarea" class="container-fluid">
         <span class="display-5" >FlowDBEditor4</span><b id="vers"></b><i>(C)GaborHorvath</i><span id="moreinfo"></span>
         <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=hgabor47%40gmail%2ecom&lc=AL&item_number=flowdbeditor&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted"><span id="donate"><img src="" id="donateimg">...for new features & modules</span></a>
         <div id="help" onclick="this.innerHTML=''">Write records with right click on created tables :)</div>
-        <div id="area" class="row">    
-            <div id="menupanel" class="col-2">   
-                <div id="menu" class="flex-column" style='min-width:200px;overflow:hidden;' onmouseover="cmdin(this)" onmouseout="cmdout(this)">
-                    <input type="text" id="title" value="Unknown title">
-                    <div style="direction:ltr;">
-                        <div class="flow_tables">CommandPanel
-                            <i style="font-size:16px" class="fa">&#xf103;</i>
-                        </div>
-                        <button class="commandbutton" onclick="{this.style.color='#ff0000';AI()}" class="fa" style="font-family: FontAwesome;" >&#xf130;<span class="micro">
-                            A.I.</span></button> 
-                        <button class="commandbutton" onclick="Save()">
-                            Save</button>
-                        <button class="commandbutton" onclick="Load()">
-                            Load</button>
-                        <button class="commandbutton" onclick="Load('alma')">
-                            Clear</button>
-                        <button id="loadserverdefault" class="commandbutton" style="display:none;" onclick="LoadServerDefault(true)">
-                            LoadServerDefault</button>
-                        <form style="display:none;"><input id="filename" class="commandbutton" type='file' accept='text/plain' ></form>
-                        <button class="commandbutton" onclick="FlowDBSave('print')">
-                            SaveToFile</button>                                        
-                        <button class="commandbutton" id="flowdbload" onclick="FlowDBLoad(this)" onmouseout="blur1()">
-                            LoadFromFile</button>
-                        <button class="commandbutton" onclick="FlowDBCopy('print')">
-                            CopyToURL</button>                                        
-                        <button class="commandbutton" onclick="savetosvgfile('print','flowdbeditor')">
-                            Download SVG</button>
-                        <button class="commandbutton" onclick="svg2png('print','flowdbeditor')">
-                            Download PNG</button>
-                        <button class="commandbutton" onclick="mySQL('print')">
-                            Download MySQL</button>
-                        <button class="commandbutton" onclick="MSSQL('print',0)">
-                            Download MSSQL</button>
-                        <button class="commandbutton" onclick="newsdialog(true)">
-                            News</button>
-                        <button class="commandbutton" onclick="zoom()">
-                            Zoom</button>                                        
-                        <button class="commandbutton" onclick="createdocument('print')">
-                            Doc</button>
-                        <!-- <button class="commandbutton" onclick="{var cmd = prompt('Command','exit');setTimeout(function(){robot(cmd)},2000);}">A.I.TEST</button> -->
-                        <div id="modules"></div>
-                        <a target="_blank" style="visibility:hidden;" id="print" download="file.txt" href="">RightClickforDownload</a>
-                        <input id="copyinput" class="invisibleinput" value="">
-                    </div>
-                </div>
-                <div class="flex-column p-2"> 
-                    <span class="s100 display-6">Tables  from hide:</span>
-                    <button  onclick="sortTables()" style="font-size:16px" class="fa">&#xf036;</button>
-                    <button class="s100" onclick="newTable()">New</button>
-                    <div id="tables" class="s100">
+        <input type="text" id="title" value="Unknown title">
 
-                    </div>
-                </div>
-                <div class="flex-column p-2"> 
-                    <span class="s100 display-6">Fields sort by drag'n drop</span>
-                    <button class="s100" onclick="newField()">New</button>
-                    <div id="fields" class="s100">                        
-                    </div>
-                </div>
-                <div class="flex-column p-2"> 
-                        <span class="s100 display-6">Constraints</span>
-                        <button id="newconstraint" class="s100 flow_flowmode" onclick="newConstraint(this)">Start link</button>
-                        <div id="constraints" class="s100">
-                            
-                        </div>
-                </div>
-            </div>
+
+        <div id="area" class="row">                   
+
             
             <div class="col-10">                
                 <svg id="flowdbeditor" style="background-color: white" width="2400" height="2400" viewBox="0 0 2400 2400">

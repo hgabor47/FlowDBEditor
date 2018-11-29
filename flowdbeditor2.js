@@ -1688,7 +1688,7 @@ function PastePanel(e){
   if ((content!="") && (content!=null)){
     var div=document.createElement("div");
     div.className="flow_clipboard";
-    document.body.appendChild(div);
+    document.getElementById('screen').appendChild(div);
     div.clipboard=content;
     div.innerHTML=`<input id="pasteheader" type="checkbox">The clipboard data has header in first row<br>`;
     div.innerHTML+=`<input id="pastenewtable" type="checkbox" >Create new table instead of fill selected table<br>`;

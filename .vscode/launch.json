@@ -9,7 +9,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Launch Chrome",
-            "url": "C:/xampp/htdocs/FlowDBEditor/index.html",
+            "url": "C:/xampp/htdocs/html/FlowDBEditor/index.html",
             "webRoot": "${workspaceFolder}"
         },
     {
