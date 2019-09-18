@@ -2493,7 +2493,13 @@ function mySQL(linknode){
                 if (i2==autoinc){
                   o2=autoidx++;
                 }
-                value+="'"+o2.replace("'","''")+"',";
+                try{
+                    if(typeof o2 == 'number'){
+                      value+="'"+o2+"',";
+                    }else{
+                      value+="'"+o2.replace("'","''")+"',";
+                    }
+                }catch (error) {};
               });
               source+=value.substring(0,value.length-1);
               source+=`),`;
