@@ -2610,7 +2610,11 @@ function MSSQL(linknode,ver){
               source+=`(`;
               value="";
               o.forEach(function(o2,i2){
-                value+="'"+o2.replace("'","''")+"',";
+                if(typeof o2 == 'number'){
+                  value+="'"+o2+"',";
+                }else{
+                  value+="'"+o2.replace("'","''")+"',";
+                }
               });
               source+=value.substring(0,value.length-1);
               source+=`),`;
