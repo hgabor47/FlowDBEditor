@@ -2603,7 +2603,7 @@ function MSSQL(linknode,ver){
       source=source.substring(0,source.length-3)+LF; //utolso vesszo
       source+=`) `+LFGO ;
       if (table.Records!=null && table.Records.length>1){
-        source+=`INSERT INTO [dbo].[`+table.name+`] (`+fields+`) VALUES `;
+        source+=`set IDENTITY_INSERT [dbo].[`+table.name+`] ON`+LF+`INSERT INTO [dbo].[`+table.name+`] (`+fields+`) VALUES `;
         table.Records.forEach(function(o,i){
           if (i>0){
               //content            
@@ -2620,7 +2620,7 @@ function MSSQL(linknode,ver){
               source+=`),`;
           }
         });
-        source=source.substring(0,source.length-1)+LF;
+        source=source.substring(0,source.length-1)+LF+`set IDENTITY_INSERT [dbo].[`+table.name+`] OFF`+LF;
       }
     }
   });
