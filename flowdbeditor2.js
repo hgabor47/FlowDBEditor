@@ -2526,6 +2526,7 @@ function mySQL(linknode){
     }
   });
   //constraints
+  source+='/*'+LF;
   idc=1;
   ATables.forEach(function(table,index){
     if (!table.readonly){
@@ -2545,7 +2546,7 @@ function mySQL(linknode){
       }
     }
   });
-
+  source+='*/'+LF;
 
   source+='DELIMITER $$'+LF;
   ATables.forEach(function(table,index){
