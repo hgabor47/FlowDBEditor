@@ -83,7 +83,7 @@ var AUTOINCTSTART=1;
 var g=null;
 var flowdbeditor=null;
 var isdown=false;
-var zooms=[1200,2400,3200];
+var zooms=[1200,4200,5400];
 var zoomvalue=1;
 var WorkflowStart=null;
 
@@ -896,7 +896,7 @@ var idField = 0;
 var TField = function(table,name){
   
   this.type=0;  //TType
-  this.length=45;
+  this.length=0;
   this.link=null; //null or TField constraint
   this.linkfilter=[false,null,null,null]; //TODOif link attached: enabled, from, to, field: false,null,null,null;   true,1,5,idgroup;    true,4,4,idgroup
   this.linkconstraint=true; //neew SQL constraint for this link
@@ -1356,11 +1356,13 @@ var AType = [new TType("String","varchar(%)","text","[varchar](%) NULL",43),
        new TType("Date","date","date","[date] NULL",0),
        new TType("DateTime","datetime","datetime-local","[datetime2] NULL",0),
        new TType("Time","time","time","[time] NULL"),
-       new TType("Bool","tinyint","checkbox","[tinyint] NULL"),
+       new TType("Bool","tinyint","checkbox","[bit] NULL"),
        new TType("Text","text","text","[varchar](max) NULL",2000),
        new TType("Image","mediumblob",'text',"[image] NULL",2000),   //<img src="%0">
        new TType("URL","varchar(400)",'<a href="%0">%1</a>',"[varchar](400) NULL",400),
-       new TType("VideoLink","varchar(400)",'<a href="%0">%1</a>',"[varchar](400) NULL",400)];
+       new TType("VideoLink","varchar(400)",'<a href="%0">%1</a>',"[varchar](400) NULL",400),
+       new TType("Shortint","tinyint",'number',"[tinyint] NULL",0)
+      ];
 var SearchTypeById = function(id){
   const result = AType.find( tab => tab.id === id );
   return result;
@@ -2614,7 +2616,12 @@ function MSSQL(linknode,ver){
                 if(typeof o2 == 'number'){
                   value+="'"+o2+"',";
                 }else{
-                  value+="'"+o2.replace("'","''")+"',";
+                  try {
+                    value+="'"+o2.replace("'","''")+"',";
+                  } catch (a)
+                  {
+                    value+=o2;
+                  }
                 }
               });
               source+=value.substring(0,value.length-1);
@@ -2625,6 +2632,31 @@ function MSSQL(linknode,ver){
       }
     }
   });
+
+  //constraints TODO rewrite to MSSQL syntax (from mysql) it is commented in this time
+  source+='/*'+LF;
+  idc=1;
+  ATables.forEach(function(table,index){
+    if (!table.readonly){
+      var one=false;
+      var s="";
+      table.AFields.forEach(function(field,index2){ 
+        if ( field.link!=null && (!field.link.table.readonly)){
+          if (field.linkconstraint) {
+            one=true;
+            s+='ADD CONSTRAINT `'+table.name+field.link.table.name+(idc++)+'` FOREIGN KEY (`'+field.name+'`) REFERENCES `'+field.link.table.name+'`('+field.link.name+'),'+LF;
+          }
+        }
+      });
+      if (one){
+        s=s.substring(0,s.length-3)+";"+LF; //utolso vesszo
+        source+=`ALTER TABLE `+table.name+LF+s;
+      }
+    }
+  });
+  source+='*/'+LF;
+
+
   //Autoinc primary key
   source += 'COMMIT TRAN;'+LF ;
   var url = "data:application/sql;charset=utf-8,"+encodeURIComponent(source);
