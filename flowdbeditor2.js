@@ -1064,7 +1064,9 @@ var TField = function(table,name){
           this.DOMLink.k.setAttribute("class","flow_line_start_hidden");
           this.DOMLink.v.setAttribute("class","flow_line_end_hidden");
         }else {
-          this.DOMLink.setAttribute("class","flow_line");
+          //this.DOMLink.setAttribute("class","flow_line");
+          var color = this.link.table.color;
+          this.DOMLink.setAttribute("style","stroke-width:2; stroke-opacity:0.5;stroke: "+color+";"); //color =rgb(222, 0, 68)
           this.DOMLink.k.setAttribute("class","flow_line_start");
           this.DOMLink.v.setAttribute("class","flow_line_end");
         }
@@ -2595,6 +2597,7 @@ function MSSQL(linknode,ver){
   ATables.forEach(function(table,index){
     if (!table.readonly){
       //source+=`DROP TABLE `+ifex+` [dbo].[`+table.name+`]`+LFGO; 
+      source+=`DROP TABLE [dbo].[`+table.name+`]`+LFGO;
       source+=`CREATE TABLE [dbo].[`+table.name+`] (`+LF;
       var fields="";      
       table.AFields.forEach(function(field,index2){              
@@ -4161,6 +4164,9 @@ async function createdocument(linknode){
             font-family: "Work Sans";   
             font-size: 1rem;                                  
         }
+        .tartalom {
+          background-color:#30a0e0;
+        }
         .tablename {
           font-size: 1.2rem;
           border-bottom: 1px gray solid;    
@@ -4250,7 +4256,29 @@ async function createdocument(linknode){
         }
       });
       t.appendChild(b);
-    }
+      //TODO content max 100 rows
+      var rec=null;
+      if (table.Records.length>1){ //with header
+        var tart = xml.createElement("div");body.appendChild(tart);tart.setAttribute("class","tartalom");
+        tart.innerHTML+="Tartalom"
+        rec = xml.createElement("table");body.appendChild(rec);      
+        table.Records.forEach(function(item,index){
+          var row = xml.createElement("tr");rec.appendChild(row);
+          item.forEach(function(cols,idx){
+            var col = xml.createElement("td");row.appendChild(col);
+            try {
+              //col.innerText=cols;
+              //col.innerHTML=encodeStr(col.innerText);  
+              col.innerHTML=encodeStr(cols);  
+            } catch (error) {
+              console.log(error);          
+            }        
+          });    
+        });  
+      }
+    };
+    
+    
   });
   var i=20;
   while ((PNG==null) && (i>0)){
@@ -4289,7 +4317,7 @@ function svg2png(linknode,svgnodename="flowdbeditor",func=null){ //or func = fun
   var str = new XMLSerializer().serializeToString(flw);
   str = str.replace(/class="flow_fields_color3"/g,'style="fill:grey;stroke-width:0;opacity:0.5"');
   str = str.replace(/class="flow_fields_color4"/g,'style="fill:grey;stroke-width:0;opacity:0.3"');
-  str = str.replace(/class="flow_line"/g,'style="stroke:black;stroke-width:2;"');
+  //str = str.replace(/class="flow_line"/g,'style="stroke:black;stroke-width:2;"');
   str = str.replace(/class="flow_line_start"/g,'style="stroke:blue;stroke-width:4;"');
   str = str.replace(/class="flow_line_end"/g,'style="stroke:orange;stroke-width:2;"');  
   //var canvas = document.getElementById("canvas");
