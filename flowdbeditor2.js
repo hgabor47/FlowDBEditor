@@ -745,6 +745,7 @@ var TTable = function(name){
     const result = this.find( fi => fi.name === fieldname );
     return result;
   };
+  //TTable
   this.getLinksTo=function(){ //result fields[]
     var res=[];
     if (this.AFields!=null){
@@ -3142,6 +3143,22 @@ function ComboBoxDOM(value,field1,field2){  //value field linkedfield
   return (opt+`</select>`);
 };
 
+function getLinkedFields(linkfield,startfield){
+  var table = linkfield.table;
+  var combo=[[startfield,linkfield]];
+  table.AFields.forEach(function(o,i){
+    if ((o.display)&&(o.link==null)){    
+        combo.push(o);      
+    }
+  });  
+  table.AFields.forEach(function(o,i){
+    if ((o.display)&& (o.link!=null)){    
+        combo = combo.concat( getLinkedFields(o.link,o) );
+    }
+  });  
+  return combo;
+}
+
 function showhint(obj,yesno01) {
   const showhint="showhint";
   if (yesno01==1){
@@ -4276,9 +4293,7 @@ async function createdocument(linknode){
           });    
         });  
       }
-    };
-    
-    
+    };        
   });
   var i=20;
   while ((PNG==null) && (i>0)){

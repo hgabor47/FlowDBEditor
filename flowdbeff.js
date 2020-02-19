@@ -391,8 +391,9 @@ function FOControlCombo(combofilename,finame,left=160){
 }
 
 function FOSave(title){
-    DDSave(title);
-    BOSave(title);  
+    //DDSave(title);
+    //BOSave(title);  
+    var tidx=0;
     var f=null;
     var cg=`<ControlGroupOrders>
    <ControlGroupOrder isAutomatic="false">`+LF;  
@@ -446,8 +447,9 @@ source+=`   <ControlGroup name="`+f.name+`">
                 <Left>10</Left>
             </Control>`+LF;
                         if (f.link!=null){ //iflink
-                            var combofilename = ComboD_direct(title,f.link.table,f.link.name);
-                            source+=FOControlCombo(combofilename,f.name)+LF;
+                            var combofilename = ComboD_direct(title,f);
+                            tidx=combofilename[1];
+                            source+=FOControlCombo(combofilename[0],f.name)+LF;
                         } else {//iflinkelse
                             switch (f.type){
                             default:
@@ -477,7 +479,7 @@ source+=`   <ControlGroup name="`+f.name+`">
             source+=cg+`</ControlGroupOrders>`+LF;
             source+=`</BusinessObject>`;
             var filename=scr.table.name.toLowerCase().replace(title.toLowerCase(),title).replace(/_/g,'');
-            SaveXML('Form'+filename,source);
+            //SaveXML('Form'+filename,source);
         
     });
 }
@@ -486,7 +488,30 @@ function DispD(title){
 
 }
 
-function ComboD_direct(title,table,skey=''){ //skey ha ures akkor az elso mező, ha nem üres, akkor AZ
+function ComboD_direct(title,field){ //skey ha ures akkor az elso mező, ha nem üres, akkor AZ    
+    //preprocess //The list of record contain field values from another linked table
+    var tidx=0;
+    var table = field.link.table;
+    var skey = field.link.name;
+    var linkfield = field.link;
+    var linkedfields=null;
+    linkedfields=getLinkedFields(linkfield,1);
+    //from and where
+    var Lfi='t'+tidx+'.'+linkedfields[0][1].name+`, concat(''`;
+    var Lleft='from '+linkedfields[0][1].table.name+' t'+tidx+' ';
+    //var Lwh = 'where t'+tidx+'.'+linkedfields[0][1].name+'='+field.name+' ';    
+    
+    for(var i=1;i<linkedfields.length;i++){
+        var e=linkedfields[i];
+        if (Array.isArray(e)) { //key            
+            Lleft+= ' left join '+e[1].table.name+' t'+(tidx+1)+' on t'+(tidx+1)+'.'+e[1].name+'=t'+tidx+'.'+e[0].name+' ' ;
+            tidx++;                    
+        }else{
+            Lfi+=', t'+tidx+'.'+e.name 
+        }        
+    }    
+    Lfi+=') as combo_'+table.name;
+
     var key=`key_`+table.name;
     var f=null;
     //var skey='';
@@ -517,6 +542,7 @@ function ComboD_direct(title,table,skey=''){ //skey ha ures akkor az elso mező,
     }else{
         sfields=fields[0]+` as `+displayfield;
     }
+    
 
     var s=`<?xml version="1.0" encoding="iso-8859-2"?>
 <ComboDefinition xmlns="http://effector.hu/schema/ns/combodefinition">
@@ -525,10 +551,9 @@ function ComboD_direct(title,table,skey=''){ //skey ha ures akkor az elso mező,
     <Database>
       <SelectionString>
         <![CDATA[
-          SELECT `+skey+` as `+key+`,`+sfields+`
-                  FROM dbo.`+table.name+`
-                  WHERE
-                  Deleted=0 
+          SELECT `+Lfi+`                   
+                  `+Lleft+` WHERE
+                  t0.Deleted=0 
                   AND 1=1 ORDER BY 2
           ]]>
       </SelectionString>
@@ -539,7 +564,7 @@ function ComboD_direct(title,table,skey=''){ //skey ha ures akkor az elso mező,
 </ComboDefinition>`;
 var filename=table.name.toLowerCase().replace(title.toLowerCase(),title).replace(/_/g,'');
 SaveXML('Combo'+filename,s);
-return 'Combo'+filename;
+return ['Combo'+filename,tidx];
 }
 
 function ComboD(title){
