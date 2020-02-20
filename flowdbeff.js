@@ -44,9 +44,10 @@ function flowdbeff(button){
         var effmenu=document.getElementById("effmenu");
         var s = `<span><span class="borderGray"><button class="btn" onclick='{document.getElementById("flowdbeff").style.display="none"; document.getElementById("area").style.display="flex";document.getElementById("menupanel").style.display="block"}'>FlowDBEditor</button></span>`;
         
-        s += `<span class="borderGray"><button class="btn" onclick=''>Screen</button>`;
-        s += `<button class="btn" onclick=''>Designs</button>`;
-        s += `<button class="btn" onclick='effSave()'>Create files</button></span></span>`; 
+        s += `<span class="borderGray"><button class="btn" onclick='BOSave(document.getElementById("title").value);'>BO</button>`;
+        s += `<button class="btn" onclick='DDSave(document.getElementById("title").value);'>DD</button>`;
+        s += `<button class="btn" onclick='DispSave(document.getElementById("title").value);'>DispD</button>`;
+        s += `<button class="btn" onclick='FOSave(document.getElementById("title").value);'>FORM (DD+BO+Combo..)</button></span></span>`; 
                                                     //sqldb
         s += `<span><span class="borderYellow"><input id="dbproject" type="text" onblur="prop_dbproject=this.value;" placeholder="Projektnév"><button class="btn btn-warning" onclick="EFFMSSQL('print',0)" hint="A 'projeknév' mező szerinti előtagú táblák kerülnek az SQL-be." onmouseover="showhint(this,1)" onmouseout="showhint(this,0)" >Effector MSSQL</button>`;
         s += `<button class="btn btn-warning" onclick="EFFFlow('print',0)" hint="
@@ -277,18 +278,10 @@ function SaveXML(filename,source){
     linknode.click();
 }
 
-function effSave(){
-    var title = document.getElementById('title').value;
-    FOSave(title);
-        //DDSave(title); //in FOSave
-        //BOSave(title);
-        //ComboD(title); //if need in FOSave
-}
-
 function DDSave(title){    
     var sid='';
     AScreens.forEach(function(scr,idx){
-            
+         if (!scr.enable) return;  
             var source=`<?xml version="1.0" encoding="iso-8859-2"?>`+LF+`<DataDefinition xmlns="http://effector.hu/schema/ns/datadefinition">`+LF+
 `<SqlSelect>FROM `+scr.table.name+` WHERE 1=1 </SqlSelect>
 <Columns>`+LF;
@@ -326,6 +319,7 @@ function BOSave(title){
     var fi='<Fields>'+LF;
     var f=null;
     AScreens.forEach(function(scr,idx){
+        if (!scr.enable) return;
             var filename=scr.table.name.toLowerCase().replace(title.toLowerCase(),title).replace(/_/g,'');
 
             var source=`<?xml version="1.0" encoding="iso-8859-2"?>`+LF+`<BusinessObject xmlns="http://effector.hu/schema/ns/businessobject">`+LF+
@@ -391,14 +385,15 @@ function FOControlCombo(combofilename,finame,left=160){
 }
 
 function FOSave(title){
-    //DDSave(title);
-    //BOSave(title);  
+    DDSave(title);
+    BOSave(title);  
     var tidx=0;
     var f=null;
     var cg=`<ControlGroupOrders>
    <ControlGroupOrder isAutomatic="false">`+LF;  
     
     AScreens.forEach(function(scr,idx){
+        if (!scr.enable) return;
             var filename=scr.table.name.toLowerCase().replace(title.toLowerCase(),title).replace(/_/g,'');
 
             var source=`<?xml version="1.0" encoding="iso-8859-2"?>`+LF+`<Form xmlns="http://effector.hu/schema/ns/editform">`+LF+
@@ -479,13 +474,96 @@ source+=`   <ControlGroup name="`+f.name+`">
             source+=cg+`</ControlGroupOrders>`+LF;
             source+=`</BusinessObject>`;
             var filename=scr.table.name.toLowerCase().replace(title.toLowerCase(),title).replace(/_/g,'');
-            //SaveXML('Form'+filename,source);
+            SaveXML('Form'+filename,source);
         
     });
 }
 
-function DispD(title){
-
+function DispSave(title){
+    var sid='';
+    var filename=scr.table.name.toLowerCase().replace(title.toLowerCase(),title).replace(/_/g,'');
+    AScreens.forEach(function(scr,idx){
+         if (!scr.enable) return;  
+            var source=`<?xml version="1.0" encoding="iso-8859-2"?>`+LF+`<DisplayDefinition xmlns="http://effector.hu/schema/ns/displaydefinition">`+LF+
+`<Caption>`+scr.table.name+`</Caption>
+<ViewType>Card</ViewType>
+<DefaultSelectionType>Multiple</DefaultSelectionType>
+<PageSize>100</PageSize>
+<AlternatePageSize>1000</AlternatePageSize>
+<OrderBy direction="Asc">nev</OrderBy>
+<DataDefinition>DataDefinition`+filename+`</DataDefinition>
+<Columns>`+LF;
+            for(var i=0;i<scr.table.AFields.length;i++){
+                f=scr.table.AFields[i];
+                if (i==0){
+                    sid=f.name;                    
+                }                
+                source+=`
+    <Column name="`+f.name+`">
+        <Visible>true</Visible>
+    </Column>`+LF;
+            } 
+            source+=`
+</Columns>
+<OutFilterColumn>`+sid+`</OutFilterColumn>
+<HTMLTemplates>
+    <HTMLTemplate width="300px" height="102px">
+      <![CDATA[
+          <div style="height:102px; width:300px; background:url(ui/gfx/card_msk_kex_jelentkezo_[##idszin##][##Iscvlinkid##].png);">
+          
+              <div style="position: relative;
+                          height: 25px;
+                          width: 300px;
+                          color: black;
+                          font-weight: bold;
+                          margin: 0;
+                          padding: 4px 0px 0px 75px;
+                          white-space: nowrap;
+                          overflow: hidden;
+                          text-overflow: ellipsis;"><b>[##nev##]</b></div>
+                        
+              <div style="position: relative; float: left; height:88px; width:300px;">          
+                          
+                    <div style="position: relative; 
+                          height: 24px; 
+                          width: 300px; 
+                          font-size: 100%;
+                          margin: 0;
+                          padding: 5px 0px 0px 95px;
+                          color: black;
+                          white-space: nowrap;
+                          overflow: hidden;
+                          text-overflow: ellipsis;">[##telefonszam##]</div>          
+                          
+                    <div style="position: relative; float: left; 
+                          height: 24px; 
+                          width: 270px; 
+                          font-size: 100%;
+                          margin: 0;
+                          padding: 5px 0px 0px 95px;
+                          color: black;
+                          white-space: nowrap;
+                          overflow: hidden;
+                          text-overflow: ellipsis;">[##email##]</div>
+                          
+                    <div style="position: relative; float: left; 
+                          height: 24px; 
+                          width: 300px; 
+                          font-size: 100%;
+                          margin: 0;
+                          padding: 5px 0px 0px 95px;
+                          color: black;">[##datum##]</div>
+                          
+              </div>
+          </div>
+        ]]>
+    </HTMLTemplate>
+  </HTMLTemplates>
+</DisplayDefinition>`;
+            
+            SaveXML('DisplayDefinition'+filename,source);
+        
+    });
 }
 
 function ComboD_direct(title,field){ //skey ha ures akkor az elso mező, ha nem üres, akkor AZ    
@@ -497,15 +575,17 @@ function ComboD_direct(title,field){ //skey ha ures akkor az elso mező, ha nem 
     var linkedfields=null;
     linkedfields=getLinkedFields(linkfield,1);
     //from and where
-    var Lfi='t'+tidx+'.'+linkedfields[0][1].name+`, concat(''`;
+    var Lfi='t'+tidx+'.'+linkedfields[0][1].name+`, concat(''`;    
     var Lleft='from '+linkedfields[0][1].table.name+' t'+tidx+' ';
+    linkedfields[0][1].table.aliasname=tidx;
     //var Lwh = 'where t'+tidx+'.'+linkedfields[0][1].name+'='+field.name+' ';    
     
     for(var i=1;i<linkedfields.length;i++){
         var e=linkedfields[i];
         if (Array.isArray(e)) { //key            
-            Lleft+= ' left join '+e[1].table.name+' t'+(tidx+1)+' on t'+(tidx+1)+'.'+e[1].name+'=t'+tidx+'.'+e[0].name+' ' ;
-            tidx++;                    
+            Lleft+= ' left join '+e[1].table.name+' t'+(tidx+1)+' on t'+(tidx+1)+'.'+e[1].name+'=t'+e[0].table.aliasname+'.'+e[0].name+' ' ;
+            tidx++;    
+            e[1].table.aliasname=tidx;                
         }else{
             Lfi+=', t'+tidx+'.'+e.name 
         }        
@@ -586,8 +666,11 @@ TScreen = function(){
     this.getListDOM = function(){
         div=document.createElement("div");
         div.screen=this;
-        s="<span><input type='checkbox' checked></span><span><span>From "+AScreenSource[this.source][1]+"</span> ";
-        s+="<span>"+AScreenType[this.type][1]+"</span><br>";
+        if (this.enable)
+            s="<span><input type='checkbox' checked onchange='ScreenChange(this)'></span>";
+        else
+            s="<span><input type='checkbox' onchange='ScreenChange(this)'></span>";
+        s+="<span><span>From "+AScreenSource[this.source][1]+"</span><span>"+AScreenType[this.type][1]+"</span><br>";
         if (this.source==1){
             s+="<textarea style='width:80%;' placeholder='SQL Expression'>"+generateSQL(this.table)+"</textarea>";
         } else {
@@ -598,6 +681,11 @@ TScreen = function(){
     }
 }
 
+function ScreenChange(chkbox)
+{
+    var div=chkbox.parentElement.parentElement;
+    div.screen.enable=chkbox.checked;
+}
 
 TDesign = function(typeindex,screensarray){
     AScreens = [];  //used screens pl.     1,4,3 / 3pf

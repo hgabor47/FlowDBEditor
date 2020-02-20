@@ -2660,6 +2660,16 @@ function MSSQL(linknode,ver){
   });
   source+='*/'+LF;
 
+  
+  ATables.forEach(function(table,index){
+    if (!table.readonly){
+      try {
+        if (table.sql[2].text!="")
+          source+=decodeEntities(decodeStr(table.sql[2].text));  //2 = mssql
+      } catch (error) {}
+    }
+  });
+  source+=LF;
 
   //Autoinc primary key
   source += 'COMMIT TRAN;'+LF ;
