@@ -461,7 +461,8 @@ source+=`   <ControlGroup name="`+f.name+`">
                                 break;
                             }
                         }
-                        source+=`           <Rules>
+                        source+=`       </Controls>
+                    <Rules>
                 <Visible type="Constant" return="boolean" default="true">true</Visible>
             </Rules>
        </ControlGroup>`+LF;                                                
@@ -470,9 +471,37 @@ source+=`   <ControlGroup name="`+f.name+`">
                     
                 } //else
             } //for
-            source+=`</ControlGroups>`+LF;
-            source+=cg+`</ControlGroupOrders>`+LF;
-            source+=`</BusinessObject>`;
+            source+=`
+            <ControlGroup name="ButtonGroup">
+            <Controls>
+              <Control>
+                <Type>SaveButton</Type>
+                <Name>Save</Name>
+                <Caption>[#EditFormPanel.SaveButton#]</Caption>
+                <Width>80</Width>
+                <Left>180</Left>
+              </Control>
+              <Control>
+                <Type>CancelButton</Type>
+                <Name>Cancel</Name>
+                <Caption>[#EditFormPanel.CancelButton#]</Caption>
+                <Width>50</Width>
+                <Left>310</Left>
+              </Control>
+              <Control>
+                <Type>DeleteButton</Type>
+                <Name>Delete</Name>
+                <Caption>[#EditFormPanel.DeleteButton#]</Caption>
+                <Width>50</Width>
+                <Left>310</Left>
+                <Visible type="Simple" return="boolean" default="false">'[##Filter.JumpType##]' != 'New'</Visible>
+              </Control>
+            </Controls>
+          </ControlGroup>      
+            </ControlGroups>`+LF;
+            source+=cg+`      <ControlGroup>ButtonGroup</ControlGroup>
+            </ControlGroupOrder></ControlGroupOrders>`+LF;
+            source+=`</Form>`;
             var filename=scr.table.name.toLowerCase().replace(title.toLowerCase(),title).replace(/_/g,'');
             SaveXML('Form'+filename,source);
         
@@ -573,9 +602,10 @@ function ComboD_direct(title,field){ //skey ha ures akkor az elso mező, ha nem 
     var skey = field.link.name;
     var linkfield = field.link;
     var linkedfields=null;
+    var key=`key_`+table.name;
     linkedfields=getLinkedFields(linkfield,1);
     //from and where
-    var Lfi='t'+tidx+'.'+linkedfields[0][1].name+`, concat(''`;    
+    var Lfi='t'+tidx+'.'+linkedfields[0][1].name+` as `+key+`, concat(''`;    
     var Lleft='from '+linkedfields[0][1].table.name+' t'+tidx+' ';
     linkedfields[0][1].table.aliasname=tidx;
     //var Lwh = 'where t'+tidx+'.'+linkedfields[0][1].name+'='+field.name+' ';    
@@ -592,7 +622,7 @@ function ComboD_direct(title,field){ //skey ha ures akkor az elso mező, ha nem 
     }    
     Lfi+=') as combo_'+table.name;
 
-    var key=`key_`+table.name;
+    
     var f=null;
     //var skey='';
     var fields =[];
