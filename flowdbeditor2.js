@@ -390,7 +390,8 @@ var TTable = function(name){
       el.removeChild(el.firstChild);
     }
     var a = this.AFields;
-    const fleft=[5,this.width*0.4,this.width*0.8];
+    //const fleft=[5,this.width*0.4,this.width*0.8];
+    const fleft=[5,this.width-120,this.width-55];
     for (let i = 0; i < a.length; i++) {
       const e = a[i];
       
