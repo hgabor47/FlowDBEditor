@@ -399,6 +399,11 @@ var TTable = function(name){
       fi.setAttribute("transform","translate("+fleft[0]+","+((i*fieldRowHeight)+fieldRowPadding)+")");
       fi.addEventListener("mousedown",fieldClick);
       fi.setAttribute("class","flow_fields")  ;
+      if (e.color=="#ff0000"){
+        fi.setAttribute("text-decoration","line-through")  ;
+      }else{
+        fi.setAttribute("fill",e.color)  ;
+      }
       var fi2 = document.createElementNS("http://www.w3.org/2000/svg","text");       
       fi2.setAttribute("transform","translate("+fleft[1]+","+((i*fieldRowHeight)+fieldRowPadding)+")");      
       fi2.setAttribute("class","flow_fields_noevent")  ;
@@ -910,6 +915,7 @@ var TField = function(table,name){
   this.autoinc=AUTOINCTSTART;
   this.display=false; //if true then if the table is linked then this field is display 
   this.description="";//TODO
+  this.color="#000000";
 
   this.setDescription=function(value){    
     this.description=nullstring(value);
@@ -927,6 +933,10 @@ var TField = function(table,name){
     }
     refreshFieldsListDOM();    
   }
+  this.setColor=function(value){
+    this.color=value;
+  };
+  //TField
   this.edit=function(parent){
     if (stateEdit) return;
     stateEdit=true;
@@ -949,6 +959,7 @@ var TField = function(table,name){
     div.innerHTML+=opt+`</select><br>
      <label>Length</label>
      <input type="number" id="edit_length" value="`+this.length+`">
+     <label>Color</label><input type="color" id="edit_color" value="`+this.color+`"><br>
      <label>Display this field when table is linked:</label>`;
      if (this.display) {
       div.innerHTML+=`<input type="checkbox" id="edit_display" checked>`;
@@ -1111,6 +1122,7 @@ var TField = function(table,name){
     f.setAttribute("type",this.type);
     f.setAttribute("length",this.length);
     f.setAttribute("description",this.description);
+    f.setAttribute("color",this.color);    
     if (this.linkfilter[0])
       f.setAttribute("linkfilter",1);
     else
@@ -1141,6 +1153,7 @@ var TField = function(table,name){
     this.linkconstraint = node.getAttribute("linkconstraint");
     var linkfilt = node.getAttribute("linkfilter");
     this.setDescription(nullstring(node.getAttribute("description")));
+    this.setColor(nullstring(node.getAttribute("color"),"#000000"));    
     if (this.display=='0') 
       this.display = false;
     else
@@ -1355,7 +1368,7 @@ var SQLModes = ["MySQL", "MSSQL"];
 //                     0        1         2         3  
 var AType = [new TType("String","varchar(%)","text","[varchar](%) NULL",43),
        new TType("Integer","int(11)","number","[int] NULL",0),
-       new TType("Float","Float","number","[float] NULL",0),
+       new TType("Float","Float","number","[float] DEFAULT ((0.00)) NULL",0),
        new TType("Autoinc","int(11) not null","number","[int] IDENTITY(1,1) PRIMARY KEY NOT NULL",0),
        new TType("Date","date","date","[date] NULL",0),
        new TType("DateTime","datetime","datetime-local","[datetime2] NULL",0),
@@ -1782,7 +1795,7 @@ function editFieldOK(div){
   var elength = document.getElementById('edit_length');
   var edisplay = document.getElementById('edit_display');
   var edescription = document.getElementById('edit_description');
-  
+  var ecolor = document.getElementById('edit_color');  
   var elinkconstraint = document.getElementById('edit_needconstraint');
   var elinkfilter = document.getElementById('edit_linkfilter');
   var elinkfilter1 = document.getElementById('edit_linkfilter1');
@@ -1815,6 +1828,7 @@ function editFieldOK(div){
   panel.field.display = edisplay.checked;
   panel.field.length = Number(elength.value);
   panel.field.setDescription(edescription.value);
+  panel.field.setColor(ecolor.value);  
   removePanelDOM(div);
   panel.field.table.refreshRecordFields();
   panel.field.table.refreshDOM();
@@ -2579,7 +2593,7 @@ function mySQL(linknode){
 
 //**************************MSSQL */
 var LFGO='\r\nGO\r\n';
-var mscollate = 'HUNGARIAN_CI_AS';
+var mscollate = 'HUNGARIAN_Technical_CI_AS';
 function MSSQL(linknode,ver){
   var ifex="";
   var ifnex="";
@@ -2666,7 +2680,7 @@ function MSSQL(linknode,ver){
     if (!table.readonly){
       try {
         if (table.sql[2].text!="")
-          source+=decodeEntities(decodeStr(table.sql[2].text));  //2 = mssql
+          source+=LF+decodeEntities(decodeStr(table.sql[2].text));  //2 = mssql
       } catch (error) {}
     }
   });
@@ -4231,7 +4245,7 @@ async function createdocument(linknode){
   </style>
   `;
   root.appendChild(head);
-  body.innerHTML="<a href='"+document.location+"'>FlowDBEditor indítása</a><h1>Tables</h1>";
+  body.innerHTML="<a href='https://codepen.io/hgabor47/full/XqezrX'>FlowDBEditor indítása</a><h1>Tables</h1>";
   PNG=null;
   svg2png(null,"flowdbeditor",asyncCreateDocument);
   ATables.forEach(function(table,index){
