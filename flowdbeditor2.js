@@ -3578,6 +3578,7 @@ function SpeechToInputbox(command){
 
 function robot(command){
   //SpeechToInputbox(command);
+  document.getElementById("moreinfo").innerHTML = " ("+command+") ";
   command=command.toLowerCase();
   for (let i = 0; i < change.length; i++) {
     const chg = change[i];
@@ -3978,6 +3979,8 @@ function SP_link(idx,command,minv,minparams){
 }
 
 function SP_maketables(num){
+  if (num == null)
+    num=1  
   num=Math.min(10,Math.abs(Math.floor(num)));
   var table=null;
   for (let i = 0; i < num; i++) {
@@ -3990,6 +3993,8 @@ function SP_maketables(num){
 }
 
 function SP_makefields(num){  
+  if (num == null)
+    num=1  
   if (SelectedTable!=null){
     SelectedField=null;
     num=Math.min(10,Math.abs(Math.floor(num)));
