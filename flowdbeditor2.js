@@ -1122,7 +1122,7 @@ var TField = function(table,name){
     f.setAttribute("type",this.type);
     f.setAttribute("length",this.length);
     f.setAttribute("description",this.description);
-    f.setAttribute("color",this.color);    
+    f.setAttribute("color",this.color);
     if (this.linkfilter[0])
       f.setAttribute("linkfilter",1);
     else
@@ -1153,7 +1153,7 @@ var TField = function(table,name){
     this.linkconstraint = node.getAttribute("linkconstraint");
     var linkfilt = node.getAttribute("linkfilter");
     this.setDescription(nullstring(node.getAttribute("description")));
-    this.setColor(nullstring(node.getAttribute("color"),"#000000"));    
+    this.setColor(nullstring(node.getAttribute("color"),"#000000"));
     if (this.display=='0') 
       this.display = false;
     else
@@ -1795,7 +1795,7 @@ function editFieldOK(div){
   var elength = document.getElementById('edit_length');
   var edisplay = document.getElementById('edit_display');
   var edescription = document.getElementById('edit_description');
-  var ecolor = document.getElementById('edit_color');  
+  var ecolor = document.getElementById('edit_color');
   var elinkconstraint = document.getElementById('edit_needconstraint');
   var elinkfilter = document.getElementById('edit_linkfilter');
   var elinkfilter1 = document.getElementById('edit_linkfilter1');
@@ -1828,7 +1828,7 @@ function editFieldOK(div){
   panel.field.display = edisplay.checked;
   panel.field.length = Number(elength.value);
   panel.field.setDescription(edescription.value);
-  panel.field.setColor(ecolor.value);  
+  panel.field.setColor(ecolor.value);
   removePanelDOM(div);
   panel.field.table.refreshRecordFields();
   panel.field.table.refreshDOM();
@@ -3481,7 +3481,7 @@ class TCMD{
 var commandgroup=0; //commands[0]
 var commands = [
   [ ["enStandard commands samples","huStandard parancs példák"], 
-  /*OK*/new TCMD(1,"create 4 tables","en"),new TCMD(1,"create 4 table","en"),new TCMD(1,"create a table","en"),new TCMD(1,"4 tables create","en"),new TCMD(1,"készíts 4 táblát"),new TCMD(1,"szeretnék 4 táblát"),new TCMD(1,"készíts 4 új táblát"),new TCMD(1,"kérek 4 új táblát"),new TCMD(1,"csinálj 4 új táblát"),new TCMD(1,"adj 4 új táblát"),
+  /*OK*/new TCMD(1,"create 4 tables","en"),new TCMD(1,"create 4 table","en"),new TCMD(1,"create a table","en"),new TCMD(1,"create table","en"),new TCMD(1,"4 tables create","en"),new TCMD(1,"kréta"),new TCMD(1,"készíts 4 táblát"),new TCMD(1,"szeretnék 4 táblát"),new TCMD(1,"készíts 4 új táblát"),new TCMD(1,"kérek 4 új táblát"),new TCMD(1,"csinálj 4 új táblát"),new TCMD(1,"adj 4 új táblát"),
   /*OK*/new TCMD(2,"create 4 field","en"),new TCMD(2,"create 4 fields","en"),new TCMD(2,"készíts 4 mezőt"),new TCMD(2,"készíts 4 új mezőt"),new TCMD(2,"kérek 4 új mezőt"),new TCMD(2,"csinálj 4 új mezőt"),new TCMD(2,"adj 4 új mezőt"),new TCMD(2,"új 1 mező"),  
   /*OK*/new TCMD(4,"clear all tables","en"),new TCMD(4,"törölj ki minden táblát"),new TCMD(4,"töröld a táblákat"),new TCMD(4,"töröld ki az összes táblát","hu",0.1),
   /*OK*/new TCMD(7,"rename table to","en"),new TCMD(7,"új tábla név"),new TCMD(7,"nevezd át a táblát%nevűre"),new TCMD(7,"nevezd át%nevűre"),new TCMD(7,"átnevezés"),new TCMD(7,"nevezd át"),new TCMD(7,"tábla neve%"),new TCMD(7,"a tábla név%"),new TCMD(7,"az új tábla név%"),
@@ -3578,7 +3578,6 @@ function SpeechToInputbox(command){
 
 function robot(command){
   //SpeechToInputbox(command);
-  document.getElementById("moreinfo").innerHTML = " ("+command+") ";
   command=command.toLowerCase();
   for (let i = 0; i < change.length; i++) {
     const chg = change[i];
@@ -3588,6 +3587,7 @@ function robot(command){
     //all text transfer
     processSpeech(-1,command,0,null);
   }
+  //document.getElementById("moreinfo").innerHTML = " ("+command+") ";
   var mini=-1;
   var minv=10;
   var minparams=[];
@@ -3645,6 +3645,7 @@ function robot(command){
   
   if (minv<egyezes){
     console.log(commands[commandgroup][mini].command,command); //1
+    document.getElementById("moreinfo").innerHTML = " ("+command+") ";
     processSpeech(mini,command,minv,minparams);
   } else {
     console.log(minv,command);
@@ -3667,8 +3668,10 @@ function robot(command){
 }
 
 function processSpeech(idx,command,minv,minparams=null){
+  console.log(idx,command,minv,minparams)
   if (idx>-1){ //yes or no -1
     var cases=commands[commandgroup][idx].grp; //0
+    console.log(cases)
     SPHistory.add([idx,command,minv,minparams],cases);
   }
   if (speechlevel>0){
@@ -3980,9 +3983,10 @@ function SP_link(idx,command,minv,minparams){
 
 function SP_maketables(num){
   if (num == null)
-    num=1  
+    num=1
   num=Math.min(10,Math.abs(Math.floor(num)));
   var table=null;
+  console.log("maketables ",num)
   for (let i = 0; i < num; i++) {
     table = newTable();  
     table.moveToPosition((i*10)+(Math.floor(Math.random()*8)*120),Math.floor(Math.random()*4)*130);
@@ -4250,7 +4254,7 @@ async function createdocument(linknode){
   </style>
   `;
   root.appendChild(head);
-  body.innerHTML="<a href='https://codepen.io/hgabor47/full/XqezrX'>FlowDBEditor indítása</a><h1>Tables</h1>";
+  body.innerHTML="<a href='"+document.location+"'>FlowDBEditor indítása</a><h1>Tables</h1>";
   PNG=null;
   svg2png(null,"flowdbeditor",asyncCreateDocument);
   ATables.forEach(function(table,index){
