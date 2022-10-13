@@ -16,7 +16,7 @@ You can create a database to the browsers' localstorage.
 You can create tables
 You can create fields of tables with any kind of type.
 You can add records to the tables on air (stored to browsers' localstorage)
-Filling the records of table takes into account the relationships (contraints links).
+Filling the records of table takes into account the relationships (constraints links).
 Write records with right click on created tables :)
 Voice recognition HUN and ENG
 
