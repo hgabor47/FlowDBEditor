@@ -21,6 +21,31 @@
 
   so. in the next time you can continue editing where you abandoned. :)
 */
+xhttp2=null
+if (window.XMLHttpRequest) {
+  xhttp2 = new XMLHttpRequest();
+  } else {    // IE 5/6
+  xhttp2 = new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  if (xhttp2!=null){
+      xhttp2.overrideMimeType('text/xml');
+  }
+
+function getFile(filename){
+    if (xhttp2==null) return null;
+    xhttp2.open("GET",filename, false);
+    xhttp2.send(null);
+    //xmlDoc = xhttp2.responseXML.getElementsByTagName("flowdbeditor")[0];
+    try{
+    source = xhttp2.responseText;
+    localStorage.setItem("flowdbeditor",source);
+    Load();
+    console.log(source.substring(0, 200));
+    }catch(e)
+    {
+      console.log('file not loaded');
+    }
+}
 
 var TParams = function(loc) {  
   this.o = new Object();
@@ -65,7 +90,6 @@ UTF8 = {
 	}
 };
 
-
 var loc = new URL(document.location);
 var params = new TParams(loc.search);
 //var params = loc.searchParams;
@@ -78,6 +102,12 @@ if (flowdbplayer!=null){
   VIEWMODE=ViewModes.User;
 }
 //var flowdbinit=null; //if exists please remove this line flowdbinit is a innercircle start flowdb if you want
+var flowdbinit = params.get("file"); //when you start chrome with --allow-file-access-from-files switch
+/*
+  go-bat template:
+  cmd /C start chrome "file:///%cd%/../flowdbeditor.html?file=file:///%cd%/yourfilename.txt" --allow-file-access-from-files
+*/
+
 var temp="flowdbeditor_temp";        
 var AUTOINCTSTART=1;
 var g=null;
@@ -116,9 +146,13 @@ function flowdbeditor_onload(){
     else //compact
     {
       if ( !flowdbinit.startsWith("<flow" )) {
-        //TODO load serverside file to flowdbinit
-        document.getElementById("loadserverdefault").style.display="flex";
-        LoadServerDefault(); //but.activ=true; in the function
+        if ( flowdbinit.startsWith("file://" )) {
+          getFile(flowdbinit);
+        }else{
+          //TODO load serverside file to flowdbinit
+          document.getElementById("loadserverdefault").style.display="flex";
+          LoadServerDefault(); //but.activ=true; in the function
+        }
       } else {
         LoadString(flowdbinit); 
         but.activ=true;     
@@ -210,10 +244,13 @@ var TTable = function(name){
   this.description="";
   this.color="#888888";
   this.id=-1;
-  this.properties=new TProperty();
-  this.properties.Add("wfstart","Workflow start","L",false);
-  this.properties.Add("wfend","Workflow end","L",false);
 
+  this.props= function(){
+    this.properties=new TProperty();
+    this.properties.Add("wfstart","Workflow start","L",false);
+    this.properties.Add("wfend","Workflow end","L",false);
+  }
+  this.props();  
   
   this.initSQL = function(){
     this.sql=Array(SQLModes.length+1); //sql , triggers, functions etc  // SQLModes.MySQL or SQLModes.MSSQL  (0,1)

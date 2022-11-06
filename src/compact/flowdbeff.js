@@ -1,5 +1,28 @@
 var ver = 'Effector plugin 1.1';
 var scriptstart=false;
+
+
+
+function addfeat(){
+    //Add Effector features
+    TTable.origprop = TTable.props;
+    Reflect.defineProperty(TTable.prototype, 'props', { value: function() {
+        origprop();
+        //this.properties=new TProperty();
+        this.properties.Add("ttype","Tipus","N",false);
+    }});
+/*
+    var old_prototype = TTable.prototype;
+    var old_init = TTable.props;
+    TTable.props = function () {
+        old_init.apply(this, arguments);
+        
+    };
+    TTable.prototype = old_prototype;
+*/
+
+}
+
 loadSQLScript(function(){
     scriptstart=true;
     var helpp = document.getElementById('moreinfo');
@@ -17,6 +40,9 @@ loadSQLScript(function(){
     AType[7].effectortype="CheckBox";
     AType[8].effectortype="TextBox";
     setWorkflowConnectType();
+
+    addfeat();
+
 
 });
 
@@ -110,6 +136,22 @@ function setWorkflowConnectType(){
     <button onclick="wflink_ok(this)">OK</button>
     <button onclick="this.parentElement.style.visibility='hidden';">Cancel</button>
     <button onclick="wflink_delete(this)">Delete</button>`;
+}
+
+function UU(s){
+    if (s==null) return "";
+    s=""+s;
+    return s.toUpperCase();
+}
+function LL(s){
+    if (s==null) return "";
+    s=""+s;
+    return s.toLowerCase();
+}
+function CC(str){
+    if (str==null) return "";
+    str=""+str;
+    return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 function loadSQLScript(fuggv){
@@ -278,6 +320,41 @@ function SaveXML(filename,source){
     linknode.click();
 }
 
+function COMPSave(title,extform='Form',extfile=''){    
+    var sid='';
+    AScreens.forEach(function(scr,idx){
+        if (!scr.enable) return;
+        var filename = getFilename(scr.table.name,title);  
+        var source=`<?xml version="1.0" encoding="utf-8"?>`+LF+`<Component xmlns="http://effector.hu/schema/ns/component">
+  <AreHeaderButtonsVisible>false</AreHeaderButtonsVisible>
+  <AreSpaceSavingButtonsVisible>false</AreSpaceSavingButtonsVisible>
+  <Tabs>
+    <Tab id="tab_4684">
+        <Caption>`+filename+`</Caption>
+        <ResourceName>`+extform+filename+`</ResourceName>
+        <RefreshParentOnClose>true</RefreshParentOnClose>  
+      </Tab>
+    </Tabs>
+</Component>`;            
+        SaveXML('Component'+filename+extfile,source);        
+    });
+}
+
+function SCREENSave(title,extcomp='',extfile=''){    
+    var sid='';
+    AScreens.forEach(function(scr,idx){
+        if (!scr.enable) return;
+        var filename = getFilename(scr.table.name,title);  
+        var source=`<?xml version="1.0" encoding="utf-8"?>`+LF+`<Screen xmlns="http://effector.hu/schema/ns/screen">
+  <Caption>`+filename+`</Caption>
+  <Component>Component`+filename+extcomp+`</Component>
+</Screen>`;            
+        SaveXML('Screen'+filename+extfile,source);        
+    });
+}
+
+
+
 function DDSave(title){    
     var sid='';
     AScreens.forEach(function(scr,idx){
@@ -309,7 +386,7 @@ function DDSave(title){
             source+=`
 </Columns>
 </DataDefinition>`;
-            var filename=scr.table.name.toLowerCase().replace(title.toLowerCase(),title).replace(/_/g,'');
+            var filename = getFilename(scr.table.name,title);
             SaveXML('DataDefinition'+filename,source);
         
     });
@@ -320,7 +397,7 @@ function BOSave(title){
     var f=null;
     AScreens.forEach(function(scr,idx){
         if (!scr.enable) return;
-            var filename=scr.table.name.toLowerCase().replace(title.toLowerCase(),title).replace(/_/g,'');
+            var filename = getFilename(scr.table.name,title);
 
             var source=`<?xml version="1.0" encoding="iso-8859-2"?>`+LF+`<BusinessObject xmlns="http://effector.hu/schema/ns/businessobject">`+LF+
             `<DataTable>`+scr.table.name+`</DataTable>`+LF;
@@ -386,7 +463,9 @@ function FOControlCombo(combofilename,finame,left=160){
 
 function FOSave(title){
     DDSave(title);
-    BOSave(title);  
+    BOSave(title);
+    COMPSave(title);
+    SCREENSave(title);      
     var tidx=0;
     var f=null;
     var cg=`<ControlGroupOrders>
@@ -394,15 +473,39 @@ function FOSave(title){
     
     AScreens.forEach(function(scr,idx){
         if (!scr.enable) return;
-            var filename=scr.table.name.toLowerCase().replace(title.toLowerCase(),title).replace(/_/g,'');
+            var filename = getFilename(scr.table.name,title);
 
-            var source=`<?xml version="1.0" encoding="iso-8859-2"?>`+LF+`<Form xmlns="http://effector.hu/schema/ns/editform">`+LF+
+            var source=`<?xml version="1.0" encoding="iso-8859-2"?>`+LF+`<Form xmlns="http://effector.hu/schema/ns/form">`+LF+
 `<Caption>`+scr.table.name+`</Caption>
 <DataDefinition>DataDefinition`+filename+`</DataDefinition>
 <BusinessObject>BusinessObject`+filename+`</BusinessObject>
 <ReportContentChangedOnValueChange>false</ReportContentChangedOnValueChange>
 <ControlGroups>
-`;
+    <ControlGroup name="Rights_RO100">
+    <Controls>
+        <Control>
+            <Name>Rights_RO100F</Name>
+            <BindingName>Closed</BindingName> <!--A RIGHTS-ban felhasznált mezőnek léteznie kell a FORM-on hogy beolvassa-->
+            <Type>TextBox</Type>
+        </Control>
+        <Control>
+            <Name>Rights_RO100</Name>
+            <BindingName>Rights_RO100</BindingName>
+            <ComputedValue default="false" type="SQL" return="string">
+                select case when '[##Field.Closed##]'=1 then 'true' else 'false' end
+            </ComputedValue>
+            <DefaultValue default="false" type="SQL" return="string">
+                select case when '[##Field.Closed##]'=1 then 'true' else 'false' end
+            </DefaultValue>
+            <Type>TextBox</Type>
+            <Recomputing>Always</Recomputing>
+        </Control>
+    </Controls>
+    <Rules>
+        <Visible>false</Visible>
+    </Rules>
+    </ControlGroup>
+`+LF+LF+LF+LF;
             for(var i=0;i<scr.table.AFields.length;i++){
                 f=scr.table.AFields[i];
                 if (i==0){ //for ID
@@ -413,13 +516,11 @@ source+=`   <ControlGroup name="`+f.name+`">
                 <Name>Label_`+f.name+`</Name>
                 <Caption>`+f.name+`</Caption>
                 <Width>150</Width>
-                <Left>10</Left>
             </Control>
             <Control>
                 <Type>TextBox</Type>
                 <Name>Control_`+f.name+`</Name>
                 <Width>200</Width>
-                <Left>160</Left>
                 <BindingName>`+f.name+`</BindingName>
                 <TextAlign>Left</TextAlign>
             </Control>
@@ -439,7 +540,6 @@ source+=`   <ControlGroup name="`+f.name+`">
                 <Name>Label_`+f.name+`</Name>
                 <Caption>`+f.name+`</Caption>
                 <Width>150</Width>
-                <Left>10</Left>
             </Control>`+LF;
                         if (f.link!=null){ //iflink
                             var combofilename = ComboD_direct(title,f);
@@ -472,28 +572,40 @@ source+=`   <ControlGroup name="`+f.name+`">
                 } //else
             } //for
             source+=`
+            <ControlGroup name="ClickedButton">
+                <Controls>
+                    <Control>
+                        <Type>TextBox</Type>
+                        <Name>CheckBox_ClickedButton</Name>
+                        <BindingName>ClickedButton</BindingName>
+                        <ComputedValue type="SQL" return="string" default="">select '[##Special.ClickedButton##]'</ComputedValue>
+                    </Control>
+                </Controls>
+                <Rules>
+                    <Visible>false</Visible>
+                </Rules>
+            </ControlGroup>	
+
             <ControlGroup name="ButtonGroup">
             <Controls>
               <Control>
                 <Type>SaveButton</Type>
                 <Name>Save</Name>
                 <Caption>[#EditFormPanel.SaveButton#]</Caption>
-                <Width>80</Width>
-                <Left>180</Left>
+                <Visible>'[##Field.Rights_RO100##]'.toLowerCase()</Visible>
+                <!--<Visible type="SQL" default="true" return="boolean" >select '[##Field.Rights_RO100##]'</Visible>-->
               </Control>
               <Control>
                 <Type>CancelButton</Type>
                 <Name>Cancel</Name>
                 <Caption>[#EditFormPanel.CancelButton#]</Caption>
                 <Width>50</Width>
-                <Left>310</Left>
               </Control>
               <Control>
                 <Type>DeleteButton</Type>
                 <Name>Delete</Name>
                 <Caption>[#EditFormPanel.DeleteButton#]</Caption>
                 <Width>50</Width>
-                <Left>310</Left>
                 <Visible type="Simple" return="boolean" default="false">'[##Filter.JumpType##]' != 'New'</Visible>
               </Control>
             </Controls>
@@ -502,18 +614,29 @@ source+=`   <ControlGroup name="`+f.name+`">
             source+=cg+`      <ControlGroup>ButtonGroup</ControlGroup>
             </ControlGroupOrder></ControlGroupOrders>`+LF;
             source+=`</Form>`;
-            var filename=scr.table.name.toLowerCase().replace(title.toLowerCase(),title).replace(/_/g,'');
+            //var filename=scr.table.name.toLowerCase().replace(title.toLowerCase(),title).replace(/_/g,'');
             SaveXML('Form'+filename,source);
         
     });
 }
 
+function getFilename(tablename,title){
+    var dbproject= document.getElementById("dbproject").value;if (dbproject=='') dbproject=title
+    var tbname = LL(tablename).replace(LL(title),'').replace(/_/g,'');
+    var filename=dbproject+CC(tbname);
+    return filename;
+}
+
+
 function DispSave(title){
     var sid='';
-    var filename=scr.table.name.toLowerCase().replace(title.toLowerCase(),title).replace(/_/g,'');
+    SCREENSave(title,'disp','disp');    
+    COMPSave(title,'DisplayDefinition','disp');
+
     AScreens.forEach(function(scr,idx){
-         if (!scr.enable) return;  
-            var source=`<?xml version="1.0" encoding="iso-8859-2"?>`+LF+`<DisplayDefinition xmlns="http://effector.hu/schema/ns/displaydefinition">`+LF+
+         if (!scr.enable) return;           
+         var filename = getFilename(scr.table.name,title);
+         var source=`<?xml version="1.0" encoding="iso-8859-2"?>`+LF+`<DisplayDefinition xmlns="http://effector.hu/schema/ns/displaydefinition">`+LF+
 `<Caption>`+scr.table.name+`</Caption>
 <ViewType>Card</ViewType>
 <DefaultSelectionType>Multiple</DefaultSelectionType>
@@ -588,6 +711,34 @@ function DispSave(title){
         ]]>
     </HTMLTemplate>
   </HTMLTemplates>
+  <ControlPanel>
+  <Controls>
+      <Control>
+          <Name>Filter_ID</Name>
+          <Type>TextSearch</Type>
+          <Caption>ID</Caption>
+          <ConnectedColumnDefinition>`+sid+`</ConnectedColumnDefinition>
+          <Operator>=</Operator>
+          <Width>200</Width>
+          <DefaultValue type="Constant" return="int" default="">'[##Filter.`+sid+`_ID##]'</DefaultValue>
+          <Visible>false</Visible>
+      </Control> <!--IDFILTER-->
+      <Control>
+          <Name>NewObject</Name>
+          <Type>NewObjectButton</Type>
+          <Caption>Hozzáadás</Caption>
+          <BusinessObject>BusinessObjectMSKFEBErtekelodelegalas</BusinessObject>
+          <Screen>ScreenMSKFEBDelegaloErtekelodelegalasKivalasztas</Screen>
+      </Control>
+      <Control>
+          <Name>Delete</Name>
+          <Type>DeleteObjectButton</Type>
+          <Caption>Törlés</Caption>
+          <BusinessObject idColumn="id">BusinessObjectMSKFEBTervezetmjgy</BusinessObject>
+      </Control>
+  </Controls>
+</ControlPanel>
+
 </DisplayDefinition>`;
             
             SaveXML('DisplayDefinition'+filename,source);
@@ -662,9 +813,7 @@ function ComboD_direct(title,field){ //skey ha ures akkor az elso mező, ha nem 
       <SelectionString>
         <![CDATA[
           SELECT `+Lfi+`                   
-                  `+Lleft+` WHERE
-                  t0.Deleted=0 
-                  AND 1=1 ORDER BY 2
+                  `+Lleft+` WHERE t0.Deleted=0 AND 1=1 ORDER BY 2
           ]]>
       </SelectionString>
       <KeyColumn>`+key+`</KeyColumn>
@@ -672,7 +821,8 @@ function ComboD_direct(title,field){ //skey ha ures akkor az elso mező, ha nem 
     </Database>
   </Source>
 </ComboDefinition>`;
-var filename=table.name.toLowerCase().replace(title.toLowerCase(),title).replace(/_/g,'');
+var filename = getFilename(table.name,title);
+
 SaveXML('Combo'+filename,s);
 return ['Combo'+filename,tidx];
 }
