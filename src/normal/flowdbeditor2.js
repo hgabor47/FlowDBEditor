@@ -3475,6 +3475,7 @@ function AI(){
   recognition.lang = 'hu-HU';
   recognition.interimResults = true;
   recognition.maxAlternatives = 1;
+  recognition.continuous=true;
 
 	recognition.addEventListener('result', e => {
 		const speechTotext = Array.from(e.results)

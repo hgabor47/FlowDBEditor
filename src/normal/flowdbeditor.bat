@@ -2,4 +2,4 @@
 # A többi FORM lekérdezhetõ a címsor kézi átírásával
 
 # cmd /C start chrome "file:///%cd%/index.html?file=file:///%cd%/flowdbFEB221102.txt" --allow-file-access-from-files
-cmd /C start chrome "file:///%cd%/index.html" --allow-file-access-from-files
+cmd /C start chrome "file:///%cd%/index.html" --allow-file-access-from-files --disable-permissions-api

@@ -5,12 +5,16 @@ var scriptstart=false;
 
 function addfeat(){
     //Add Effector features
+/*New
     TTable.origprop = TTable.props;
     Reflect.defineProperty(TTable.prototype, 'props', { value: function() {
         origprop();
         //this.properties=new TProperty();
         this.properties.Add("ttype","Tipus","N",false);
     }});
+*/
+
+
 /*
     var old_prototype = TTable.prototype;
     var old_init = TTable.props;
