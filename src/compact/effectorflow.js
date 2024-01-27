@@ -1,661 +1,3 @@
-﻿<!DOCTYPE html>  
-<html lang="en">
-<head>
-    <script>
-        var vers="1.41";
-		
-        var flowdbinit=''; 
-		//    //can I use content (XML) or file path on server side. On client side please use GET 
-                               
-								//example: copy to clipbrd saved flowdb file content and paste to here among `` signs
-        //var imgs="";//for local
-        var imgs="https://raw.githubusercontent.com/hgabor47/FlowDBEditor/master/";
-    </script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=0.7">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    <title>FlowDBEditor4</title>
-     <!-- Bootstrap CSS -->
-     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-     <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-    <style>
-
-        @import url('https://fonts.googleapis.com/css?family=Work+Sans:200,400');
-        * {
-            font-family: "Work Sans";   
-            font-size: 1rem;                               
-        }
-        ::-webkit-scrollbar {
-            width: 20px;
-        }
-        button.fa {
-            font-size:16px;
-        }
-        /* Track */
-        ::-webkit-scrollbar-track {
-            box-shadow: inset 0 0 5px grey; 
-            border-radius: 10px;
-        }
-        
-        /* Handle */
-        ::-webkit-scrollbar-thumb {
-            background: #ddd; 
-            border-radius: 10px;
-        }
-
-        /* Handle on hover */
-        ::-webkit-scrollbar-thumb:hover {
-            background: #ccc; 
-        }
-        #area {
-            
-            display: flex;
-        }
-        #menu{        
-            z-index:300;        
-            height:auto;
-            width:200pt; 
-            /* min-width:200px; */
-            overflow:hidden;
-            position: relative;
-            left:13pt;
-        }
-        #menupanel{
-          background-color:rgba(255,255,255,0.8);
-          position: fixed;
-          direction: rtl;
-          overflow-x:hidden;
-          overflow-y:auto;
-          z-index:301;
-          top:12%;
-          left:16px;
-          max-height:95vh;
-          /* height:auto; */
-          width:200pt;
-          -webkit-backface-visibility: hidden;
-        }
-        .item_direction {
-          direction:ltr;
-        }
-        .properties {
-            width: 100%;            
-            border: gray dotted 1px;            
-        }
-        .properties table {        
-            width:100%;
-        }
-        .properties table tr #propname {
-            background-color: rgba(189, 189, 189, 0);
-            border-right: rgb(128, 128, 128) dotted 2px;
-        }
-        .properties table tr td input {            
-            width:100%;
-            border: none;
-        }
-
-        nav {
-            width:90%;
-            height:3rem;
-        }
-        #showhint{
-            background-color: rgba(0, 128, 0, 0.7);
-            color: white;
-            position: absolute;
-            top:100px;
-            left:100px;
-            padding:12px;
-        }
-        .borderYellow{
-            padding:12px;
-            border: rgb(255, 225, 142) solid 1px;
-        }
-        .borderGray{
-            padding:12px;
-            border: rgb(194, 194, 194) solid 1px;
-        }
-        .addoninfo{
-            padding:10px;
-            border:gray dotted 1px;
-            background-color: rgb(237, 237, 237);
-            max-width:120px;
-        }
-        .addoninfo:hover{
-            background-color: rgb(216, 209, 185);
-        }
-        #title {
-            font-size: 2rem;
-            border: black 0 solid;
-            left:20%;
-            position: absolute;
-            top:5rem;
-            width:300px;
-            z-index: 180; 
-        }
-        svg text {
-            -webkit-touch-callout: none; /* iOS Safari */
-            -webkit-user-select: none; /* Safari */
-            -khtml-user-select: none; /* Konqueror HTML */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently
-                                        supported by Chrome and Opera */
-        }
-        svg text::selection {
-            background:none;
-        }
-        .inputtext {
-          width:400px;
-        }
-        .btn_x {
-            margin:0.3rem;
-            width:1.2rem;
-            height:1.2rem;
-            font-size: 0.8rem;
-            padding:0;
-        }
-      .tabs {
-            margin-right: 2px;
-            border-bottom: 2px rgba(0, 0, 255, 0) solid; 
-            padding-right:20px;
-            background-color: rgba(128, 128, 128, 0.26);  
-            cursor:pointer;          
-        }
-        .tab_selected {
-            margin-right: 2px;
-            border-bottom: 2px blue solid;
-            padding-right:20px;
-            background-color: rgba(128, 128, 128, 0.63);   
-            cursor:pointer;         
-        }
-
-        .invisibleinput{
-            position: absolute;
-            top:-1000px;
-            left:0px;
-        }
-        #area {
-            
-            display: flex;
-        }
-        #AIHelp {
-            z-index: 200;
-            position: absolute;
-            padding:16px;
-            top:10%;
-            left:20%;
-            height:60%;
-            width:70%;
-            background-color: rgba(255, 231, 166, 0.9);
-            border:black 1px dotted;
-            color: rgb(0, 29, 29);
-            visibility: hidden;
-        }
-        .AITitle {
-            color: rgb(153, 105, 0);
-            font-weight: 800;
-            font-size: 1.4rem;            
-        }
-        .AIText {
-            color:rgb(44, 30, 0);
-            font-size: 1rem;
-        }
-        #news {
-            z-index: 200;
-            position: absolute;
-            padding:16px;
-            top:10%;
-            left:20%;
-            height:50%;
-            width:50%;
-            background-color: rgba(204, 204, 204, 0.897);
-            border:black 1px dotted;
-            color: rgb(0, 29, 29);
-            visibility: hidden;
-        }
-        #defaultcontent {
-            z-index: 200;
-            position: absolute;
-            padding:16px;
-            top:10%;
-            left:20%;
-            
-            width:50%;
-            background-color: rgba(209, 196, 180, 0.897);
-            border:black 2px dotted;
-            color: rgb(0, 29, 29);
-            visibility: hidden;
-            cursor:pointer;
-        }
-        button {
-            height:1.8rem;
-            margin:0.1rem;
-            width:auto;    
-        }
-        .grid-container {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-        }
-        label {
-            font-size: 0.6rem;
-            height:0.6rem;
-            width:100%;
-        }
-        .label {
-            font-size: 0.6rem;
-            height:0.6rem;
-        }
-        .display-5 {
-            font-size: 2.7rem;
-            font-weight: 300;
-            line-height: 1.4;
-        }
-        .display-6 {
-            font-size: 1.5rem;
-            font-weight: 300;
-            line-height: 1;
-        }
-        #flowdbeditor {
-            width:4200px;
-            height:4200px;            
-            padding: 0; margin: 0;
-        }
-        .flow_flowmode{
-            color: black;
-        }
-        .flow_constraintmode{
-            color:rgb(32, 0, 173);
-        }
-
-        .modeContraint {
-            background-color: blue;
-        }
-        .green {
-            background-color: greenyellow;
-        }
-        .s100{
-            width:100%;
-        }
-        .flow_edit{
-            position: absolute;
-            padding:16px;
-            top:100px;
-            left:100px;         
-            background-color: rgba(233, 233, 233, 0.89);
-            border: 1px rgb(88, 88, 88) dotted;
-            z-index: 320;
-        }
-        .flow_browse{
-            position: absolute;
-            padding:16px;
-            top:100px;
-            left:100px;
-            height:80%;
-            width:90%;
-            overflow: auto;
-            background-color: rgba(233, 233, 233, 0.89);
-            border: 1px rgb(88, 88, 88) dotted;
-            z-index: 310;
-        }
-        .flow_context {
-            font-size: 1.3rem;
-            font-family: FontAwesome;
-            font-weight: 400;
-            cursor:pointer;   
-            height:1.5rem;                  
-        }
-        .red {
-            color: red;
-        }
-        .flow_tables {
-            font-size: 1.1rem;
-            font-weight: 800;
-            cursor:pointer;   
-            height:1.5rem;                  
-        }
-        .flow_browse_header {
-            position: relative;
-            top:0px;    
-            padding:16px;
-            background-color: rgba(105, 105, 148, 0.322);        
-        }
-        
-        .flow_tables_color1 {
-            background-color: rgb(192, 192, 192);
-            
-        }
-        .flow_tables_color2 {
-            background-color: rgb(175, 175, 175);
-        }
-        .flow_tablegroup {
-            cursor: all-scroll;
-        }
-        .flow_fields {
-            font-size: 1rem;
-            cursor:pointer;
-        }
-        .flow_fields_noevent {
-            cursor: all-scroll;
-            font-size: 1rem;            
-        }
-        .flow_fields_color1 {
-            background-color:rgb(160, 160, 160);
-            fill:rgb(156, 156, 156);
-        }
-        .flow_fields_color2 {
-            background-color:rgb(207, 207, 207);
-            fill:rgb(192, 192, 192);
-        }
-        .flow_fields_color3 {
-            fill:rgba(127, 127, 127,0.3);
-        }
-        .flow_fields_color4 {
-            fill:rgba(127, 127, 127,0.0);
-        }
-        .flow_constraints{
-            font-size: 0.7rem;
-        }
-        .flow_constraints_color1{
-            background-color:rgb(161, 161, 161);                        
-        }
-        .flow_constraints_color2{
-            background-color:rgb(204, 204, 204);                      
-        }
-        
-        .flow_line {
-            stroke: rgb(59, 60, 68);
-            stroke-width: 2;
-        }
-        .wf_line {
-            stroke: rgba(255, 157, 0, 0.3);
-            stroke-width: 6;
-        }
-        .flow_line_hidden {
-            stroke: rgba(59, 60, 68,0);
-            stroke-width: 0;
-        }
-        .flow_line_start {
-            stroke: rgb(29, 40, 126);
-            stroke-width: 4;
-        }
-        .flow_line_end {
-            stroke: rgb(255, 174, 0);
-            stroke-width: 2;
-        }
-        .flow_line_start_hidden {
-            stroke: rgba(29, 40, 126,0);
-            stroke-width: 0;
-        }
-        .flow_line_end_hidden {
-            stroke: rgba(255, 174, 0,0);
-            stroke-width: 0;
-        }
-        .flow_rec_header{
-            font-weight: 900;
-        }
-        .flow_clipboard {
-            background-color: rgb(255, 219, 174);           
-            position: fixed;
-            padding:16px;
-            top:16px;
-            left:16px; 
-            width:600px;
-            z-index: 350;           
-            border: 1px rgb(88, 88, 88) dotted;
-            -webkit-backface-visibility: hidden;
-        }
-
-        .commandbutton {
-            width:"100%";
-            height:2rem;
-            cursor:pointer;
-        }
-        #help {
-            color: green;
-            height:1.8rem;
-        }
-        #yesno {
-            visibility: hidden;
-            z-index: 300;
-            position: absolute;
-            padding:32px;
-            top:200px;
-            left:200px;  
-            width:300px;
-            height:180px;       
-            background-color: rgba(113, 170, 96, 0.89);
-            border: 1px rgb(88, 197, 74) solid;            
-            font-size: 2.2rem;
-        }
-        #donate {
-            color:black;
-            font-weight: 500;
-            font-size: 0.6rem;
-            padding-left:60px;
-            padding-right:60px;
-            background-color: rgba(211, 211, 211, 0.472);
-        }
-        .micro {
-            font-size:0.6rem;
-        }
-        #smile {
-            visibility: hidden;
-            opacity:0.5;
-            z-index: 310;
-            left:300px;
-            position: absolute;            
-        }
-        #screen{
-            position: fixed;
-            top:0px;
-            left:0px;
-            z-index: 350;
-            width: auto;
-            height: auto;
-            -webkit-backface-visibility: hidden;
-        }
-    </style>
-<script src="jszip.min.js"></script>
-    <script>
-        var news = [
-          [119,"17. Works on Chrome and IE"]  
-        ,[118,"16.You can create soft link (link without export the constraint)"]    
-        ,[117,"15.You can write triggers,functions for MySQL export ($LineEnd!)"]
-        ,[116,"14.(HUN)Ékezetes tábla és mezőnév átalakítása ékezet nélkülire (hangparanccsal)"]
-        ,[115,"12.You can create documentation with autodoc HTML (with inbuilt PNG)"]
-        ,[113,"11.You can export to PNG"]
-            ,[112,"10.Control by VOICE :) Hungarian and English"]
-            ,[111,"9.Built in default content load option"]
-            ,[109,"8.Filtered&linked combobox is able to setup by Field editor window"]
-            ,[108,"7.Touch is working on tablet or mobile and the Zoom implemented by a button"]
-            ,[106,"6.Bug fixes (can able to insert new records to table content."]
-            ,[104,"5.Copy from Excel or another source to clipboard. Press CTRL+V on FlowDBEditor and create a new table or fill a table from clipboard."]
-            ,[103,"4.Press CopyToURL button for copy to clipboard a link with inbuilt data"]
-            ,[102,"3.You can export to SVG, MySQL"]
-            ,[101,"2.You can Save to browser memory (and Load from)"]
-            ,[100,"1.You can Save to file and load from file later"]
-            ];
-
-        function cmdin(a){
-            a.style.height="auto";
-        }
-        function cmdout(a){
-            a.style.height="3.7rem";
-        }
-        function blur1(){
-            var but=document.getElementById("flowdbload");
-            if (but.activ){
-                //document.getElementById("help").innerHTML="blur";
-                FlowDBLoad(but);
-            }
-        }
-        window.onload=function(){            
-            try{
-                v = document.getElementById("vers");
-                v.innerHTML="v"+vers;
-                document.title+="."+vers;                
-                flowdbeditor_onload();
-            } catch (error) {
-                
-            }
-        }
-
-
-    </script>
-</head>
-<body > 
-    <div id="screen"></div>  
-    <img id="smile" src="smile.gif" title="smile" />
-    <div id="AIHelp">
-        <div style="height:80%;overflow:auto;">
-            <h1>A.I. Help</h1>
-            <button onclick="AIHelp('en')">English</button>
-            <button onclick="AIHelp('hu')">Hungarian</button>
-            <ul id="aiul">
-                
-            </ul>
-        </div>
-        <button  onclick='{this.parentElement.style.visibility="hidden"}'>OK</button>        
-    </div>
-    <div id="defaultcontent" onclick="{this.style.visibility='hidden'}">
-        <div class="display-3">Default content changed on server and loaded.</div>
-        <div class="display-5">Your last saved content not modified!</div>
-        <br>
-        <div>Please use LOAD for access your last stored flow or store this with SAVE (and overwrite your last flow).</div>
-        <div>If you MODIFY this default loaded content this will automatically store to TEMP (and didn't overwrite last SAVEd).</div>
-        <div>If you press F5 then reload the latest TEMP flow (and this content will disapear and if you'd like then use LoadDefault button for view it)</div>
-    </div>
-    <div id="yesno" onclick="{speechlevel=0;this.style.visibility='hidden';}">YES or NO?</div>
-    <div id="news">
-        <div style="height:80%;overflow:auto;">
-            <h1>News</h1>
-            <ul id="newsul">
-            
-            </ul>
-        </div>
-        <button  onclick='{this.parentElement.style.visibility="hidden"}'>OK</button>
-    </div>
-    <div id="menupanel" > 
-                      
-            <div id="menu" class="flex-column"  onmouseover="cmdin(this)" onmouseout="cmdout(this)">
-                
-                <div style="direction:ltr;">
-                    <div class="flow_tables">CommandPanel
-                        <i style="font-size:16px" class="fa">&#xf103;</i>
-                    </div>
-                    <button class="commandbutton" onclick="{this.style.color='#ff0000';AI()}" class="fa" style="font-family: FontAwesome;" >&#xf130;<span class="micro">
-                        A.I.</span></button> 
-                    <button class="commandbutton" onclick="oncehints.hint('save');Save()">
-                        Save</button>
-                    <button class="commandbutton" onclick="oncehints.hint('load');Load()">
-                        Load</button>
-                    <button class="commandbutton" onclick="Load('alma')">
-                        Clear</button>
-                    <button id="loadserverdefault" class="commandbutton" style="display:none;" onclick="LoadServerDefault(true)">
-                        LoadServerDefault</button>
-                    <form style="display:none;"><input id="filename" class="commandbutton" type='file' accept='text/plain' ></form>
-                    <button class="commandbutton" onclick="FlowDBSave('print')">
-                        SaveToFile</button>                                        
-                    <button class="commandbutton" id="flowdbload" onclick="FlowDBLoad(this)" onmouseout="blur1()">
-                        LoadFromFile</button>
-                    <button class="commandbutton" onclick="FlowDBCopy('print')">
-                        CopyToURL</button>                                        
-                    <button class="commandbutton" onclick="savetosvgfile('print','flowdbeditor')">
-                        Download SVG</button>
-                    <button class="commandbutton" onclick="svg2png('print','flowdbeditor')">
-                        Download PNG</button>
-                    <button class="commandbutton" onclick="mySQL('print')">
-                        Download MySQL</button>
-                    <button class="commandbutton" onclick="MSSQL('print',0)">
-                        Download MSSQL</button>
-                    <button class="commandbutton" onclick="newsdialog(true)">
-                        News</button>
-                    <button class="commandbutton" onclick="zoom()">
-                        Zoom</button>                                        
-                    <button class="commandbutton" onclick="createdocument('print')">
-                        Doc</button>
-                    <button class="commandbutton" onclick="importsql(this)">
-                        IMPORT SQL</button>
-                    <!-- <button class="commandbutton" onclick="{var cmd = prompt('Command','exit');setTimeout(function(){robot(cmd)},2000);}">A.I.TEST</button> -->
-                    <div id="modules"></div>
-                    <a target="_blank" style="visibility:hidden;" id="print" download="file.txt" href="">RightClickforDownload</a>
-                    <input id="copyinput" class="invisibleinput" value="">
-                </div>
-            </div>
-            <div class="flex-column p-2"> 
-                <span class="display-6">Tables</span>
-                <button onclick="getOutsideTables()"  class="fa">&#xf036;</button>
-                <button onclick="toMoveTables(200,0)" class="fa">&#xf050;</button>               
-                <button onclick="toMoveTables(-200,0)" class="fa">&#xf049;</button>               
-                <button class="s100" onclick="newTable()">New</button>
-                <div id="tables" class="s100">
-
-                </div>
-            </div>
-            <div class="flex-column p-2"> 
-                <span class="display-6">Fields</span>
-                <span class="label">sort by drag'n drop</span>
-                <button class="s100" onclick="newField()">New</button>
-                <div id="fields" class="s100">                        
-                </div>
-            </div>
-            <div class="flex-column p-2"> 
-                    <span class="display-6">Constraints</span>
-                    <span class="label">click 2 fieldnames</span>
-                    <button id="newconstraint" class="s100 flow_flowmode" onclick="newConstraint(this)">Start link</button>
-                    <div id="constraints" class="s100">
-                        
-                    </div>
-            </div>
-        </div>
-    <div id="mainarea" class="container-fluid">
-        <span class="display-5" >FlowDBEditor4</span><b id="vers"></b><i>(C)GaborHorvath</i><span id="moreinfo"></span>
-        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=hgabor47%40gmail%2ecom&lc=AL&item_number=flowdbeditor&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted"><span id="donate"><img src="" id="donateimg">...for new features & modules</span></a>
-        <div id="help" onclick="this.innerHTML=''">Write records with right click on created tables :)</div>
-        <input type="text" id="title" value="Unknown title">
-
-
-        <div id="area" class="row">                   
-
-            
-            <div class="col-10">                
-                <svg id="flowdbeditor" style="background-color: white" width="4200" height="4200" viewBox="0 0 4200 4200">
-                    <defs>
-                        <linearGradient id="e" x1="40" y1="210" x2="460" y2="210" gradientUnits="objectBoundingBox">
-                            <stop stop-color="steelblue" offset="0" />
-                            <stop stop-color="red" offset="1" />
-                        </linearGradient>
-                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
-                            <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
-                        </marker>
-                    </defs>                    
-                </svg>  
-            </div>
-        </div>   
-        <!-- workflowedit -->
-        <div id="workflowedit" class="flow_edit" style="visibility:hidden;">
-            <div>Functional contact type (without any effect)</div>
-            <select id="wfe_trigger_mode">
-                <option value="0">None</option>                
-                <option value="1">AND</option>
-                <option value="2">OR</option>
-            </select>
-            <button onclick="wflink_ok(this)">OK</button>
-            <button onclick="this.parentElement.style.visibility='hidden';">Cancel</button>
-            <button onclick="wflink_delete(this)">Delete</button>
-        </div>
-    </div>
-        <!-- jQuery first, then Popper.js, then Bootstrap JS 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>    
-    -->
-    <script src="./flowdbeditor2.js"></script>
-    <!--Codepen insert point , delete line below-->
-    <script>
 /*jshint esversion: 6 */
 /* FlowDBEditor content can load from (maybe automatically)
     GET parameter, 
@@ -679,31 +21,6 @@
 
   so. in the next time you can continue editing where you abandoned. :)
 */
-xhttp2=null
-if (window.XMLHttpRequest) {
-  xhttp2 = new XMLHttpRequest();
-  } else {    // IE 5/6
-  xhttp2 = new ActiveXObject("Microsoft.XMLHTTP");
-  }
-  if (xhttp2!=null){
-      xhttp2.overrideMimeType('text/xml');
-  }
-
-function getFile(filename){
-    if (xhttp2==null) return null;
-    xhttp2.open("GET",filename, false);
-    xhttp2.send(null);
-    //xmlDoc = xhttp2.responseXML.getElementsByTagName("flowdbeditor")[0];
-    try{
-    source = xhttp2.responseText;
-    localStorage.setItem("flowdbeditor",source);
-    Load();
-    console.log(source.substring(0, 200));
-    }catch(e)
-    {
-      console.log('file not loaded');
-    }
-}
 
 var TParams = function(loc) {  
   this.o = new Object();
@@ -748,11 +65,12 @@ UTF8 = {
 	}
 };
 
+
 var loc = new URL(document.location);
 var params = new TParams(loc.search);
 //var params = loc.searchParams;
 //var flowdbget = ppp.get("flowdb");     
-var flowdbget = params.get("flowdb"); 
+var flowdbget = params.get("flowdb");  
 var flowdbplayer = params.get("player");  //USERVIEW if exists
 var ViewModes = Object.freeze({"Developer":1, "User":2});
 var VIEWMODE=ViewModes.Developer;
@@ -760,18 +78,12 @@ if (flowdbplayer!=null){
   VIEWMODE=ViewModes.User;
 }
 //var flowdbinit=null; //if exists please remove this line flowdbinit is a innercircle start flowdb if you want
-var flowdbinit = params.get("file"); //when you start chrome with --allow-file-access-from-files switch
-/*
-  go-bat template:
-  cmd /C start chrome "file:///%cd%/../flowdbeditor.html?file=file:///%cd%/yourfilename.txt" --allow-file-access-from-files
-*/
-
 var temp="flowdbeditor_temp";        
 var AUTOINCTSTART=1;
 var g=null;
 var flowdbeditor=null;
 var isdown=false;
-var zooms=[1200,4200,5400];
+var zooms=[1200,2400,3200];
 var zoomvalue=1;
 var WorkflowStart=null;
 
@@ -781,14 +93,7 @@ function flowdbeditor_onload(){
   
   flowdbeditor.addEventListener("mousemove",move);
   flowdbeditor.addEventListener("mouseup",up);
-  document.addEventListener('keydown', function(e) {
-    if (e.ctrlKey && e.key === 'c') {
-        if (SelectedTable!=null && !stateEdit ) {
-          e.preventDefault();
-          editTableCopy(null);
-        }
-    }
-});
+
  
 
   for (let i = 0; i < g.length; i++) {
@@ -811,16 +116,9 @@ function flowdbeditor_onload(){
     else //compact
     {
       if ( !flowdbinit.startsWith("<flow" )) {
-        if ( flowdbinit.startsWith("file://" )) {
-          getFile(flowdbinit);
-        }
         //TODO load serverside file to flowdbinit
-        //HOP remove document.getElementById("loadserverdefault").style.display="flex";
-        //HOP remove LoadServerDefault(); //but.activ=true; in the function
-                
-        //var but=document.getElementById("flowdbload");
-		    //document.getElementById("filename").InnerHTML=flowdbinit;
-		    //FlowDBLoad(but);
+        document.getElementById("loadserverdefault").style.display="flex";
+        LoadServerDefault(); //but.activ=true; in the function
       } else {
         LoadString(flowdbinit); 
         but.activ=true;     
@@ -834,16 +132,6 @@ function flowdbeditor_onload(){
 
   
 }
-
-function copyToClipboard(text) {
-  var dummy = document.createElement('textarea');
-  document.body.appendChild(dummy);
-  dummy.value = text;
-  dummy.select();
-  document.execCommand('copy');
-  document.body.removeChild(dummy);
-}
-
 
 function zoom(){
   if ((zoomvalue++)>2) zoomvalue=0;  
@@ -894,18 +182,14 @@ var oncehints = [];
 oncehints.NewLinkFromPanel="Please select an another field name.";
 oncehints.NewLink="Please select first a field name and after click an another field name.";
 oncehints.outside="Reposition missed tables.";
-oncehints.move="Move all tables";
 oncehints.save="Save to browsers' local storage.\nIn the next time you can load this.";
 oncehints.load="Loaded latest stored database from localstorage.";
 oncehints.loadfromfile="Loaded database from file.";
-oncehints.loadfromsqlfile="Loaded SQL from scriptfile.";
 oncehints.loadserverdefault="Default content loaded from server";
 oncehints.hint = function(hint){
   if (oncehints[hint]!=""){
     document.getElementById("help").innerHTML=oncehints[hint];
     oncehints[hint]="";
-  }else{
-    document.getElementById("help").innerHTML='';
   }
 };
 
@@ -913,7 +197,7 @@ oncehints.hint = function(hint){
 
 var idTable=0;
 var TTable = function(name){  
-  this.posxy=[300,100]; //in px  
+  this.posxy=[100,100]; //in px  
   this.width=200;
   this.height=200;
   this.AFields = []; //Tfield  
@@ -995,10 +279,9 @@ var TTable = function(name){
     SortTables();
   };
   this.setName(name+(this.id));
-  this.addField = function(name,type,length=0){
+  this.addField = function(name,type){
     var f = new TField(this,name);    
     f.type=type;
-    f.setLength(length);
     var AF= this.AFields;
     this.AFields.push(f);    
     this.Records.forEach(function(o,i){
@@ -1011,16 +294,6 @@ var TTable = function(name){
     this.refreshDOM();    
     return f;
   };
-  this.copyField  = function(fromfield){
-    f = this.addField(fromfield.name,fromfield.type,fromfield.length)
-    f.link=fromfield.link
-    f.linkfilter=fromfield.linkfilter
-    f.linkconstraint=fromfield.linkconstraint
-    f.color=fromfield.color
-    f.description=fromfield.description
-    this.refreshDOM();    
-    return f
-  }
   this.moveFieldBeforeByName=function(beforefieldname,anotherfieldname){
     var a=-1;
     var b=-1;
@@ -1035,16 +308,6 @@ var TTable = function(name){
         this.AFields.splice(b+1,1);
       }else{
         this.AFields.splice(b,1);
-      }
-      
-      for (let i = 0; i < this.Records.length; i++) {
-        var f= this.Records[i][b];
-        this.Records[i].splice(a,0,f);
-        if (a<b){
-          this.Records[i].splice(b+1,1);
-        }else{
-          this.Records[i].splice(b,1);
-        }  
       }
     }
   }
@@ -1124,8 +387,7 @@ var TTable = function(name){
       el.removeChild(el.firstChild);
     }
     var a = this.AFields;
-    //const fleft=[5,this.width*0.4,this.width*0.8];
-    const fleft=[5,this.width-120,this.width-55];
+    const fleft=[5,this.width*0.4,this.width*0.8];
     for (let i = 0; i < a.length; i++) {
       const e = a[i];
       
@@ -1133,11 +395,6 @@ var TTable = function(name){
       fi.setAttribute("transform","translate("+fleft[0]+","+((i*fieldRowHeight)+fieldRowPadding)+")");
       fi.addEventListener("mousedown",fieldClick);
       fi.setAttribute("class","flow_fields")  ;
-      if (e.color=="#ff0000"){
-        fi.setAttribute("text-decoration","line-through")  ;
-      }else{
-        fi.setAttribute("fill",e.color)  ;
-      }
       var fi2 = document.createElementNS("http://www.w3.org/2000/svg","text");       
       fi2.setAttribute("transform","translate("+fleft[1]+","+((i*fieldRowHeight)+fieldRowPadding)+")");      
       fi2.setAttribute("class","flow_fields_noevent")  ;
@@ -1257,11 +514,7 @@ var TTable = function(name){
     div.setAttribute("id","flow_edit");
     div.className="flow_edit";
     div.style.top=Number(this.posxy[1]+20)+"px";
-    var c=Number(this.posxy[0])-30;
-    if (c<300) {
-      c=300;
-    }
-    div.style.left=c+"px";
+    div.style.left=Number(this.posxy[0]-30)+"px";
     div.innerHTML=
     `<label>Tablename</label><input type="text" id="edit_name" tabindex="0" autofocus value="`+this.name+`"><br>
      <label>Width</label><input type="number" id="edit_width" step="30" value="`+this.width+`"><br>     
@@ -1296,7 +549,6 @@ var TTable = function(name){
      <button onclick="{commandgroup=0;editTableOK(this);}">OK</button>
      <button onclick="{commandgroup=0;editCancel(this);}">Cancel</button>
      <button onclick="{commandgroup=0;editTableDelete(this);}">Delete</button>
-     <button onclick="{commandgroup=0;editTableCopy(this);}">Copy with content</button>
     `;
     div.table=this;
     parent.appendChild(div);
@@ -1486,7 +738,6 @@ var TTable = function(name){
     const result = this.find( fi => fi.name === fieldname );
     return result;
   };
-  //TTable
   this.getLinksTo=function(){ //result fields[]
     var res=[];
     if (this.AFields!=null){
@@ -1632,105 +883,13 @@ var TTable = function(name){
   };
 
   this.AFields.SearchFieldByName=this.SearchFieldByName;
-
-  this.createsql=function(typ,hasinsert){  //edit table copy SQL alapon
-    var table = this;
-    var source = '';
-    if (typ=='MSSQL'){
-      if (!table.readonly){
-        source=`CREATE TABLE [dbo].[`+table.name+`] (`+LF;
-        var fields="";      
-        table.AFields.forEach(function(field,index2){              
-            tip= AType.SearchTypeById(field.type);
-            filen=field.length
-            if (tip.mssql.indexOf('varchar')>0 && filen==65535)
-              filen='max'
-            source+='['+field.name+'] '+tip.mssql.replace("%",filen)+','+LF ;
-            fields+='['+field.name+'],';        
-        });
-        fields=fields.substring(0,fields.length-1);
-        source=source.substring(0,source.length-3)+LF; //utolso vesszo
-        source+=`) `;
-        if (hasinsert){
-          source+=LFGO
-          if (table.Records!=null && table.Records.length>1){
-            source+=`set IDENTITY_INSERT [dbo].[`+table.name+`] ON`+LF+`INSERT INTO [dbo].[`+table.name+`] (`+fields+`) VALUES `;
-            table.Records.forEach(function(o,i){
-              if (i>0){
-                  //content            
-                  source+=`(`;
-                  value="";
-                  o.forEach(function(o2,i2){
-                    if(typeof o2 == 'number'){
-                      value+="'"+o2+"',";
-                    }else{
-                      try {
-                        value+="'"+o2.replace("'","''")+"',";
-                      } catch (a)
-                      {
-                        value+=o2;
-                      }
-                    }
-                  });
-                  source+=value.substring(0,value.length-1);
-                  source+=`),`;
-              }
-            });
-            source=source.substring(0,source.length-1)+LF+`set IDENTITY_INSERT [dbo].[`+table.name+`] OFF`+LF;          
-          }
-        }
-      }
-    }else{
-      if (!table.readonly){
-        source=`CREATE TABLE `+table.name+` (`+LF;
-        var fields="";
-        var autoinc=-1;
-        table.AFields.forEach(function(field,index2){      
-          tip= AType.SearchTypeById(field.type);
-          if (field.type==3){autoinc=index2;}
-          source+='`'+field.name+'` '+tip.sql.replace("%",field.length)+','+LF ;
-          fields+='`'+field.name+'`,';
-        });
-        fields=fields.substring(0,fields.length-1);
-        source=source.substring(0,source.length-3)+LF; //utolso vesszo
-        source+=`) ENGINE=InnoDB DEFAULT CHARSET=utf8;`+LF ;
-
-        if (table.Records!=null && table.Records.length>1){
-          source+=`INSERT INTO `+table.name+` (`+fields+`) VALUES `;
-          table.Records.forEach(function(o,i){
-            if (i>0){
-                //content            
-                source+=`(`;
-                var value="";
-                o.forEach(function(o2,i2){
-                  if (i2==autoinc){
-                    o2=autoidx++;
-                  }
-                  try{
-                      if(typeof o2 == 'number'){
-                        value+="'"+o2+"',";
-                      }else{
-                        value+="'"+o2.replace("'","''")+"',";
-                      }
-                  }catch (error) {};
-                });
-                source+=value.substring(0,value.length-1);
-                source+=`),`;
-            }
-          });
-          source=source.substring(0,source.length-1)+";"+LF;
-        }
-      }
-    }
-    return source;
-  }
 };
 var idField = 0;
 
 var TField = function(table,name){
   
   this.type=0;  //TType
-  this.length=0;
+  this.length=45;
   this.link=null; //null or TField constraint
   this.linkfilter=[false,null,null,null]; //TODOif link attached: enabled, from, to, field: false,null,null,null;   true,1,5,idgroup;    true,4,4,idgroup
   this.linkconstraint=true; //neew SQL constraint for this link
@@ -1742,14 +901,10 @@ var TField = function(table,name){
   this.autoinc=AUTOINCTSTART;
   this.display=false; //if true then if the table is linked then this field is display 
   this.description="";//TODO
-  this.color="#000000";
 
   this.setDescription=function(value){    
     this.description=nullstring(value);
   };
-  this.setLength=function(value){
-    this.length=value
-  }
   this.setName=function(name){
     name=toAscii7(name);
     name=name.trim().replace(" ","_");
@@ -1763,10 +918,6 @@ var TField = function(table,name){
     }
     refreshFieldsListDOM();    
   }
-  this.setColor=function(value){
-    this.color=value;
-  };
-  //TField
   this.edit=function(parent){
     if (stateEdit) return;
     stateEdit=true;
@@ -1789,7 +940,6 @@ var TField = function(table,name){
     div.innerHTML+=opt+`</select><br>
      <label>Length</label>
      <input type="number" id="edit_length" value="`+this.length+`">
-     <label>Color</label><input type="color" id="edit_color" value="`+this.color+`"><br>
      <label>Display this field when table is linked:</label>`;
      if (this.display) {
       div.innerHTML+=`<input type="checkbox" id="edit_display" checked>`;
@@ -1907,9 +1057,7 @@ var TField = function(table,name){
           this.DOMLink.k.setAttribute("class","flow_line_start_hidden");
           this.DOMLink.v.setAttribute("class","flow_line_end_hidden");
         }else {
-          //this.DOMLink.setAttribute("class","flow_line");
-          var color = this.link.table.color;
-          this.DOMLink.setAttribute("style","stroke-width:2; stroke-opacity:0.5;stroke: "+color+";"); //color =rgb(222, 0, 68)
+          this.DOMLink.setAttribute("class","flow_line");
           this.DOMLink.k.setAttribute("class","flow_line_start");
           this.DOMLink.v.setAttribute("class","flow_line_end");
         }
@@ -1952,7 +1100,6 @@ var TField = function(table,name){
     f.setAttribute("type",this.type);
     f.setAttribute("length",this.length);
     f.setAttribute("description",this.description);
-    f.setAttribute("color",this.color);
     if (this.linkfilter[0])
       f.setAttribute("linkfilter",1);
     else
@@ -1983,7 +1130,6 @@ var TField = function(table,name){
     this.linkconstraint = node.getAttribute("linkconstraint");
     var linkfilt = node.getAttribute("linkfilter");
     this.setDescription(nullstring(node.getAttribute("description")));
-    this.setColor(nullstring(node.getAttribute("color"),"#000000"));
     if (this.display=='0') 
       this.display = false;
     else
@@ -2198,39 +1344,16 @@ var SQLModes = ["MySQL", "MSSQL"];
 //                     0        1         2         3  
 var AType = [new TType("String","varchar(%)","text","[varchar](%) NULL",43),
        new TType("Integer","int(11)","number","[int] NULL",0),
-       new TType("Float","Float","number","[float] DEFAULT ((0.00)) NULL",0),
+       new TType("Float","Float","number","[float] NULL",0),
        new TType("Autoinc","int(11) not null","number","[int] IDENTITY(1,1) PRIMARY KEY NOT NULL",0),
        new TType("Date","date","date","[date] NULL",0),
-       new TType("DateTime","datetime","datetime-local","[datetime] NULL",0),
+       new TType("DateTime","datetime","datetime-local","[datetime2] NULL",0),
        new TType("Time","time","time","[time] NULL"),
-       new TType("Bool","tinyint","checkbox","[bit] NULL"),
-       new TType("Text","text","textarea","[varchar](max) NULL",2000),
+       new TType("Bool","tinyint","checkbox","[tinyint] NULL"),
+       new TType("Text","text","text","[varchar](max) NULL",2000),
        new TType("Image","mediumblob",'text',"[image] NULL",2000),   //<img src="%0">
        new TType("URL","varchar(400)",'<a href="%0">%1</a>',"[varchar](400) NULL",400),
-       new TType("VideoLink","varchar(400)",'<a href="%0">%1</a>',"[varchar](400) NULL",400),
-       new TType("Shortint","tinyint",'number',"[tinyint] NULL",0)
-      ];
-
-      /*MSSQL IMporthoz index: */
-var AMSType = [
-      new TType("Text",0,8,"[varchar](max)"),
-      new TType("Text",0,8,"[nvarchar](max)"),
-      new TType("URL",0,10,"[varchar](400)"),
-      new TType("VideoLink",0,11,"[varchar](1000)"),
-      new TType("String",0,0,"[varchar]"),
-      new TType("String",0,0,"[nvarchar]"),
-      new TType("Integer",0,1,"[int]"),
-      new TType("Float",0,2,"[float]"),
-      new TType("Autoinc",0,3,"[int]"),
-      new TType("Date",0,4,"[date]"),
-      new TType("DateTime",0,5,"[datetime]"),
-      new TType("Time",0,6,"[time]"),
-      new TType("Bool",0,7,"[bit]"),
-      new TType("Image",0,9,"[image]"),   //<img src="%0">
-      new TType("Shortint",0,12,"[tinyint]")
-     ];
-
-
+       new TType("VideoLink","varchar(400)",'<a href="%0">%1</a>',"[varchar](400) NULL",400)];
 var SearchTypeById = function(id){
   const result = AType.find( tab => tab.id === id );
   return result;
@@ -2240,7 +1363,6 @@ AType.SearchTypeById=SearchTypeById;
 var SelectedTable = null;
 var flowMode = FlowModes.Flow;
 var SelectedField = null;//SPRcog only TODO
-var CopyField = null
 var constraintField =null; //starting field
 
 var AWFLinks = []; //TWFLink
@@ -2282,7 +1404,7 @@ ATables.SearchTableById=SearchTableById;
 
 //#region HIGH
 
-function getOutsideTables(){
+function sortTables(){
   oncehints.hint("outside");
   if (ATables!=null){
     ATables.forEach(function(table,idx){
@@ -2292,17 +1414,6 @@ function getOutsideTables(){
       if (!ok){
         table.refreshDOM();
       }
-    });    
-    Save(temp);
-  }
-}
-function toMoveTables(x,y){
-  oncehints.hint("move");
-  if (ATables!=null){
-    ATables.forEach(function(table,idx){
-      table.posxy[0]+=x;
-      table.posxy[0]+=y;
-      table.refreshDOM();      
     });    
     Save(temp);
   }
@@ -2459,23 +1570,6 @@ function titleClick(e){
 
 function fieldClick(e){
   isdown=false;
-  if (e.ctrlKey && e.shiftKey && CopyField!=null) {
-    SelectedTable.copyField(CopyField);
-    //CopyField=null
-    return
-  }
-  if (e.ctrlKey && !e.shiftKey ) {
-    CopyField=new TField(null,this.field.name)
-    CopyField.length=this.field.length
-    CopyField.type=this.field.type
-    CopyField.link=this.field.link
-    CopyField.linkfilter=this.field.linkfilter
-    CopyField.linkconstraint=this.field.linkconstraint
-    CopyField.color=this.field.color
-    CopyField.description=this.field.description    
-    return
-  }
-
   if (flowMode==FlowModes.Flow){    
     this.field.edit(document.getElementById("area"));
     SelectedField=this.field;
@@ -2574,25 +1668,6 @@ function editTableDelete(div){
     }
   }  
 }
-function editTableCopy(div){
-  var table=null;
-  var  hasinsert=false
-  if (div!=null){
-    var panel = div.parentElement;
-    var index = ATables.indexOf(panel.table);
-    if (index > -1) {
-      table = panel.table;
-      hasinsert=true
-    }
-  }
-  else {
-    table=SelectedTable;
-  }
-  if (table!=null){
-    source = table.createsql('MSSQL',hasinsert);
-    copyToClipboard(source);
-  }
-}
 
 //endregion
 
@@ -2609,14 +1684,10 @@ function PastePanel(e){
   if ((content!="") && (content!=null)){
     var div=document.createElement("div");
     div.className="flow_clipboard";
-    document.getElementById('screen').appendChild(div);
+    document.body.appendChild(div);
     div.clipboard=content;
-    if (isSQL(content)){
-      div.innerHTML=`<input id="pasterefresh" type="checkbox">Refresh table structure<br>`;
-    }else{
-      div.innerHTML=`<input id="pasteheader" type="checkbox">The clipboard data has header in first row<br>`;
-      div.innerHTML+=`<input id="pastenewtable" type="checkbox" >Create new table instead of fill selected table<br>`;
-    }
+    div.innerHTML=`<input id="pasteheader" type="checkbox">The clipboard data has header in first row<br>`;
+    div.innerHTML+=`<input id="pastenewtable" type="checkbox" >Create new table instead of fill selected table<br>`;
     div.innerHTML+=`<button onclick="onPaste(this.parentElement,null)">Rendben</button><button onclick="this.parentElement.parentElement.removeChild(this.parentElement)">Mégsem</button>`;
   }
 }
@@ -2624,68 +1695,56 @@ function PastePanel(e){
 function onPaste(div,startidx){        
     var content = div.clipboard;
     
+    if (startidx==null){
+      var idx=document.getElementById("pasteheader");
+      if (idx.checked)
+        startidx = 1
+      else 
+        startidx = 0;
+    }
+
+    var newtable = document.getElementById("pastenewtable");
+    if (newtable.checked) {
+      
+      var t = new TTable("Unknown");      
+      ATables.push(t);
+      flowdbeditor.appendChild(t.getDOM());      
+      t.Selected();
+    }
+    
     if (content!=""){
       console.log( typeof content );
+      if (SelectedTable){      
+        const cvs = content.split("\n");
+        for (let i = startidx; i < cvs.length; i++) {
+          cvs[i]=cvs[i].replace("\r","");        
+          const row = cvs[i].split("\t");
 
-      if (isSQL(content)){
-        var idx=document.getElementById("pasterefresh");
-        if (idx.checked){
-          if (SelectedTable){ 
-            refreshSQLFromContent(content)
-          }
-        } else 
-          importSQLFromContent(content);      
-        refreshTablesListDOM();
-      }else{
-        if (startidx==null){
-          var idx=document.getElementById("pasteheader");
-          if (idx.checked)
-            startidx = 1
-          else 
-            startidx = 0;
-        }
-    
-        var newtable = document.getElementById("pastenewtable");
-        if (newtable.checked) {
-          
-          var t = new TTable("Unknown");      
-          ATables.push(t);
-          flowdbeditor.appendChild(t.getDOM());      
-          t.Selected();
-        }
-    
-        if (SelectedTable){      
-          const cvs = content.split("\n");
-          for (let i = startidx; i < cvs.length; i++) {
-            cvs[i]=cvs[i].replace("\r","");        
-            const row = cvs[i].split("\t");
-
-            if (newtable.checked) {
-              if (i==startidx){ //first data and if new table then create AFields
-                for (let k = 0; k < row.length; k++) {
-                  SelectedTable.addField("Field"+(idField++),0);
-                }
-              }
-              if (idx.checked){ //has header 
-                if (i==1){ //first data
-                  cvs[0]=cvs[0].replace("\r","");        
-                  const hrow = cvs[0].split("\t");
-                  for (let k = 0; k < hrow.length; k++) {
-                    SelectedTable.AFields[k].name=hrow[k];
-                  }                  
-                }
+          if (newtable.checked) {
+            if (i==startidx){ //first data and if new table then create AFields
+              for (let k = 0; k < row.length; k++) {
+                SelectedTable.addField("Field"+(idField++),0);
               }
             }
-
-            list_addrecordheader(SelectedTable);                                
-            SelectedTable.Records.push(row);        
+            if (idx.checked){ //has header 
+              if (i==1){ //first data
+                cvs[0]=cvs[0].replace("\r","");        
+                const hrow = cvs[0].split("\t");
+                for (let k = 0; k < hrow.length; k++) {
+                  SelectedTable.AFields[k].name=hrow[k];
+                }                  
+              }
+            }
           }
-          SelectedTable.refreshDOM();
-          SelectedTable.recalcAutoincFields();
-          refreshTablesListDOM();
+
+          list_addrecordheader(SelectedTable);                                
+          SelectedTable.Records.push(row);        
         }
-        //document.execCommand('insertText', false, content);      
+        SelectedTable.refreshDOM();
+        SelectedTable.recalcAutoincFields();
+        refreshTablesListDOM();
       }
+      //document.execCommand('insertText', false, content);      
     }
 
     div.parentElement.removeChild(div);
@@ -2699,7 +1758,7 @@ function editFieldOK(div){
   var elength = document.getElementById('edit_length');
   var edisplay = document.getElementById('edit_display');
   var edescription = document.getElementById('edit_description');
-  var ecolor = document.getElementById('edit_color');
+  
   var elinkconstraint = document.getElementById('edit_needconstraint');
   var elinkfilter = document.getElementById('edit_linkfilter');
   var elinkfilter1 = document.getElementById('edit_linkfilter1');
@@ -2732,29 +1791,10 @@ function editFieldOK(div){
   panel.field.display = edisplay.checked;
   panel.field.length = Number(elength.value);
   panel.field.setDescription(edescription.value);
-  panel.field.setColor(ecolor.value);
   removePanelDOM(div);
-
-  if (panel.field.type==3) {
-    o = panel.field
-    // refresh autoinc fields
-    if ((o.autoinc<2) && (o.table.Records.length>0 )) {
-      o.autoinc=AUTOINCTSTART;
-      for (let j = 1; j < o.table.Records.length; j++) {
-        const r = o.table.Records[j];
-        try {
-          r[o.posrow]=Number(o.autoinc);
-          o.autoinc=Number(r[o.posrow])+1;
-        } catch (error) {            
-        }
-      }
-    }
-  }  
-
   panel.field.table.refreshRecordFields();
   panel.field.table.refreshDOM();
   refreshFieldsListDOM();
-  //panel.field.table.recalcAutoincFields();  
   Save(temp);
 }
 /*
@@ -2922,9 +1962,6 @@ function move(e){
       cX = event.clientX-grab;  
       cY = event.clientY-grab;
       var s = th.getAttribute("transform");
-      if (s==null){
-        s = th.style.transform;
-      }
       var o =tool_getTransform(s);
       s = "translate("+o[0]+","+o[1]+")";
       th.setAttribute("transform",s);
@@ -3147,9 +2184,6 @@ function tool_getTransform(s){
   s = s.substring(10,999);
   s= s.substring(0,s.length-1);
   s =s.split(",");
-  if (s.length<2){
-    s =s[0].split(" ");
-  }
   return [Number(s[0])-grab+dX,Number(s[1])-grab+dY];  
 }
 function tool_getTransformPure(s){
@@ -3241,7 +2275,7 @@ function savetosvgfile(linknode,svgnode){  // print , flowdbeditor
 
 var xmlroot="flowdbeditor";
 function Save(variable,moduleFunc=null){
-  // oncehints.hint("save");
+  oncehints.hint("save");
   var xmlText = SavetoString(moduleFunc);
   if (variable!=null){
     //alert(variable);
@@ -3257,7 +2291,7 @@ function Load(variable,moduleFunc=null){
   } else {
     xmlText  = localStorage.getItem("flowdbeditor");
   }
-  // oncehints.hint("load");
+  oncehints.hint("load");
   LoadString(xmlText,moduleFunc);
 }
 function SavetoString(moduleFunc=null){  
@@ -3435,13 +2469,7 @@ function mySQL(linknode){
                 if (i2==autoinc){
                   o2=autoidx++;
                 }
-                try{
-                    if(typeof o2 == 'number'){
-                      value+="'"+o2+"',";
-                    }else{
-                      value+="'"+o2.replace("'","''")+"',";
-                    }
-                }catch (error) {};
+                value+="'"+o2+"',";
               });
               source+=value.substring(0,value.length-1);
               source+=`),`;
@@ -3468,7 +2496,6 @@ function mySQL(linknode){
     }
   });
   //constraints
-  source+='/*'+LF;
   idc=1;
   ATables.forEach(function(table,index){
     if (!table.readonly){
@@ -3488,9 +2515,9 @@ function mySQL(linknode){
       }
     }
   });
-  source+='*/'+LF;
 
-  source+='DELIMITER $'+LF;
+
+  source+='DELIMITER $$'+LF;
   ATables.forEach(function(table,index){
     if (!table.readonly){
       try {
@@ -3515,7 +2542,7 @@ function mySQL(linknode){
 
 //**************************MSSQL */
 var LFGO='\r\nGO\r\n';
-var mscollate = 'HUNGARIAN_Technical_CI_AS';
+var mscollate = 'HUNGARIAN_CI_AS';
 function MSSQL(linknode,ver){
   var ifex="";
   var ifnex="";
@@ -3535,85 +2562,34 @@ function MSSQL(linknode,ver){
   ATables.forEach(function(table,index){
     if (!table.readonly){
       //source+=`DROP TABLE `+ifex+` [dbo].[`+table.name+`]`+LFGO; 
-      source+=`DROP TABLE [dbo].[`+table.name+`]`+LFGO;
-      source+=table.createsql('MSSQL',true);
-      /*
       source+=`CREATE TABLE [dbo].[`+table.name+`] (`+LF;
       var fields="";      
       table.AFields.forEach(function(field,index2){              
           tip= AType.SearchTypeById(field.type);
-          filen=field.length
-          if (tip.mssql.indexOf('varchar')>0 && filen==65535)
-            filen='max'
-          source+='['+field.name+'] '+tip.mssql.replace("%",filen)+','+LF ;
+          source+='['+field.name+'] '+tip.mssql.replace("%",field.length)+','+LF ;
           fields+='['+field.name+'],';        
       });
       fields=fields.substring(0,fields.length-1);
       source=source.substring(0,source.length-3)+LF; //utolso vesszo
       source+=`) `+LFGO ;
       if (table.Records!=null && table.Records.length>1){
-        source+=`set IDENTITY_INSERT [dbo].[`+table.name+`] ON`+LF+`INSERT INTO [dbo].[`+table.name+`] (`+fields+`) VALUES `;
+        source+=`INSERT INTO [dbo].[`+table.name+`] (`+fields+`) VALUES `;
         table.Records.forEach(function(o,i){
           if (i>0){
               //content            
               source+=`(`;
               value="";
               o.forEach(function(o2,i2){
-                if(typeof o2 == 'number'){
-                  value+="'"+o2+"',";
-                }else{
-                  try {
-                    value+="'"+o2.replace("'","''")+"',";
-                  } catch (a)
-                  {
-                    value+=o2;
-                  }
-                }
+                value+="'"+o2+"',";
               });
               source+=value.substring(0,value.length-1);
               source+=`),`;
           }
         });
-        source=source.substring(0,source.length-1)+LF+`set IDENTITY_INSERT [dbo].[`+table.name+`] OFF`+LF;
-      }
-      */
-    }
-  });
-
-  //constraints TODO rewrite to MSSQL syntax (from mysql) it is commented in this time
-  source+='/*'+LF;
-  idc=1;
-  ATables.forEach(function(table,index){
-    if (!table.readonly){
-      var one=false;
-      var s="";
-      table.AFields.forEach(function(field,index2){ 
-        if ( field.link!=null && (!field.link.table.readonly)){
-          if (field.linkconstraint) {
-            one=true;
-            s+='ADD CONSTRAINT `'+table.name+field.link.table.name+(idc++)+'` FOREIGN KEY (`'+field.name+'`) REFERENCES `'+field.link.table.name+'`('+field.link.name+'),'+LF;
-          }
-        }
-      });
-      if (one){
-        s=s.substring(0,s.length-3)+";"+LF; //utolso vesszo
-        source+=`ALTER TABLE `+table.name+LF+s;
+        source=source.substring(0,source.length-1)+LF;
       }
     }
   });
-  source+='*/'+LF;
-
-  
-  ATables.forEach(function(table,index){
-    if (!table.readonly){
-      try {
-        if (table.sql[2].text!="")
-          source+=LF+decodeEntities(decodeStr(table.sql[2].text));  //2 = mssql
-      } catch (error) {}
-    }
-  });
-  source+=LF;
-
   //Autoinc primary key
   source += 'COMMIT TRAN;'+LF ;
   var url = "data:application/sql;charset=utf-8,"+encodeURIComponent(source);
@@ -3788,7 +2764,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
           var c= document.createElement("td");
           r.appendChild(c);
           var s3 = "'"+sor[0]+"'";
-          c.innerHTML='<div class="grid-container"><button style="width:40px;" onclick="list_edit(this,'+tableidx+','+s3+','+(Number(window.pageXOffset)+20)+','+(Number(window.pageYOffset)+20)+')"><i class="fa fa-pencil"></i></button><button style="width:40px;" onclick="list_del(this,'+tableidx+','+s3+')"><i class="fa fa-times"></i></i></button></div>';
+          c.innerHTML='<button onclick="list_edit(this,'+tableidx+','+s3+')">Edit</button><button onclick="list_del(this,'+tableidx+','+s3+')">Delete</button>';      
         }
 
         //r.setAttribute("sqlid",sor[0]);
@@ -3818,7 +2794,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
             var c= document.createElement("td");
             r.appendChild(c);
             var s3 = "'"+sor[0]+"'";
-            c.innerHTML='<button onclick="list_edit(this,'+tableidx+','+s3+','+(Number(window.pageXOffset)+20)+','+(Number(window.pageYOffset)+20)+')">Edit</button><button onclick="list_del(this,'+tableidx+','+s3+')">Delete</button>';      
+            c.innerHTML='<button onclick="list_edit(this,'+tableidx+','+s3+')">Edit</button><button onclick="list_del(this,'+tableidx+','+s3+')">Delete</button>';      
         }
     }
   }  
@@ -3937,7 +2913,7 @@ function list_new(tableidx) {
   list(tableidx,null);
   return sor[0];
 }
-function list_edit(e,tableidx,id,x=0,y=0) {
+function list_edit(e,tableidx,id) {
   //var r = e.parentElement;
   if ((tableidx<0) || (tableidx>=ATables.length)) 
     return ;
@@ -3947,8 +2923,6 @@ function list_edit(e,tableidx,id,x=0,y=0) {
   var div = document.createElement("div");
   div.id=t.name+id;
   div.className="flow_edit";
-  div.style.left=x+20+"px";
-  div.style.top=y+20+"px";
   div.innerHTML="";
 
   var fi = t.AFields;
@@ -3959,12 +2933,8 @@ function list_edit(e,tableidx,id,x=0,y=0) {
       } else if (f.type==3){ //autoinc
         div.innerHTML+=`<label>`+f.name+`</label><div>`+rec[idx]+`</div>`;
       } else {
-        var typ=AType.SearchTypeById(f.type);  
-        if (typ.inputtype=='textarea' || (f.length>=100)){
-          div.innerHTML+=`<label>`+f.name+`</label><textarea rows="6" cols="48" id="`+t.name+f.name+`">`+rec[idx]+`</textarea><button class="btn_x" onclick="editfieldNULL('`+t.name+f.name+`')">X</button><br>`;
-        } else {       
-          div.innerHTML+=`<label>`+f.name+`</label><input class="inputtext" type="`+typ.inputtype+`" id="`+t.name+f.name+`" value="`+rec[idx]+`"><button class="btn_x" onclick="editfieldNULL('`+t.name+f.name+`')">X</button><br>`;
-        }
+        var typ=AType.SearchTypeById(f.type);          
+        div.innerHTML+=`<label>`+f.name+`</label><input type="`+typ.inputtype+`" id="`+t.name+f.name+`" value="`+rec[idx]+`"><button class="btn_x" onclick="editfieldNULL('`+t.name+f.name+`')">X</button><br>`;
       }
     } else {
       div.innerHTML+=ComboBoxDOM(rec[idx],f,f.link)+`<button class="btn_x" onclick="editfieldNULL('`+f.table.name+f.name+`')">X</button><br>`;
@@ -4063,7 +3033,7 @@ function ComboBoxDOM(value,field1,field2){  //value field linkedfield
     default:
       break;
   }
-  var opt = `<label>`+field1.name+`</label><select class="inputtext" id="`+field1.table.name+field1.name+`"><option selected value=""></option>`;
+  var opt = `<label>`+field1.name+`</label><select id="`+field1.table.name+field1.name+`"><option selected value=""></option>`;
   var t=null;
   if (filtered){
     t = getTable(field2.table,filterfield,field2.posrow);
@@ -4099,22 +3069,6 @@ function ComboBoxDOM(value,field1,field2){  //value field linkedfield
   }
   return (opt+`</select>`);
 };
-
-function getLinkedFields(linkfield,startfield){
-  var table = linkfield.table;
-  var combo=[[startfield,linkfield]];
-  table.AFields.forEach(function(o,i){
-    if ((o.display)&&(o.link==null)){    
-        combo.push(o);      
-    }
-  });  
-  table.AFields.forEach(function(o,i){
-    if ((o.display)&& (o.link!=null)){    
-        combo = combo.concat( getLinkedFields(o.link,o) );
-    }
-  });  
-  return combo;
-}
 
 function showhint(obj,yesno01) {
   const showhint="showhint";
@@ -5138,9 +4092,6 @@ async function createdocument(linknode){
             font-family: "Work Sans";   
             font-size: 1rem;                                  
         }
-        .tartalom {
-          background-color:#30a0e0;
-        }
         .tablename {
           font-size: 1.2rem;
           border-bottom: 1px gray solid;    
@@ -5177,7 +4128,7 @@ async function createdocument(linknode){
   </style>
   `;
   root.appendChild(head);
-  body.innerHTML="<a href='https://codepen.io/hgabor47/full/XqezrX'>FlowDBEditor indítása</a><h1>Tables</h1>";
+  body.innerHTML="<a href='"+document.location+"'>FlowDBEditor indítása</a><h1>Tables</h1>";
   PNG=null;
   svg2png(null,"flowdbeditor",asyncCreateDocument);
   ATables.forEach(function(table,index){
@@ -5230,27 +4181,7 @@ async function createdocument(linknode){
         }
       });
       t.appendChild(b);
-      //TODO content max 100 rows
-      var rec=null;
-      if (table.Records.length>1){ //with header
-        var tart = xml.createElement("div");body.appendChild(tart);tart.setAttribute("class","tartalom");
-        tart.innerHTML+="Tartalom"
-        rec = xml.createElement("table");body.appendChild(rec);      
-        table.Records.forEach(function(item,index){
-          var row = xml.createElement("tr");rec.appendChild(row);
-          item.forEach(function(cols,idx){
-            var col = xml.createElement("td");row.appendChild(col);
-            try {
-              //col.innerText=cols;
-              //col.innerHTML=encodeStr(col.innerText);  
-              col.innerHTML=encodeStr(cols);  
-            } catch (error) {
-              console.log(error);          
-            }        
-          });    
-        });  
-      }
-    };        
+    }
   });
   var i=20;
   while ((PNG==null) && (i>0)){
@@ -5289,7 +4220,7 @@ function svg2png(linknode,svgnodename="flowdbeditor",func=null){ //or func = fun
   var str = new XMLSerializer().serializeToString(flw);
   str = str.replace(/class="flow_fields_color3"/g,'style="fill:grey;stroke-width:0;opacity:0.5"');
   str = str.replace(/class="flow_fields_color4"/g,'style="fill:grey;stroke-width:0;opacity:0.3"');
-  //str = str.replace(/class="flow_line"/g,'style="stroke:black;stroke-width:2;"');
+  str = str.replace(/class="flow_line"/g,'style="stroke:black;stroke-width:2;"');
   str = str.replace(/class="flow_line_start"/g,'style="stroke:blue;stroke-width:4;"');
   str = str.replace(/class="flow_line_end"/g,'style="stroke:orange;stroke-width:2;"');  
   //var canvas = document.getElementById("canvas");
@@ -5322,202 +4253,9 @@ function svg2png(linknode,svgnodename="flowdbeditor",func=null){ //or func = fun
 }
 
 //#endregion printdocument
-/*
-function parseMSSQLScript(script) {
-  const tableRegex = /CREATE TABLE \[dbo\]\.\[(.+?)\]\s*\(([\s\S]+?)\)\s*(?=CREATE TABLE|$)/g;
-  const fieldRegex = /\[(.*?)\]\s*(\[.*?\])(?:\s*IDENTITY\(\d+,\d+\))?\s*(NULL|NOT NULL|PRIMARY KEY|DEFAULT \(\(.*?\)\))?(?:\s*,\s*)?/g;
-  const tables = [];
-
-  let tableMatch;
-  while ((tableMatch = tableRegex.exec(script)) !== null) {
-    const tableName = tableMatch[1];
-    const fieldsDefinition = tableMatch[2];
-
-    const fields = [];
-    let fieldMatch;
-    while ((fieldMatch = fieldRegex.exec(fieldsDefinition)) !== null) {
-      fields.push({
-        name: fieldMatch[1],
-        type: fieldMatch[2],
-        constraint: fieldMatch[3] || '',
-      });
-    }
-
-    tables.push({ name: tableName, fields });
-  }
-  return tables;
-}*/
-
-function isSQL(input) {
-  const createTableRegex = /^\s*CREATE TABLE (?:\[.*\]\.)?\[.*\]\s*\(/i;
-  return createTableRegex.test(input);
-}
-
-
-function parseMSSQLScript(script) {
-  const tableRegex = /CREATE TABLE \[dbo\]\.\[(.+?)\]\s*\(([\s\S]+?)\)\s*(?=CREATE TABLE|$)/g;
-  const fieldSplitRegex = /,\s*(?=\[)/g;
-  const fieldRegex = /^\[(.*?)\]\s*(\[.*?(?:\(\d+\))?.*?\])\s*(.*)/;
-
-  const tables = [];
-
-  let tableMatch;
-  while ((tableMatch = tableRegex.exec(script)) !== null) {
-    const tableName = tableMatch[1];
-    const fieldsDefinition = tableMatch[2].trim();
-
-    const fields = [];
-    const fieldStrings = fieldsDefinition.split(fieldSplitRegex);
-    fieldStrings.forEach((fieldString) => {
-      const fieldMatch = fieldString.trim().match(fieldRegex);
-      if (fieldMatch) {
-        const fieldType = fieldMatch[2];
-        const lengthMatch = fieldType.match(/\((\d+)\)/);
-        const length = lengthMatch ? parseInt(lengthMatch[1], 10) : null;
-
-        fields.push({
-          name: fieldMatch[1],
-          type: fieldType,
-          length: length,
-          constraint: fieldMatch[3] || '',
-        });
-      }
-    });
-
-    tables.push({ name: tableName, fields });
-  }
-
-  return tables;
-}
-
-function refreshTableFromMSSQLDefinition(definition) {
-  const t = SelectedTable
-  definition.fields.forEach((field) => {
-    if (t.AFields.SearchFieldByName(field.name) == null ){
-      const fieldTypeIndex = getTypeIndexFromMSSQLType(field.type);
-      if (fieldTypeIndex !== -1) {
-        if (field.constraint.startsWith('(')){
-          c=field.constraint.indexOf(')')
-          if (c>0){
-            sss=field.constraint.substring(1,c)
-            if (sss=='max')
-              sss=65535
-            
-            t.addField(field.name, fieldTypeIndex,sss);
-          }
-          else {
-            
-            t.addField(field.name, fieldTypeIndex);
-          }
-          t.width=Math.max(t.width,field.name.length*1.5*10)
-        }else  
-          t.addField(field.name, fieldTypeIndex);
-          t.width=Math.max(t.width,field.name.length*1.5*10)
-      }
-    }
-  });
-
-  SelectedTable.refreshDOM();
-  SelectedTable.recalcAutoincFields();  
-  refreshTablesListDOM();
-  return t;
-}
-
-
-function createTableFromMSSQLDefinition(definition) {
-  const t = new TTable(definition.name);
-  t.setName(definition.name)
-  t.width=200  
-  definition.fields.forEach((field) => {
-    const fieldTypeIndex = getTypeIndexFromMSSQLType(field.type);
-    if (fieldTypeIndex !== -1) {
-      if (field.constraint.startsWith('(')){
-        c=field.constraint.indexOf(')')
-        if (c>0){
-          sss=field.constraint.substring(1,c)
-          if (sss=='max')
-            sss=65535
-            
-          t.addField(field.name, fieldTypeIndex,sss);
-        }
-        else
-          t.addField(field.name, fieldTypeIndex);
-        t.width=Math.max(t.width,field.name.length*1.5*10)
-      }else 
-        t.addField(field.name, fieldTypeIndex);
-        t.width=Math.max(t.width,field.name.length*1.5*10)
-    }
-  });
-
-  ATables.push(t);
-  flowdbeditor.appendChild(t.getDOM());  
-  t.Selected();
-  SelectedTable.refreshDOM();
-  SelectedTable.recalcAutoincFields();  
-  refreshTablesListDOM();
-  return t;
-}
-
-
-function getTypeIndexFromMSSQLType(mssqlType) {
-  for (let i = 0; i < AMSType.length; i++) {
-    if ( mssqlType.toLowerCase().startsWith(AMSType[i].mssql) ) {
-      return AMSType[i].inputtype;
-    }
-  }
-  return -1;
-}
-
-function importSQLFromContent(mssqlScript){
-  const tableDefinitions = parseMSSQLScript(mssqlScript);
-  tableDefinitions.forEach((definition) => {
-    createTableFromMSSQLDefinition(definition);
-  });    
-}
-function refreshSQLFromContent(mssqlScript){
-  const tableDefinitions = parseMSSQLScript(mssqlScript);
-  tableDefinitions.forEach((definition) => {
-    refreshTableFromMSSQLDefinition(definition);
-  });    
-}
-function importsql(e){
-
-  oncehints.hint("loadfromsqlfile");
-  var input = document.getElementById("filename");
-  if (input.file!=null || input.files[0]!=null)
-  {
-      var reader = new FileReader();
-      reader.onload = function(){
-        var mssqlScript = reader.result;   
-        importSQLFromContent(mssqlScript)
-        input.form.reset();        
-        e.activ=false;
-        console.log(mssqlScript.substring(0, 200));
-        refreshTablesListDOM();     
-      };          
-      reader.readAsText(input.files[0]);
-  } else {
-    //alert("Please choose a file before click loadfromfile button!")
-    var fil=document.getElementById("filename");
-    e.activ=true;
-    fil.click();
-  }
-  
-
-
-
-
-  const mssqlScript = "Itt tegye be a MSSQL script fájl tartalmát";
-
-}
 
 //#region IETOOLS
 
 
 
 //#endregion IETOOLS
-
-  </script>
-    
-</body>
-</html>

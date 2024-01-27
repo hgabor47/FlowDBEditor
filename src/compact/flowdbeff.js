@@ -1,32 +1,5 @@
 var ver = 'Effector plugin 1.1';
 var scriptstart=false;
-
-
-
-function addfeat(){
-    //Add Effector features
-/*New
-    TTable.origprop = TTable.props;
-    Reflect.defineProperty(TTable.prototype, 'props', { value: function() {
-        origprop();
-        //this.properties=new TProperty();
-        this.properties.Add("ttype","Tipus","N",false);
-    }});
-*/
-
-
-/*
-    var old_prototype = TTable.prototype;
-    var old_init = TTable.props;
-    TTable.props = function () {
-        old_init.apply(this, arguments);
-        
-    };
-    TTable.prototype = old_prototype;
-*/
-
-}
-
 loadSQLScript(function(){
     scriptstart=true;
     var helpp = document.getElementById('moreinfo');
@@ -45,9 +18,6 @@ loadSQLScript(function(){
     AType[8].effectortype="TextBox";
     setWorkflowConnectType();
 
-    addfeat();
-
-
 });
 
 var flowdbeffdiv=null;
@@ -58,6 +28,7 @@ var AScreenSource=[[0,"Table"],[1,"Custom SQL"]];
 var ADesignTypes=[[0,"1p"],[1,"2pv"],[2,"2pf"],[3,"3pv"],[4,"3pf"],[5,"4p"],[6,"6pv"],[7,"6pf"]];
 
 var prop_dbproject="";
+var prop_dbextraname="";
 var prop_dbpath="";
 var prop_usesqlcmd=null;
 
@@ -77,9 +48,9 @@ function flowdbeff(button){
         s += `<span class="borderGray"><button class="btn" onclick='BOSave(document.getElementById("title").value);'>BO</button>`;
         s += `<button class="btn" onclick='DDSave(document.getElementById("title").value);'>DD</button>`;
         s += `<button class="btn" onclick='DispSave(document.getElementById("title").value);'>DispD</button>`;
-        s += `<button class="btn" onclick='FOSave(document.getElementById("title").value);'>FORM (DD+BO+Combo..)</button></span></span>`; 
+        s += `<button class="btn" onclick='FOSave(document.getElementById("title").value);'>FORM (DD+BO+Combo..)</button>Extra name<input id="dbextraname" type="text" hint="Gombnyomáskor az XML nevekbe extra egyedi szövegrészlet beillesztése" onblur="prop_dbextraname=this.value;" placeholder="" onmouseover="showhint(this,1)" onmouseout="showhint(this,0)"></span>`; 
                                                     //sqldb
-        s += `<span><span class="borderYellow"><input id="dbproject" type="text" onblur="prop_dbproject=this.value;" placeholder="Projektnév"><button class="btn btn-warning" onclick="EFFMSSQL('print',0)" hint="A 'projeknév' mező szerinti előtagú táblák kerülnek az SQL-be." onmouseover="showhint(this,1)" onmouseout="showhint(this,0)" >Effector MSSQL</button>`;
+        s += `<span><span class="borderYellow">Project<input id="dbproject" type="text" onblur="prop_dbproject=this.value;" placeholder="Projektnév"><button class="btn btn-warning" onclick="EFFMSSQL('print',0)" hint="A 'projeknév' mező szerinti előtagú táblák kerülnek az SQL-be." onmouseover="showhint(this,1)" onmouseout="showhint(this,0)" >Effector MSSQL</button>`;
         s += `<button class="btn btn-warning" onclick="EFFFlow('print',0)" hint="
              Két fájl készül. Egy batch, melyet futtatni kell. És egy SQL.<br>
              A folyamatban résztvevő táblák kerülnek az SQL-be.<br>
@@ -92,7 +63,7 @@ function flowdbeff(button){
         
     } 
     document.getElementById("menupanel").style.display='none';
-    document.getElementById("dbproject").value=prop_dbproject;
+    document.getElementById("dbextraname").value=prop_dbextraname;
     document.getElementById("usesqlcmd").checked=prop_usesqlcmd;
     document.getElementById("dbpath").value=prop_dbpath;
     flowdbeffdiv.style.display="inline";    
@@ -108,6 +79,7 @@ function flowdbeffLoad(root,setup){
         prop_dbproject = setup.getAttribute("effproject");
         prop_usesqlcmd = setup.getAttribute("usesqlcmd")=="true";
         prop_dbpath = setup.getAttribute("effpath");        
+        prop_dbextraname = setup.getAttribute("effextraname");
     } catch (error) {
     }   
 }
@@ -116,6 +88,7 @@ function flowdbeffSave(xml,root,setup){
     setup.setAttribute("effproject", prop_dbproject);
     setup.setAttribute("effpath", prop_dbpath);
     setup.setAttribute("usesqlcmd", prop_usesqlcmd);
+    setup.setAttribute("effextraname", prop_dbextraname);
 }
 
 function setWorkflowConnectType(){
@@ -351,20 +324,29 @@ function SCREENSave(title,extcomp='',extfile=''){
         var filename = getFilename(scr.table.name,title);  
         var source=`<?xml version="1.0" encoding="utf-8"?>`+LF+`<Screen xmlns="http://effector.hu/schema/ns/screen">
   <Caption>`+filename+`</Caption>
+  <Width>90%</Width><Height>90%</Height>
   <Component>Component`+filename+extcomp+`</Component>
 </Screen>`;            
         SaveXML('Screen'+filename+extfile,source);        
     });
 }
 
+function VerifyFailBeforeRUN(){
+    dp=document.getElementById("dbproject").value;
+    if ((dp=='') || (dp=='null')){
+        alert('The Project field is empty! Fill it before generate!');
+        return true;
+    }
+    return false;
+}
 
-
-function DDSave(title){    
+function DDSave(title){  
+    if (VerifyFailBeforeRUN()) return;
     var sid='';
     AScreens.forEach(function(scr,idx){
          if (!scr.enable) return;  
-            var source=`<?xml version="1.0" encoding="iso-8859-2"?>`+LF+`<DataDefinition xmlns="http://effector.hu/schema/ns/datadefinition">`+LF+
-`<SqlSelect>FROM `+scr.table.name+` WHERE 1=1 </SqlSelect>
+            var source=`<?xml version="1.0" encoding="utf-8"?>`+LF+`<DataDefinition xmlns="http://effector.hu/schema/ns/datadefinition">`+LF+
+`<SqlSelect>FROM `+scr.table.name+` WHERE Deleted=0 and 1=1 </SqlSelect>
 <Columns>`+LF;
             for(var i=0;i<scr.table.AFields.length;i++){
                 f=scr.table.AFields[i];
@@ -397,18 +379,20 @@ function DDSave(title){
 }
 
 function BOSave(title){    
+    if (VerifyFailBeforeRUN()) return;
     var fi='<Fields>'+LF;
     var f=null;
     AScreens.forEach(function(scr,idx){
         if (!scr.enable) return;
             var filename = getFilename(scr.table.name,title);
 
-            var source=`<?xml version="1.0" encoding="iso-8859-2"?>`+LF+`<BusinessObject xmlns="http://effector.hu/schema/ns/businessobject">`+LF+
+            var source=`<?xml version="1.0" encoding="utf-8"?>`+LF+`<BusinessObject xmlns="http://effector.hu/schema/ns/businessobject">`+LF+
             `<DataTable>`+scr.table.name+`</DataTable>`+LF;
             for(var i=0;i<scr.table.AFields.length;i++){
                 f=scr.table.AFields[i];
                 if (i==0){
                     source+=`<UniqueIDColumn>`+f.name+`</UniqueIDColumn>`+LF;
+                    fi+=`   <Field name="`+f.name+`" />`+LF;
                 }else{
                     if (f.name.toLowerCase() !="deleted"){
                         fi+=`   <Field name="`+f.name+`" />`+LF;
@@ -466,6 +450,7 @@ function FOControlCombo(combofilename,finame,left=160){
 }
 
 function FOSave(title){
+    if (VerifyFailBeforeRUN()) return;
     DDSave(title);
     BOSave(title);
     COMPSave(title);
@@ -479,7 +464,7 @@ function FOSave(title){
         if (!scr.enable) return;
             var filename = getFilename(scr.table.name,title);
 
-            var source=`<?xml version="1.0" encoding="iso-8859-2"?>`+LF+`<Form xmlns="http://effector.hu/schema/ns/form">`+LF+
+            var source=`<?xml version="1.0" encoding="utf-8"?>`+LF+`<Form xmlns="http://effector.hu/schema/ns/form">`+LF+
 `<Caption>`+scr.table.name+`</Caption>
 <DataDefinition>DataDefinition`+filename+`</DataDefinition>
 <BusinessObject>BusinessObject`+filename+`</BusinessObject>
@@ -615,8 +600,8 @@ source+=`   <ControlGroup name="`+f.name+`">
             </Controls>
           </ControlGroup>      
             </ControlGroups>`+LF;
-            source+=cg+`      <ControlGroup>ButtonGroup</ControlGroup>
-            </ControlGroupOrder></ControlGroupOrders>`+LF;
+            //source+=cg+`      <ControlGroup>ButtonGroup</ControlGroup>
+            //</ControlGroupOrder></ControlGroupOrders>`+LF;
             source+=`</Form>`;
             //var filename=scr.table.name.toLowerCase().replace(title.toLowerCase(),title).replace(/_/g,'');
             SaveXML('Form'+filename,source);
@@ -625,14 +610,16 @@ source+=`   <ControlGroup name="`+f.name+`">
 }
 
 function getFilename(tablename,title){
+    var dbextraname= document.getElementById("dbextraname").value;
     var dbproject= document.getElementById("dbproject").value;if (dbproject=='') dbproject=title
-    var tbname = LL(tablename).replace(LL(title),'').replace(/_/g,'');
+    var tbname = LL(tablename).replace(LL(title),'').replace(/_/g,'')+LL(dbextraname);
     var filename=dbproject+CC(tbname);
     return filename;
 }
 
 
 function DispSave(title){
+    if (VerifyFailBeforeRUN()) return;
     var sid='';
     SCREENSave(title,'disp','disp');    
     COMPSave(title,'DisplayDefinition','disp');
@@ -640,7 +627,7 @@ function DispSave(title){
     AScreens.forEach(function(scr,idx){
          if (!scr.enable) return;           
          var filename = getFilename(scr.table.name,title);
-         var source=`<?xml version="1.0" encoding="iso-8859-2"?>`+LF+`<DisplayDefinition xmlns="http://effector.hu/schema/ns/displaydefinition">`+LF+
+         var source=`<?xml version="1.0" encoding="utf-8"?>`+LF+`<DisplayDefinition xmlns="http://effector.hu/schema/ns/displaydefinition">`+LF+
 `<Caption>`+scr.table.name+`</Caption>
 <ViewType>Card</ViewType>
 <DefaultSelectionType>Multiple</DefaultSelectionType>
@@ -731,8 +718,8 @@ function DispSave(title){
           <Name>NewObject</Name>
           <Type>NewObjectButton</Type>
           <Caption>Hozzáadás</Caption>
-          <BusinessObject>BusinessObjectMSKFEBErtekelodelegalas</BusinessObject>
-          <Screen>ScreenMSKFEBDelegaloErtekelodelegalasKivalasztas</Screen>
+          <BusinessObject>BusinessObject`+filename+`</BusinessObject>
+          <Screen>Screen`+filename+`</Screen>
       </Control>
       <Control>
           <Name>Delete</Name>
@@ -809,7 +796,7 @@ function ComboD_direct(title,field){ //skey ha ures akkor az elso mező, ha nem 
     }
     
 
-    var s=`<?xml version="1.0" encoding="iso-8859-2"?>
+    var s=`<?xml version="1.0" encoding="utf-8"?>
 <ComboDefinition xmlns="http://effector.hu/schema/ns/combodefinition">
   <SourceType>Database</SourceType>
   <Source>
@@ -917,13 +904,13 @@ del /Q Workflow
 md Workflow
 md BusinessObject
 md EditForm
-if not exist Workflows.xml echo ^<?xml version="1.0" encoding="ISO-8859-2"?^>^<Workflows^>^</Workflows^> >Workflows.xml
+if not exist Workflows.xml echo ^<?xml version="1.0" encoding="utf-8"?^>^<Workflows^>^</Workflows^> >Workflows.xml
 xml ed -L -s /Workflows -t elem -n Workflow -s /Workflows/Workflow[last()] -t elem -n ObjectType -v `+wfid+` -s /Workflows/Workflow[last()] -t elem -n Caption -v `+wfcaption+` workflows.xml
 echo Workflow
 md Workflow
 md BusinessObject
 md EditForm
-echo ^<?xml version="1.0" encoding="ISO-8859-2"?^>^<Workflow/^> >Workflow/Workflow`+wfid+`.1.xml
+echo ^<?xml version="1.0" encoding="utf-8"?^>^<Workflow/^> >Workflow/Workflow`+wfid+`.1.xml
 xml ed -L -s /Workflow -t elem -n Steps Workflow/Workflow`+wfid+`.1.xml
 `;
     source_WFMid="";
