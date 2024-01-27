@@ -1431,21 +1431,22 @@ var TTable = function(name){
     }
 
     var rec = node.getElementsByTagName("records");
-    if (rec!=null) 
-      rec = rec[0];
-    
-    var row = rec.getElementsByTagName("row");
-    this.Records=[];
-    var Rec=this.Records;
-    Array.prototype.forEach.call(row,function(r,ridx){
-      var col = r.getElementsByTagName("col");
-      var bc=[];
-      Array.prototype.forEach.call(col,function(c,cidx){
-        //cols
-        bc.push(decodeStr(c.innerHTML));
+    if (rec != null && rec.length > 0 ) 
+    {
+      rec = rec[0];    
+      var row = rec.getElementsByTagName("row");
+      this.Records=[];
+      var Rec=this.Records;
+      Array.prototype.forEach.call(row,function(r,ridx){
+        var col = r.getElementsByTagName("col");
+        var bc=[];
+        Array.prototype.forEach.call(col,function(c,cidx){
+          //cols
+          bc.push(decodeStr(c.innerHTML));
+        });
+        Rec.push(bc);
       });
-      Rec.push(bc);
-    });
+    }
     
     this.initSQL();
     try {
