@@ -31,6 +31,10 @@
         ::-webkit-scrollbar {
             width: 20px;
         }
+        .head {
+          background-color: #f0f0f0;
+          height:55px;          
+        }
         button.fa {
             font-size:16px;
         }
@@ -435,7 +439,7 @@
             font-size: 0.6rem;
             padding-left:60px;
             padding-right:60px;
-            background-color: rgba(211, 211, 211, 0.472);
+            /*background-color: rgba(211, 211, 211, 0.472);*/
         }
         .micro {
             font-size:0.6rem;
@@ -611,8 +615,11 @@
             </div>
         </div>
     <div id="mainarea" class="container-fluid">
-        <span class="display-5" >FlowDBEditor4</span><b id="vers"></b><i>(C)GaborHorvath</i><span id="moreinfo"></span>
-        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=hgabor47%40gmail%2ecom&lc=AL&item_number=flowdbeditor&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted"><span id="donate"><img src="" id="donateimg">...for new features & modules</span></a>
+      <div class="head">
+        <span class="display-5" >FlowDBEditor4</span><b id="vers"></b><i>(C)GaborHorvath</i>
+      | <i><a target="_blank" href="https://chat.openai.com/g/g-LARFlw7Kf-flowdbeditor-generator">You can generate DB struct via <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEQAAAAXCAYAAACyCenrAAABhWlDQ1BJQ0MgcHJvZmlsZQAAKJF9kT1Iw1AUhU9TRZGKQzuIOmSoTlaKijhKFYtgobQVWnUweekfNGlIUlwcBdeCgz+LVQcXZ10dXAVB8AfE2cFJ0UVKvC8ptIjxwuN9nHfP4b37AKFRYarZFQVUzTJS8ZiYza2KPa/wYRhBTCAqMVNPpBcz8Kyve+qmuovwLO++P6tfyZsM8InEc0w3LOIN4plNS+e8TxxiJUkhPiceN+iCxI9cl11+41x0WOCZISOTmicOEYvFDpY7mJUMlXiaOKyoGuULWZcVzluc1UqNte7JXxjIaytprtMaQRxLSCAJETJqKKMCCxHaNVJMpOg85uEfcvxJcsnkKoORYwFVqJAcP/gf/J6tWZiadJMCMaD7xbY/RoGeXaBZt+3vY9tungD+Z+BKa/urDWD2k/R6WwsfAQPbwMV1W5P3gMsdYPBJlwzJkfy0hEIBeD+jb8oBwVugb82dW+scpw9Ahma1fAMcHAJjRcpe93h3b+fc/u1pze8H9Hdy23rcaKAAAAAGYktHRAD/AP8A/6C9p5MAAAAJcEhZcwAALiMAAC4jAXilP3YAAAAHdElNRQfoARsTNg+LeFusAAAAGXRFWHRDb21tZW50AENyZWF0ZWQgd2l0aCBHSU1QV4EOFwAAB1xJREFUWMPtWGlMU90WXSVIpUaFApZICOCHBsSp+IMQAgLaoCFxCIjBKWIIhhBRiFET5wiRlEDgh0KoYABBQiFOBQuimEBTU4jgiDIUBU1rgQqFtrfjfj9eXiMP/J5+eUOeuv7dfc5Z59x91z5778siIsJvOOD02wW/HfLvc8ivEF1O3+MEmUyG/fv3Izo6GkeOHIFcLofdbv8pHcL6V5fq3bt30dTUhIyMDHh6ekKn0+HkyZMIDQ3FokWL4O/vD4FAAHd3959bIUSEgYEBlJaWIjc3F+vWrQOLxUJDQwO4XC5CQ0MRERGB8fFxpKSkYGho6OeQCM2D6elpKi4uJnd3dzp//jwREYnFYgoLCyOJREJ6vZ60Wi2ZzWYiInr48CEdPnzY8fw11Go11dTUUEFBAZWWltLw8DD9N9Dd3U3Xrl2jZ8+ezbLL5XISiURkNBrnXTdHIRaLBWVlZQCACxcuwN/fHyqVCjKZDFKpFNHR0ZBIJMjOzsbp06ehVCoRGRkJvV6P0dHRWVz9/f3Ys2cP6urqMDk5icePH2P79u148uTJf/Qj22w23LlzB8ePH4dYLIbNZnOMjY6OoqioaJbtazj/s0GtVqOpqQkSiQS3b9+GyWSC3W6Ht7c3Xr9+jZKSEsTFxaG0tBTt7e04ePAgdu/eDZPJBKvV6uCxWq0QCoUIDg5GQUEBOBwOGIZBcXExhEIh1qxZAwCYmJgAl8vFyMgI2Gw2/vjjD7i6ujo4lEolxsfH4efnBx8fHwDA0NAQOBwODAYDxsbGEBAQAB6P59h7eHgYOTk5uHjxIi5duoSsrCx4eXn9tZBpbW2lqqoqIiKqqamhiooK+vjxIwkEApJIJKTRaCg/P5/Ky8tpbGyMvnz5QlVVVeTt7U19fX0Onrdv3xIAkslks/iVSiUBoKdPn5JUKiUAFB0dTbt27aLg4GA6c+YMWSwWslqtdPnyZQoPD6ekpCTi8/nU0dFBRETJycnE5/MpKiqKQkJCSCAQkEajcexRXV1N8fHxpFKpaOXKlVRTU+MYq6+vp5CQEJqZmZk3ZOYoZMmSJejo6AARYeHChRgfH4fdbkd8fDzi4+MBANnZ2Thw4ADUajU2btyIpKQkODs749atWzh37hycnZ2h1WoBAEFBQbP4ly9fDjc3N2g0GrDZbLBYLJw9exaxsbHo7e1FVFQUtm/fDpvNhsbGRtTW1sLf3x+NjY3Iz88Hn88Hi8VCaGgo8vLyoFarsWPHDrx69QoxMTEwmUwQi8XYt28feDweMjIyUFtbi8TERLi4uPx4lgkKCkJnZydevnyJrVu3ws3NDUVFRTCbzbPm+fj44MSJEygpKYFKpcK2bdsgEolgMpkAAG5ubgAAjUYza53RaITJZHKERUBAAKKiosBisbBq1Sps3rwZw8PD6O/vh1qtxqlTp5CcnIwbN27gw4cP0Ol0AIDw8HB4enrCx8cHHh4emJ6eBgA8f/4cbW1tAAC5XI7Fixejvb0dg4OD3xUxcxSydOlSpKSk4NChQ8jLy0NiYiIiIyNx//591NfXg8/no6GhARMTE3BxcYGLiwuICK6urvD09HTw8Hg88Pl8tLS0zFKJXC4Hm83GihUrMDg4CKPRiMnJSXh5ecFqtWJiYgJeXl7Q6XRYv349hEIhOBwOjEYj7Hb7n94FRITOzk44OTkhNzcXRAQWiwW73Q6pVDpHrd9dh1gsFqSlpaG5uRmZmZkwm83Yu3cvWltbUV1djdTUVHC53FlrPn/+jMDAQDg7/93HXC4XeXl5uHLlCq5fvw6FQoH6+nocO3YMQqEQAQEBAACVSoW6ujq8e/cO9+7dg1KpxOrVq8Hn8/H+/Xu8ePECRqMRUqkUFRUVf9o+TE1NobCwEGKxGAqFAl1dXVAoFBCJRKiqqsLMzMyPK+QfKmEYBgUFBejt7UV2djb8/PyQnp6ODRs2oKenBwaDwfFV3rx5g4aGBhw9ehRsNtvBs2XLFty8eROVlZXIzMxEYmIiCgsLIRAIwGKxHHeWVqtFeHg4IiIiUFdXBx6PBxaLhfLycpSVlSE9PR0JCQnIysrCggULwOVyHfs4OTnB19cXHA4HPT094PP5CAsLA4fDmXWOyspK9PX1wcnJCcuWLfuxwmxkZIQ2bdpEAwMDRESk1+vJaDTSp0+fKCcnhxISEqi3t5dmZmYoJiaG4uLiSCaTkc1mm/fmNhqNpNPpiGGYWfaWlhby9fUlrVZLOp2ODAbDnLUMw5BOpyOTyeSwGQwGB5fdbie9Xk8Wi4UYhiG9Xk92u30Oj16vJ7PZTAzD0PT09LxziIjwrUqvra2NYmNjqba2lpqbm+nq1askEAioubnZcfBHjx5RamrqvC/yPZBKpeTh4fHNFPi/wDebOyKCUqlEV1cXpqamMDAwALPZjLS0NLDZbHR3d0MkEqGsrAyBgYF/qaJkGAYMwzgy0v9Ft/t1unzw4AEUCgUmJyexdu1a7Ny501E9/jLt/3x9gs1m+64i55dwyO9fiL8Y/gbQEhon0PvPPgAAAABJRU5ErkJggg=="> based FlowDBEditor generator too</a></i><span id="moreinfo"></span>
+        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=hgabor47%40gmail%2ecom&lc=AL&item_number=flowdbeditor&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted"><span id="donate"><img src="" id="donateimg">Donate for new features & modules</span></a>
+      </div>  
         <div id="help" onclick="this.innerHTML=''">Write records with right click on created tables :)</div>
         <input type="text" id="title" value="Unknown title">
 

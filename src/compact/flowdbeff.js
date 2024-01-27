@@ -4,9 +4,6 @@ loadSQLScript(function(){
     scriptstart=true;
     var helpp = document.getElementById('moreinfo');
     helpp.innerHTML+="<span> +"+ver+" </span>";
-    helpp.innerHTML+="<a class='addoninfo' href='http://172.24.112.109/effector/xml.exe'>XMLStarlet</a>";
-    helpp.innerHTML+="<a class='addoninfo' href='http://172.24.112.109/effector/xml.exe'>Microsoft SQLCMD</a>";
-    helpp.innerHTML+=" <a class='addoninfo' href='http://172.24.112.109/effector/tutorial.mp4' target='_blank' >EffectorFlow tutorial</a>";
     AType[0].effectortype="TextBox";
     AType[1].effectortype="TextBox";
     AType[2].effectortype="TextBox";
