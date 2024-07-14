@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <script>
-        var vers="1.41";
+        var vers="1.57";
 		
         var flowdbinit=''; 
 		//    //can I use content (XML) or file path on server side. On client side please use GET 
@@ -489,15 +489,15 @@
             a.style.height="3.7rem";
         }
         function blur1(){
-            var but=document.getElementById("flowdbload");
+            var but=$("flowdbload");
             if (but.activ){
-                //document.getElementById("help").innerHTML="blur";
+                //$("help").innerHTML="blur";
                 FlowDBLoad(but);
             }
         }
         window.onload=function(){            
             try{
-                v = document.getElementById("vers");
+                v = $("vers");
                 v.innerHTML="v"+vers;
                 document.title+="."+vers;                
                 flowdbeditor_onload();
@@ -617,9 +617,13 @@
     <div id="mainarea" class="container-fluid">
       <div class="head">
         <span class="display-5" >FlowDBEditor4</span><b id="vers"></b><i>(C)GaborHorvath</i>
-      | <i><a target="_blank" href="https://chat.openai.com/g/g-LARFlw7Kf-flowdbeditor-generator">You can generate DB struct via <img src="data:image/png;base64,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"> based FlowDBEditor generator too</a></i><span id="moreinfo"></span>
+        <span id="api-key-panel">
+          <input type="password" id="api-key" placeholder="OpenAI API key for voice">
+          <button onclick="setApiKey()">Set</button>
+        </span>  
+    | <i><a target="_blank" href="https://chat.openai.com/g/g-LARFlw7Kf-flowdbeditor-generator">Generate via <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEQAAAAXCAYAAACyCenrAAABhWlDQ1BJQ0MgcHJvZmlsZQAAKJF9kT1Iw1AUhU9TRZGKQzuIOmSoTlaKijhKFYtgobQVWnUweekfNGlIUlwcBdeCgz+LVQcXZ10dXAVB8AfE2cFJ0UVKvC8ptIjxwuN9nHfP4b37AKFRYarZFQVUzTJS8ZiYza2KPa/wYRhBTCAqMVNPpBcz8Kyve+qmuovwLO++P6tfyZsM8InEc0w3LOIN4plNS+e8TxxiJUkhPiceN+iCxI9cl11+41x0WOCZISOTmicOEYvFDpY7mJUMlXiaOKyoGuULWZcVzluc1UqNte7JXxjIaytprtMaQRxLSCAJETJqKKMCCxHaNVJMpOg85uEfcvxJcsnkKoORYwFVqJAcP/gf/J6tWZiadJMCMaD7xbY/RoGeXaBZt+3vY9tungD+Z+BKa/urDWD2k/R6WwsfAQPbwMV1W5P3gMsdYPBJlwzJkfy0hEIBeD+jb8oBwVugb82dW+scpw9Ahma1fAMcHAJjRcpe93h3b+fc/u1pze8H9Hdy23rcaKAAAAAGYktHRAD/AP8A/6C9p5MAAAAJcEhZcwAALiMAAC4jAXilP3YAAAAHdElNRQfoARsTNg+LeFusAAAAGXRFWHRDb21tZW50AENyZWF0ZWQgd2l0aCBHSU1QV4EOFwAAB1xJREFUWMPtWGlMU90WXSVIpUaFApZICOCHBsSp+IMQAgLaoCFxCIjBKWIIhhBRiFET5wiRlEDgh0KoYABBQiFOBQuimEBTU4jgiDIUBU1rgQqFtrfjfj9eXiMP/J5+eUOeuv7dfc5Z59x91z5778siIsJvOOD02wW/HfLvc8ivEF1O3+MEmUyG/fv3Izo6GkeOHIFcLofdbv8pHcL6V5fq3bt30dTUhIyMDHh6ekKn0+HkyZMIDQ3FokWL4O/vD4FAAHd3959bIUSEgYEBlJaWIjc3F+vWrQOLxUJDQwO4XC5CQ0MRERGB8fFxpKSkYGho6OeQCM2D6elpKi4uJnd3dzp//jwREYnFYgoLCyOJREJ6vZ60Wi2ZzWYiInr48CEdPnzY8fw11Go11dTUUEFBAZWWltLw8DD9N9Dd3U3Xrl2jZ8+ezbLL5XISiURkNBrnXTdHIRaLBWVlZQCACxcuwN/fHyqVCjKZDFKpFNHR0ZBIJMjOzsbp06ehVCoRGRkJvV6P0dHRWVz9/f3Ys2cP6urqMDk5icePH2P79u148uTJf/Qj22w23LlzB8ePH4dYLIbNZnOMjY6OoqioaJbtazj/s0GtVqOpqQkSiQS3b9+GyWSC3W6Ht7c3Xr9+jZKSEsTFxaG0tBTt7e04ePAgdu/eDZPJBKvV6uCxWq0QCoUIDg5GQUEBOBwOGIZBcXExhEIh1qxZAwCYmJgAl8vFyMgI2Gw2/vjjD7i6ujo4lEolxsfH4efnBx8fHwDA0NAQOBwODAYDxsbGEBAQAB6P59h7eHgYOTk5uHjxIi5duoSsrCx4eXn9tZBpbW2lqqoqIiKqqamhiooK+vjxIwkEApJIJKTRaCg/P5/Ky8tpbGyMvnz5QlVVVeTt7U19fX0Onrdv3xIAkslks/iVSiUBoKdPn5JUKiUAFB0dTbt27aLg4GA6c+YMWSwWslqtdPnyZQoPD6ekpCTi8/nU0dFBRETJycnE5/MpKiqKQkJCSCAQkEajcexRXV1N8fHxpFKpaOXKlVRTU+MYq6+vp5CQEJqZmZk3ZOYoZMmSJejo6AARYeHChRgfH4fdbkd8fDzi4+MBANnZ2Thw4ADUajU2btyIpKQkODs749atWzh37hycnZ2h1WoBAEFBQbP4ly9fDjc3N2g0GrDZbLBYLJw9exaxsbHo7e1FVFQUtm/fDpvNhsbGRtTW1sLf3x+NjY3Iz88Hn88Hi8VCaGgo8vLyoFarsWPHDrx69QoxMTEwmUwQi8XYt28feDweMjIyUFtbi8TERLi4uPx4lgkKCkJnZydevnyJrVu3ws3NDUVFRTCbzbPm+fj44MSJEygpKYFKpcK2bdsgEolgMpkAAG5ubgAAjUYza53RaITJZHKERUBAAKKiosBisbBq1Sps3rwZw8PD6O/vh1qtxqlTp5CcnIwbN27gw4cP0Ol0AIDw8HB4enrCx8cHHh4emJ6eBgA8f/4cbW1tAAC5XI7Fixejvb0dg4OD3xUxcxSydOlSpKSk4NChQ8jLy0NiYiIiIyNx//591NfXg8/no6GhARMTE3BxcYGLiwuICK6urvD09HTw8Hg88Pl8tLS0zFKJXC4Hm83GihUrMDg4CKPRiMnJSXh5ecFqtWJiYgJeXl7Q6XRYv349hEIhOBwOjEYj7Hb7n94FRITOzk44OTkhNzcXRAQWiwW73Q6pVDpHrd9dh1gsFqSlpaG5uRmZmZkwm83Yu3cvWltbUV1djdTUVHC53FlrPn/+jMDAQDg7/93HXC4XeXl5uHLlCq5fvw6FQoH6+nocO3YMQqEQAQEBAACVSoW6ujq8e/cO9+7dg1KpxOrVq8Hn8/H+/Xu8ePECRqMRUqkUFRUVf9o+TE1NobCwEGKxGAqFAl1dXVAoFBCJRKiqqsLMzMyPK+QfKmEYBgUFBejt7UV2djb8/PyQnp6ODRs2oKenBwaDwfFV3rx5g4aGBhw9ehRsNtvBs2XLFty8eROVlZXIzMxEYmIiCgsLIRAIwGKxHHeWVqtFeHg4IiIiUFdXBx6PBxaLhfLycpSVlSE9PR0JCQnIysrCggULwOVyHfs4OTnB19cXHA4HPT094PP5CAsLA4fDmXWOyspK9PX1wcnJCcuWLfuxwmxkZIQ2bdpEAwMDRESk1+vJaDTSp0+fKCcnhxISEqi3t5dmZmYoJiaG4uLiSCaTkc1mm/fmNhqNpNPpiGGYWfaWlhby9fUlrVZLOp2ODAbDnLUMw5BOpyOTyeSwGQwGB5fdbie9Xk8Wi4UYhiG9Xk92u30Oj16vJ7PZTAzD0PT09LxziIjwrUqvra2NYmNjqba2lpqbm+nq1askEAioubnZcfBHjx5RamrqvC/yPZBKpeTh4fHNFPi/wDebOyKCUqlEV1cXpqamMDAwALPZjLS0NLDZbHR3d0MkEqGsrAyBgYF/qaJkGAYMwzgy0v9Ft/t1unzw4AEUCgUmJyexdu1a7Ny501E9/jLt/3x9gs1m+64i55dwyO9fiL8Y/gbQEhon0PvPPgAAAABJRU5ErkJggg=="></a></i><span id="moreinfo"></span>
         <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=hgabor47%40gmail%2ecom&lc=AL&item_number=flowdbeditor&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted"><span id="donate"><img src="" id="donateimg">Donate for new features & modules</span></a>
-      </div>  
+            </div>  
         <div id="help" onclick="this.innerHTML=''">Write records with right click on created tables :)</div>
         <input type="text" id="title" value="Unknown title">
 
@@ -686,29 +690,16 @@
 
   so. in the next time you can continue editing where you abandoned. :)
 */
-xhttp2=null
-if (window.XMLHttpRequest) {
-  xhttp2 = new XMLHttpRequest();
-  } else {    // IE 5/6
-  xhttp2 = new ActiveXObject("Microsoft.XMLHTTP");
-  }
-  if (xhttp2!=null){
-      xhttp2.overrideMimeType('text/xml');
-  }
-
-function getFile(filename){
-    if (xhttp2==null) return null;
-    xhttp2.open("GET",filename, false);
-    xhttp2.send(null);
-    //xmlDoc = xhttp2.responseXML.getElementsByTagName("flowdbeditor")[0];
-    try{
-    source = xhttp2.responseText;
-    localStorage.setItem("flowdbeditor",source);
-    Load();
-    console.log(source.substring(0, 200));
-    }catch(e)
-    {
-      console.log('file not loaded');
+async function getFile(filename) {
+    try {
+        const response = await fetch(filename);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const source = await response.text();
+        localStorage.setItem("flowdbeditor", source);
+        Load();
+        console.log(source.substring(0, 200));
+    } catch (e) {
+        console.log('file not loaded');
     }
 }
 
@@ -782,9 +773,11 @@ var zooms=[1200,4200,5400];
 var zoomvalue=1;
 var WorkflowStart=null;
 
+function $(o) { return document.getElementById (o) }
+
 function flowdbeditor_onload(){
   g = document.getElementsByName("table");
-  flowdbeditor = document.getElementById("flowdbeditor");
+  flowdbeditor = $("flowdbeditor");
   
   flowdbeditor.addEventListener("mousemove",move);
   flowdbeditor.addEventListener("mouseup",up);
@@ -803,9 +796,9 @@ function flowdbeditor_onload(){
     obj.setAttribute("transform","translate(100,100)");
     obj.addEventListener("mousedown",down);
   }
-  addModules(document.getElementById("modules"));
+  addModules($("modules"));
 
-  var but=document.getElementById("flowdbload");
+  var but=$("flowdbload");
   but.activ=false; //TODO!!! for prevent to double load in same time
   if (flowdbget!=null){
     LoadString(flowdbget);
@@ -822,11 +815,11 @@ function flowdbeditor_onload(){
           getFile(flowdbinit);
         }
         //TODO load serverside file to flowdbinit
-        //HOP remove document.getElementById("loadserverdefault").style.display="flex";
+        //HOP remove $("loadserverdefault").style.display="flex";
         //HOP remove LoadServerDefault(); //but.activ=true; in the function
                 
-        //var but=document.getElementById("flowdbload");
-		    //document.getElementById("filename").InnerHTML=flowdbinit;
+        //var but=$("flowdbload");
+		    //$("filename").InnerHTML=flowdbinit;
 		    //FlowDBLoad(but);
       } else {
         LoadString(flowdbinit); 
@@ -864,7 +857,7 @@ function newsdialog(show){
   if (show){
     localStorage.setItem("flowdbeditornews","");
   }
-  var newsul = document.getElementById("newsul");
+  var newsul = $("newsul");
   newsul.innerHTML="";
   var news1 = localStorage.getItem("flowdbeditornews");
   var shownews=false;
@@ -882,7 +875,7 @@ function newsdialog(show){
   }  
   if (shownews){
     localStorage.setItem("flowdbeditornews",news1);
-    var newsdom = document.getElementById("news");
+    var newsdom = $("news");
     newsdom.style.visibility="visible";
   }
 }
@@ -909,10 +902,10 @@ oncehints.loadfromsqlfile="Loaded SQL from scriptfile.";
 oncehints.loadserverdefault="Default content loaded from server";
 oncehints.hint = function(hint){
   if (oncehints[hint]!=""){
-    document.getElementById("help").innerHTML=oncehints[hint];
+    $("help").innerHTML=oncehints[hint];
     oncehints[hint]="";
   }else{
-    document.getElementById("help").innerHTML='';
+    $("help").innerHTML='';
   }
 };
 
@@ -1310,10 +1303,10 @@ var TTable = function(name){
 
     //ITT, mert így megmarad az input-on a properties tulajdonság
     this.properties.refresh(); 
-    this.properties.connectUI(document.getElementById("editproperties"));
+    this.properties.connectUI($("editproperties"));
     
-    changeCHKfilter(document.getElementById("edit_tablesql"));
-    var sql = document.getElementById('edit_sql');
+    changeCHKfilter($("edit_tablesql"));
+    var sql = $('edit_sql');
     sql.sqlindex = 1;
     setFocus("edit_name");
     return div;
@@ -1835,10 +1828,10 @@ var TField = function(table,name){
     setFocus("edit_name");
     SelectedField=this;   
     if (this.link!=null) {
-      changeCHKfilter(document.getElementById("edit_linkfilter"));
+      changeCHKfilter($("edit_linkfilter"));
     }
     
-    var ty = document.getElementById("edit_type");
+    var ty = $("edit_type");
     if (ty!=null){
       ty.onchange=this.onchange2;
     }    
@@ -1846,10 +1839,10 @@ var TField = function(table,name){
   };
   
   this.onchange2=function(event){
-    var ty = document.getElementById("edit_type");
+    var ty = $("edit_type");
     if (ty != null ) {
       var deflen = AType[ty.value].defaultlength;
-      var l = document.getElementById("edit_length");
+      var l = $("edit_length");
       if ( l!=null){
         l.value  = deflen;
       }
@@ -2069,7 +2062,7 @@ class TWFLink{
     this.DOMLink.addEventListener("mousedown",TWFClick);    
     this.DOMLink.wflink=this;
     //this.DOMLink.setAttribute("class","flow_line");
-    //flowdbeditor.insertBefore(this.DOMLink,document.getElementById("flowbackground"));
+    //flowdbeditor.insertBefore(this.DOMLink,$("flowbackground"));
     flowdbeditor.appendChild(this.DOMLink);
     this.refresh();
   }
@@ -2326,7 +2319,7 @@ function newTable(){
 }
 
 function refreshTablesListDOM(){  //tables / [div (button,span)] ...
-  var l=document.getElementById("tables");
+  var l=$("tables");
   l.innerHTML="";
   for (let i = 0; i < ATables.length; i++) {
     const e = ATables[i];
@@ -2359,7 +2352,7 @@ function refreshTablesListDOM(){  //tables / [div (button,span)] ...
 }
 
 function searchTableListDOMButton(table){
-  var l=document.getElementById("tables");  
+  var l=$("tables");  
   for (let i = 0;  i< l.childNodes.length; i++) {
     const div = l.childNodes[i];
     var b=div.childNodes[0];
@@ -2393,9 +2386,9 @@ function newField(){
 
 //with contsraints
 function refreshFieldsListDOM(){  
-  var l=document.getElementById("fields");
+  var l=$("fields");
   l.innerHTML="";
-  var co=document.getElementById("constraints");
+  var co=$("constraints");
   co.innerHTML="";
   if (SelectedTable==null) return;
   var coindex=0;
@@ -2455,7 +2448,7 @@ function newConstraint(b,nohint){
 function titleClick(e){
   isdown=false;
   if (flowMode==FlowModes.Flow){
-    this.table.edit(document.getElementById("area"));
+    this.table.edit($("area"));
   }else{
     if (WorkflowStart!=null){
       flowMode=FlowModes.Flow;
@@ -2485,7 +2478,7 @@ function fieldClick(e){
   }
 
   if (flowMode==FlowModes.Flow){    
-    this.field.edit(document.getElementById("area"));
+    this.field.edit($("area"));
     SelectedField=this.field;
   }
   if (flowMode==FlowModes.Constraint){
@@ -2496,7 +2489,7 @@ function fieldClick(e){
       constraintField.addLink(this.field);      
       constraintField  = null;
       if (automodeLink==false){
-        var b= document.getElementById("newconstraint");
+        var b= $("newconstraint");
         newConstraint(b,true);
       }
     }
@@ -2504,10 +2497,10 @@ function fieldClick(e){
 }
 
 function TWFClick(e){  //.target == DOMLink
-  var d = document.getElementById("workflowedit"); //DIV  
+  var d = $("workflowedit"); //DIV  
   d.wflink=e.target.wflink;
   if (d.wflink.prop_triggermode!=null){
-    document.getElementById("wfe_trigger_mode").value=d.wflink.prop_triggermode;
+    $("wfe_trigger_mode").value=d.wflink.prop_triggermode;
   }
   d.style.top=Number(d.wflink.next.posxy[1]+40)+"px";
   d.style.left=Number(d.wflink.next.posxy[0]+40)+"px";
@@ -2531,7 +2524,7 @@ function wflink_ok(div){
     if (panel.wflink.prop_triggermode==null){
       panel.wflink.prop_triggermode="";
     }
-    panel.wflink.prop_triggermode=document.getElementById("wfe_trigger_mode").value;
+    panel.wflink.prop_triggermode=$("wfe_trigger_mode").value;
     Save(temp);
     panel.style.visibility='hidden';
   } catch (error) {    }
@@ -2546,12 +2539,12 @@ function removePanelDOM(div){
 //region TABLE Buttons
 function editTableOK(div){
   var panel = div.parentElement;
-  var ename = document.getElementById('edit_name');
-  var ewidth = document.getElementById('edit_width');
-  var esql = document.getElementById('edit_tablesql');
-  var ereadonly = document.getElementById('edit_readonly');
-  var edescription = document.getElementById('edit_description');
-  var ecolor = document.getElementById('edit_color');
+  var ename = $('edit_name');
+  var ewidth = $('edit_width');
+  var esql = $('edit_tablesql');
+  var ereadonly = $('edit_readonly');
+  var edescription = $('edit_description');
+  var ecolor = $('edit_color');
   panel.table.setName(ename.value);
   panel.table.width=Number(ewidth.value);
   //panel.table.height=Number(eheight.value);
@@ -2617,7 +2610,7 @@ function PastePanel(e){
   if ((content!="") && (content!=null)){
     var div=document.createElement("div");
     div.className="flow_clipboard";
-    document.getElementById('screen').appendChild(div);
+    $('screen').appendChild(div);
     div.clipboard=content;
     if (isSQL(content)){
       div.innerHTML=`<input id="pasterefresh" type="checkbox">Refresh table structure<br>`;
@@ -2636,7 +2629,7 @@ function onPaste(div,startidx){
       console.log( typeof content );
 
       if (isSQL(content)){
-        var idx=document.getElementById("pasterefresh");
+        var idx=$("pasterefresh");
         if (idx.checked){
           if (SelectedTable){ 
             refreshSQLFromContent(content)
@@ -2646,14 +2639,14 @@ function onPaste(div,startidx){
         refreshTablesListDOM();
       }else{
         if (startidx==null){
-          var idx=document.getElementById("pasteheader");
+          var idx=$("pasteheader");
           if (idx.checked)
             startidx = 1
           else 
             startidx = 0;
         }
     
-        var newtable = document.getElementById("pastenewtable");
+        var newtable = $("pastenewtable");
         if (newtable.checked) {
           
           var t = new TTable("Unknown");      
@@ -2702,17 +2695,17 @@ function onPaste(div,startidx){
 //region FIELD Buttons
 function editFieldOK(div){
   var panel = div.parentElement;
-  var ename = document.getElementById('edit_name');
-  var etype = document.getElementById('edit_type');
-  var elength = document.getElementById('edit_length');
-  var edisplay = document.getElementById('edit_display');
-  var edescription = document.getElementById('edit_description');
-  var ecolor = document.getElementById('edit_color');
-  var elinkconstraint = document.getElementById('edit_needconstraint');
-  var elinkfilter = document.getElementById('edit_linkfilter');
-  var elinkfilter1 = document.getElementById('edit_linkfilter1');
-  var elinkfilter2 = document.getElementById('edit_linkfilter2');  
-  var elinkfilterfield = document.getElementById('edit_linkfilterfield');  
+  var ename = $('edit_name');
+  var etype = $('edit_type');
+  var elength = $('edit_length');
+  var edisplay = $('edit_display');
+  var edescription = $('edit_description');
+  var ecolor = $('edit_color');
+  var elinkconstraint = $('edit_needconstraint');
+  var elinkfilter = $('edit_linkfilter');
+  var elinkfilter1 = $('edit_linkfilter1');
+  var elinkfilter2 = $('edit_linkfilter2');  
+  var elinkfilterfield = $('edit_linkfilterfield');  
   if (elinkfilter!=null){
     try {
       panel.field.linkfilter[0]=elinkfilter.checked;
@@ -2781,7 +2774,7 @@ function editFieldLink(div){
     automodeLink=false;
     var panel = div.parentElement;
     removePanelDOM(div);
-    var b= document.getElementById("newconstraint");
+    var b= $("newconstraint");
     newConstraint(b,true);
     constraintField  = panel.field;  
     oncehints.hint("NewLinkFromPanel");
@@ -2796,7 +2789,7 @@ function editFieldLinkDelete(div){
 function changeCHKfilter(chk){  
   var DOM = chk.getAttribute("linked");
   if (DOM==null) return;
-  var DOMfilterDIV = document.getElementById(DOM);
+  var DOMfilterDIV = $(DOM);
   if ((chk.checked) && (DOMfilterDIV!=null)){
     DOMfilterDIV.style.visibility="visible";
     DOMfilterDIV.style.display="block";
@@ -2807,13 +2800,13 @@ function changeCHKfilter(chk){
 }
 
 function changeSQL(textarea){
-   var div = document.getElementById('flow_edit');  
-   var sql = document.getElementById('edit_sql');
+   var div = $('flow_edit');  
+   var sql = $('edit_sql');
    div.table.sql[sql.sqlindex].text=textarea.value;
 }
 
 function changeTAB(DOMtabs,uj){
-  var t = document.getElementById(DOMtabs);  
+  var t = $(DOMtabs);  
   var tab=t.getElementsByTagName('span');
   var idx=-1;
   for (let i = 0; i < tab.length; i++) {
@@ -2824,8 +2817,8 @@ function changeTAB(DOMtabs,uj){
       tab[i].setAttribute("class","tabs");
     }    
   }
-  var sql = document.getElementById('edit_sql');
-  var div = document.getElementById('flow_edit');
+  var sql = $('edit_sql');
+  var div = $('flow_edit');
   try {
     sql.sqlindex=idx;
     sql.value=nullstring(div.table.sql[idx].text);
@@ -2881,8 +2874,8 @@ function down(e){
 function contextmenu(e){
     isdown=false;
     e.preventDefault();
-    e.currentTarget.table.browse(document.getElementById("area"));      
-    //this.table.browse(document.getElementById("area"));      
+    e.currentTarget.table.browse($("area"));      
+    //this.table.browse($("area"));      
 }
 
 function workflowmenu(e){
@@ -2971,7 +2964,7 @@ function toAscii7(v=""){
 }
 
 function setFocus(DOMname){
-    var foc=document.getElementById(DOMname);
+    var foc=$(DOMname);
     setTimeout(function(){
       foc.focus();
       foc.select();
@@ -3069,42 +3062,40 @@ function getEditDistance(a, b){
 
   return matrix[b.length][a.length];
 }
-/*
-function LoadFile(file,fuggveny){ //function(responsetxt) {
-  $.get(file, fuggveny);
-}*/
-function LoadContentFromServer(file,fuggveny){
-  var xhttp = new XMLHttpRequest();
-  xhttp.onreadystatechange = function(){ 
-      if (this.readyState==2){
-          var mtimefile = this.getResponseHeader('Last-Modified')+file;
-          var stimefile = localStorage.getItem("flowdbeditor_infileID");
-          if ((stimefile!=null) && (stimefile==mtimefile))
-            this.abort();
-          else 
-            localStorage.setItem("flowdbeditor_infileID",mtimefile);
-      }     
-      if (this.readyState==4){ // && xhttp.status==200){  
-          fuggveny(this.responseText,this.status); //1. sora fejlec  2.adat        
-      }
-  };
-  var s=file+"?id="+Math.random();
-  xhttp.open("GET",s,true);            
-  xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-  xhttp.send();  
+
+async function LoadContentFromServer(file, fuggveny) {
+    try {
+        const response = await fetch(file + "?id=" + Math.random(), {
+            method: 'GET',
+            headers: {
+                "Content-type": "application/x-www-form-urlencoded"
+            }
+        });
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+        const mtimefile = response.headers.get('Last-Modified') + file;
+        const stimefile = localStorage.getItem("flowdbeditor_infileID");
+        if (stimefile !== null && stimefile == mtimefile) {
+            throw new Error('Content already loaded');
+        } else {
+            localStorage.setItem("flowdbeditor_infileID", mtimefile);
+        }
+        
+        const text = await response.text();
+        fuggveny(text, response.status);
+    } catch (e) {
+        console.error('Fetch error:', e);
+    }
 }
 
-function URLExists(url)
-{
-  try {
-      var http = new XMLHttpRequest();
-      http.open('HEAD', url, false);
-    
-      http.send();
-      return http.status!=404;        
+
+async function URLExists(url) {
+    try {
+        const response = await fetch(url, { method: 'HEAD' });
+        return response.status != 404;
     } catch (error) {
-      return false;
-    }    
+        return false;
+    }
 }
 
 var  hasModules=false;
@@ -3216,8 +3207,8 @@ function decode_utf8(s) {
 //region --------LOAD / SAVE -------------------
 
 function savetosvgfile(linknode,svgnode){  // print , flowdbeditor
-  linknode=document.getElementById(linknode);
-  var svg = document.getElementById(svgnode); //"svg"
+  linknode=$(linknode);
+  var svg = $(svgnode); //"svg"
   //get svg source.
   var serializer = new XMLSerializer();
   var source = serializer.serializeToString(svg);
@@ -3275,7 +3266,7 @@ function SavetoString(moduleFunc=null){
   setup.setAttribute("idField",idField);
   setup.setAttribute("idTable",idTable);
   try{
-    setup.setAttribute("name",document.getElementById("title").value);
+    setup.setAttribute("name",$("title").value);
   } catch (error) {};
   root.appendChild(setup);
   for (let i = 0; i < ATables.length; i++) {
@@ -3304,7 +3295,7 @@ function LoadServerDefault(forceload){
     if (code==200){
       LoadString(txt);
       if (!forceload){
-        var warning=document.getElementById("defaultcontent");
+        var warning=$("defaultcontent");
         warning.style.visibility="visible";
       }
     }
@@ -3313,7 +3304,7 @@ function LoadServerDefault(forceload){
       //alert("Auto load from server file can't success!");
       // this is generally when date and filename same than last
     }
-    var but=document.getElementById("flowdbload");
+    var but=$("flowdbload");
     but.activ=true;
   });
 
@@ -3322,7 +3313,7 @@ function LoadServerDefault(forceload){
 function LoadString(xmlText,moduleFunc=null){
   Asci7ON=false;
   ATables.clear();
-  flowdbeditor=document.getElementById("flowdbeditor");
+  flowdbeditor=$("flowdbeditor");
   flowdbeditor.innerHTML=`      
       <defs>
           <linearGradient id="e" x1="40" y1="210" x2="460" y2="210" gradientUnits="objectBoundingBox">
@@ -3381,10 +3372,10 @@ function LoadString(xmlText,moduleFunc=null){
         idTable = Number(v);
      try{
         v="Unknown title";
-        document.getElementById("title").value = v;
+        $("title").value = v;
         v = setup.getAttribute("name");
         if ((v=="") || (v==null)) v="Unknown title";
-        document.getElementById("title").value = v;
+        $("title").value = v;
      }catch(error){};
   }
 
@@ -3407,8 +3398,8 @@ var SQLdb="flowdbeditor";
 var LF='\r\n';
 function mySQL(linknode){
   if (ATables==null) return;
-  try { SQLdb=document.getElementById("title").value; } catch (error) {};
-  linknode=document.getElementById(linknode);
+  try { SQLdb=$("title").value; } catch (error) {};
+  linknode=$(linknode);
   var source=`START TRANSACTION;`+LF+` 
   SET time_zone = "+00:00";`+LF ;
   source+=`drop database if exists `+SQLdb+`;`+LF+`  
@@ -3533,8 +3524,8 @@ function MSSQL(linknode,ver){
   }
 
   if (ATables==null) return;
-  try { SQLdb=document.getElementById("title").value; } catch (error) {};
-  linknode=document.getElementById(linknode);
+  try { SQLdb=$("title").value; } catch (error) {};
+  linknode=$(linknode);
   var source=`USE [master];`+LFGO;  
   source+=`drop database `+ifex+SQLdb+LFGO+`;
   CREATE DATABASE `+ifex+SQLdb+` COLLATE `+mscollate+LFGO+`
@@ -3636,7 +3627,7 @@ function FlowDBSave(linknode) {
   Save();
   var source=localStorage.getItem("flowdbeditor");
   var url = "data:application/sql;charset=utf-8,"+encodeURIComponent(source);
-  linknode=document.getElementById(linknode);
+  linknode=$(linknode);
   linknode.href = url;
   //linknode.style.visibility="visible";
   linknode.setAttribute("download","flowdb.txt");
@@ -3651,7 +3642,7 @@ function FlowDBLoad(e) {
   }*/
 
   oncehints.hint("loadfromfile");
-  var input = document.getElementById("filename");
+  var input = $("filename");
   if (input.file!=null || input.files[0]!=null)
   {
       var reader = new FileReader();
@@ -3667,7 +3658,7 @@ function FlowDBLoad(e) {
       reader.readAsText(input.files[0]);
   } else {
     //alert("Please choose a file before click loadfromfile button!")
-    var fil=document.getElementById("filename");
+    var fil=$("filename");
     e.activ=true;
     fil.click();
   }
@@ -3680,7 +3671,7 @@ function FlowDBCopy(e){
   if (loc.indexOf("codepen")>0){
     loc = "https://codepen.io/hgabor47/full/XqezrX/";
   } 
-  var it = document.getElementById("copyinput");
+  var it = $("copyinput");
   if (it!=null){
     var pos=loc.indexOf("?");
     if (pos>=0){
@@ -3705,10 +3696,10 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
   if (divname==null)
     divname=Divname;
   Divname=divname;    
-  var div = document.getElementById(divname);
+  var div = $(divname);
   div.innerHTML=``;
   div.addEventListener('scroll', function(e) {
-    var hdr = document.getElementById("list_header");
+    var hdr = $("list_header");
     hdr.style.top=(e.target.scrollTop)+'px';
   });
   if (divname!=null) //TODO New position in new table
@@ -3830,7 +3821,7 @@ function list( tableidx , divname ){   // tomb.... és "lista"  a div id-je
         }
     }
   }  
-  var hdr = document.getElementById("list_header");    
+  var hdr = $("list_header");    
   if (hdr!=null)
     hdr.style.top=(div.scrollTop)+'px';            
 }
@@ -3990,7 +3981,7 @@ function listEditOK(e){
   var t=div.table;
   for (let i = 0; i < div.table.AFields.length; i++) { //and div.REC has same element
     const f = t.AFields[i];      
-    var o=document.getElementById(t.name+f.name);
+    var o=$(t.name+f.name);
     if (o!=null){
       div.rec[i]=o.value;
     }
@@ -4020,7 +4011,7 @@ function list_del(e,tableidx,id) {
   //const rec = t.Records.find( fi => fi[0] == id );
 }
 function editfieldNULL(name){
-  var f=document.getElementById(name);
+  var f=$(name);
   if (f!=null){
     f.value="";
   }
@@ -4140,7 +4131,7 @@ function showhint(obj,yesno01) {
     d.style.left=left+"px";
     document.body.appendChild(d);
   }else{
-    var o= document.getElementById(showhint);
+    var o= $(showhint);
     document.body.removeChild(o);
   }
 }
@@ -4318,9 +4309,9 @@ function drop(ev) {
 //#region SPEECH 
 
 function AIHelp(lang="en"){
-  var b = document.getElementById("AIHelp");
+  var b = $("AIHelp");
   b.style.visibility="visible";
-  var aiul = document.getElementById("aiul");
+  var aiul = $("aiul");
   aiul.innerHTML="";
   var t=document.createElement("table");  
   for(let i=0;i<commands.length;i++){ 
@@ -4515,6 +4506,135 @@ function SpeechToInputbox(command){
     }
   }
 }
+
+var apiKey = "";
+
+function setApiKey() {
+    apiKey = $("api-key").value;
+    $("api-key-panel").style.display="None";
+}
+
+const url = "https://api.openai.com/v1/chat/completions";
+
+const headers = {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${apiKey}`
+};
+const initialSystemMessage = {
+    role: "system",
+    content: `A user szövege alapján az alábbi csoportokba sorolod a megkapott szöveget hasonlóság alapján. A listából adsz vissza elemeket, a %s jelet kicseréled egy oda leginkább illeszkedő angol szóra a %i jelet számra. Más szöveget semmiféleképpen. Kérdésekre nem válaszolsz. A listaelemeket egymás után teheted | jellel elválasztva ha több lista elemmel tudod leírni a user kérését. A listában zárójelben fontos megjegyzések vannak az adott listaelemre. A táblák és mezők neveit csak angolul írhatod vagy ékezetek nélkül!
+
+clear all tables;
+create a table %s; (%s is the table name in English)
+delete table;
+select new table; (select the last table)
+select table; (make the table under the cursor active)
+add %s field %s; (first %s = integer/string/etc., second %s = field name in English)
+connect from %s to %s;
+double size; (table width)
+half size; (table width)
+thank;
+data entry;
+hide table;
+show table %s;
+show datasheet of %s table;
+show datasheet of %s field;
+new record;
+exit;
+scroll down;
+scroll up;
+tablename;
+width;
+color;
+description;
+readonly;
+writeable;
+fieldname;
+length;
+type;
+display;
+no display;
+delete link;
+delete field;`
+};
+
+let conversationHistory = [initialSystemMessage];
+
+async function queryOpenAI(userText) {
+    if (apiKey=="") return ""
+
+    conversationHistory.push({ role: "user", content: userText });
+
+    const data = {
+        model: "gpt-4",
+        messages: conversationHistory,
+        max_tokens: 150,
+        n: 1,
+        stop: null,
+        temperature: 0.7
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const json = await response.json();
+        const assistantReply = json.choices[0].message.content.trim();
+
+        conversationHistory.push({ role: "assistant", content: assistantReply });
+
+        // Összefoglalás készítése
+        if (conversationHistory.length > 10) {
+            const summary = await summarizeConversation(conversationHistory);
+            conversationHistory = [initialSystemMessage, { role: "assistant", content: summary }];
+        }
+
+        return assistantReply;
+    } catch (error) {
+        console.error("Error querying OpenAI API:", error);
+        return null;
+    }
+}
+
+async function summarizeConversation(conversationHistory) {
+    const summaryPrompt = "Summarize the following conversation: " + conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join("\n");
+    
+    const summaryData = {
+        model: "gpt-4",
+        messages: [{ role: "user", content: summaryPrompt }],
+        max_tokens: 100,
+        n: 1,
+        stop: null,
+        temperature: 0.7
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify(summaryData)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const json = await response.json();
+        return json.choices[0].message.content.trim();
+    } catch (error) {
+        console.error("Error summarizing conversation:", error);
+        return null;
+    }
+}
+
+
 
 function robot(command){
   //SpeechToInputbox(command);
@@ -4771,7 +4891,7 @@ function SP_changecolor(inputDOM,idx,cmd,minv,minparams) {
   if (SelectedTable){
     cmd=cmd.replace(commands[commandgroup][idx].command,"");
     cmd=cmd.trim().replace(/ /g,"");
-    var div = document.getElementById(inputDOM);
+    var div = $(inputDOM);
     if (cmd=="") {
       setTimeout(function(){
         div.style.opacity=0;
@@ -4781,7 +4901,7 @@ function SP_changecolor(inputDOM,idx,cmd,minv,minparams) {
       
       return;
     }
-    var div = document.getElementById(inputDOM);
+    var div = $(inputDOM);
     var col = colourNameToHex(cmd);
     if (col){
       div.value=col;
@@ -4790,7 +4910,7 @@ function SP_changecolor(inputDOM,idx,cmd,minv,minparams) {
 }
 
 function SP_setCheckbox(id,logic) {
-  var chk =document.getElementById(id);
+  var chk =$(id);
   chk.checked=logic;
 }
 
@@ -4804,14 +4924,14 @@ function SP_tabledatasheet(idx,command,minv,minparams){
     SP_selecttable(idx,command,minv,minparams);
   }
   if (SelectedTable){
-    SelectedTable.edit(document.getElementById("area"));
+    SelectedTable.edit($("area"));
     //commandgroup=2;  
    }  
 }
 
 function SP_fielddatasheet(){
   if (SelectedField){
-    SelectedField.edit(document.getElementById("area"));
+    SelectedField.edit($("area"));
   }
 }
 
@@ -4842,7 +4962,7 @@ function SP_showtable(idx,command,minv,minparams){
 function SP_adatfelvitel(params) {
   if (SelectedTable){
     //commandgroup=1;    // in browse function
-    SelectedTable.browse(document.getElementById("area"));
+    SelectedTable.browse($("area"));
   }  
 }
 
@@ -4856,17 +4976,17 @@ function SP_adatfelvitel_new(){
 
 function SP_adatfelvitel_exit() {
   if (commandgroup==1){
-    editCancel(document.getElementById("list").childNodes[0]);
+    editCancel($("list").childNodes[0]);
   }
   if ((commandgroup==2) || (commandgroup==3)){
-    var div = document.getElementById("flow_edit");
+    var div = $("flow_edit");
     editCancel(div.childNodes[0]);
   }
   commandgroup=0;  
 }
 
 function SP_smile(){
-  var img = document.getElementById("smile");
+  var img = $("smile");
   if (img!=null){
     img.src = "";
     img.src = imgs+"smile.gif";
@@ -4985,7 +5105,7 @@ function SP_deletetable(idx,cmd) {
   if (SelectedTable!=null){
     if (speechlevel!=0){
       speechlevel=0; //agree
-      document.getElementById("yesno").style.visibility="hidden";
+      $("yesno").style.visibility="hidden";
       if (cmd=="yes"){
         var index = ATables.indexOf(SelectedTable);
         if (index > -1) {
@@ -5001,7 +5121,7 @@ function SP_deletetable(idx,cmd) {
       }
     } else {
       speechlevel=commands[commandgroup][idx].grp;
-      document.getElementById("yesno").style.visibility="visible";
+      $("yesno").style.visibility="visible";
     }  
   }
     
@@ -5084,7 +5204,7 @@ function SP_renamefield(idx,cmd,minv,minparams) {
 
 function createdocument2(linknode){
   if (ATables==null) return;
-  linknode=document.getElementById(linknode);
+  linknode=$(linknode);
   var source=`Táblák`+LF;  
 
   ATables.forEach(function(table,index){
@@ -5099,26 +5219,7 @@ function createdocument2(linknode){
         source+=''+field.name+'\t'+tip.mssql.replace("%",field.length)+LF ;
         //source+='\t'+field.description+LF;        
       });
-/*      
-      if (table.Records!=null && table.Records.length>1){
-        //source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] ON `+LF;
-        source+=`Kivonat`+table.name+`] (`+fields+`) VALUES `;
-        table.Records.forEach(function(o,i){
-          if (i>0){
-              //content            
-              source+=`(`;
-              value="";
-              o.forEach(function(o2,i2){
-                value+="'"+o2+"',";
-              });
-              source+=value.substring(0,value.length-1);
-              source+=`),`;
-          }
-        });
-        source=source.substring(0,source.length-1)+LF;
-        //source+=`SET IDENTITY_INSERT [dbo].[`+table.name+`] OFF `+LF;
-      }
-      */
+
     }
   });
   //Autoinc primary key
@@ -5282,7 +5383,7 @@ function asyncCreateDocument(png){
 }
 
 function savedoc(linknode,filename,source){ 
-  linknode=document.getElementById(linknode);
+  linknode=$(linknode);
   var url = "data:application/text;charset=utf-8,"+encodeURIComponent(source);
   linknode.href = url;
   //linknode.style.visibility="visible";
@@ -5293,14 +5394,14 @@ function savedoc(linknode,filename,source){
 
 //http://bl.ocks.org/biovisualize/8187844 
 function svg2png(linknode,svgnodename="flowdbeditor",func=null){ //or func = function(png){}
-  var flw = document.getElementById(svgnodename);
+  var flw = $(svgnodename);
   var str = new XMLSerializer().serializeToString(flw);
   str = str.replace(/class="flow_fields_color3"/g,'style="fill:grey;stroke-width:0;opacity:0.5"');
   str = str.replace(/class="flow_fields_color4"/g,'style="fill:grey;stroke-width:0;opacity:0.3"');
   //str = str.replace(/class="flow_line"/g,'style="stroke:black;stroke-width:2;"');
   str = str.replace(/class="flow_line_start"/g,'style="stroke:blue;stroke-width:4;"');
   str = str.replace(/class="flow_line_end"/g,'style="stroke:orange;stroke-width:2;"');  
-  //var canvas = document.getElementById("canvas");
+  //var canvas = $("canvas");
   var canvas = document.createElement("canvas");
   canvas.setAttribute("style","display:block");
   canvas.width=flw.clientWidth;
@@ -5315,7 +5416,7 @@ function svg2png(linknode,svgnodename="flowdbeditor",func=null){ //or func = fun
       ctx.drawImage(img, 0, 0);
       var png = canvas.toDataURL("image/png");
       if (this.func==null){
-        linknode=document.getElementById(linknode);
+        linknode=$(linknode);
         var url = "data:image/png;charset=utf-8,"+png;
         linknode.href = png;      
         linknode.setAttribute("download","flowdbdoc.png");
@@ -5330,31 +5431,6 @@ function svg2png(linknode,svgnodename="flowdbeditor",func=null){ //or func = fun
 }
 
 //#endregion printdocument
-/*
-function parseMSSQLScript(script) {
-  const tableRegex = /CREATE TABLE \[dbo\]\.\[(.+?)\]\s*\(([\s\S]+?)\)\s*(?=CREATE TABLE|$)/g;
-  const fieldRegex = /\[(.*?)\]\s*(\[.*?\])(?:\s*IDENTITY\(\d+,\d+\))?\s*(NULL|NOT NULL|PRIMARY KEY|DEFAULT \(\(.*?\)\))?(?:\s*,\s*)?/g;
-  const tables = [];
-
-  let tableMatch;
-  while ((tableMatch = tableRegex.exec(script)) !== null) {
-    const tableName = tableMatch[1];
-    const fieldsDefinition = tableMatch[2];
-
-    const fields = [];
-    let fieldMatch;
-    while ((fieldMatch = fieldRegex.exec(fieldsDefinition)) !== null) {
-      fields.push({
-        name: fieldMatch[1],
-        type: fieldMatch[2],
-        constraint: fieldMatch[3] || '',
-      });
-    }
-
-    tables.push({ name: tableName, fields });
-  }
-  return tables;
-}*/
 
 function isSQL(input) {
   const createTableRegex = /^\s*CREATE TABLE (?:\[.*\]\.)?\[.*\]\s*\(/i;
@@ -5491,7 +5567,7 @@ function refreshSQLFromContent(mssqlScript){
 function importsql(e){
 
   oncehints.hint("loadfromsqlfile");
-  var input = document.getElementById("filename");
+  var input = $("filename");
   if (input.file!=null || input.files[0]!=null)
   {
       var reader = new FileReader();
@@ -5506,7 +5582,7 @@ function importsql(e){
       reader.readAsText(input.files[0]);
   } else {
     //alert("Please choose a file before click loadfromfile button!")
-    var fil=document.getElementById("filename");
+    var fil=$("filename");
     e.activ=true;
     fil.click();
   }
