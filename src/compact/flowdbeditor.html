@@ -2598,6 +2598,15 @@ function editTableCopy(div){
 //endregion
 
 function PastePanel(e){
+  const activeElement = document.activeElement;
+  const apikeyField = document.getElementById('api-key');
+
+  if (activeElement == apikeyField) {
+      // Hagyományos beillesztés végrehajtása
+      return true;
+  }
+
+
   if (stateEdit) return;
   e.preventDefault();
   var content="";
@@ -4351,7 +4360,7 @@ function AIHelp(lang="en"){
 
 
 var startedAI=false;
-function AI(){  
+async function AI(){  
   AIHelp();
   if (startedAI) return;
   startedAI=true;
@@ -4370,18 +4379,30 @@ function AI(){
   recognition.interimResults = true;
   recognition.maxAlternatives = 1;
 
-	recognition.addEventListener('result', e => {
+	recognition.addEventListener('result', async e => {
 		const speechTotext = Array.from(e.results)
 			.map(result => result[0])
 			.map(result => result.transcript)
 			.join('');
 			
 			if (e.results[0].isFinal) {
-        robot(speechTotext);
+        const openai = await queryOpenAI(speechTotext)
+        if (openai=="") {
+          robot(speechTotext);
+        }else{
+          Aopenai=openai.split("|")
+          Aopenai.forEach( e => {
+
+          })
+        }
 			}
 	});
 
-	recognition.addEventListener('end', recognition.start);
+  recognition.addEventListener('end', () => {
+    if (startedAI) {
+      recognition.start();
+    }
+  });
   recognition.start();
 }
 
@@ -4516,10 +4537,7 @@ function setApiKey() {
 
 const url = "https://api.openai.com/v1/chat/completions";
 
-const headers = {
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${apiKey}`
-};
+
 const initialSystemMessage = {
     role: "system",
     content: `A user szövege alapján az alábbi csoportokba sorolod a megkapott szöveget hasonlóság alapján. A listából adsz vissza elemeket, a %s jelet kicseréled egy oda leginkább illeszkedő angol szóra a %i jelet számra. Más szöveget semmiféleképpen. Kérdésekre nem válaszolsz. A listaelemeket egymás után teheted | jellel elválasztva ha több lista elemmel tudod leírni a user kérését. A listában zárójelben fontos megjegyzések vannak az adott listaelemre. A táblák és mezők neveit csak angolul írhatod vagy ékezetek nélkül!
@@ -4566,7 +4584,7 @@ async function queryOpenAI(userText) {
     conversationHistory.push({ role: "user", content: userText });
 
     const data = {
-        model: "gpt-4",
+        model: "gpt-4o",
         messages: conversationHistory,
         max_tokens: 150,
         n: 1,
@@ -4574,6 +4592,10 @@ async function queryOpenAI(userText) {
         temperature: 0.7
     };
 
+    const headers = {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`
+    };
     try {
         const response = await fetch(url, {
             method: "POST",
@@ -4586,7 +4608,8 @@ async function queryOpenAI(userText) {
         }
 
         const json = await response.json();
-        const assistantReply = json.choices[0].message.content.trim();
+        let assistantReply = json.choices[0].message.content.trim();
+        assistantReply = assistantReply.replace(/%s/g, "Unknown").replace(/%i/g, "integer").replace(";","").trim();
 
         conversationHistory.push({ role: "assistant", content: assistantReply });
 
@@ -4596,10 +4619,12 @@ async function queryOpenAI(userText) {
             conversationHistory = [initialSystemMessage, { role: "assistant", content: summary }];
         }
 
+        
+
         return assistantReply;
     } catch (error) {
         console.error("Error querying OpenAI API:", error);
-        return null;
+        return "";
     }
 }
 
