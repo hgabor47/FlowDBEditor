@@ -489,11 +489,13 @@
             a.style.height="3.7rem";
         }
         function blur1(){
+          /*
             var but=$("flowdbload");
             if (but.activ){
                 //$("help").innerHTML="blur";
                 FlowDBLoad(but);
             }
+                */
         }
         window.onload=function(){            
             try{
@@ -618,7 +620,7 @@
       <div class="head">
         <span class="display-5" >FlowDBEditor4</span><b id="vers"></b><i>(C)GaborHorvath</i>
         <span id="api-key-panel">
-          <input type="password" id="api-key" placeholder="OpenAI API key for voice">
+          <input type="text" id="api-key" placeholder="OpenAI API key for voice" autocomplete="off" autofill="off" >
           <button onclick="setApiKey()">Set</button>
         </span>  
     | <i><a target="_blank" href="https://chat.openai.com/g/g-LARFlw7Kf-flowdbeditor-generator">Generate via <img src="data:image/png;base64,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"></a></i><span id="moreinfo"></span>
@@ -667,6 +669,18 @@
     <script src="./flowdbeditor2.js"></script>
     <!--Codepen insert point , delete line below-->
     <script>
+
+
+var apiKey = '';
+function setApiKey() {
+    apiKey = $("api-key").value;
+    $("api-key-panel").style.display="None";
+}
+const url = "https://api.openai.com/v1/chat/completions";
+// whispercost per minute
+// commandcost per token
+costs = {"whisper":0,"command":0,"whispercost":0.006,"commandcostin":5/1000000,"commandcostout":15/1000000}
+
 /*jshint esversion: 6 */
 /* FlowDBEditor content can load from (maybe automatically)
     GET parameter, 
@@ -3645,33 +3659,52 @@ function FlowDBSave(linknode) {
 }
 
 function FlowDBLoad(e) {
-  /*if (!e.activ){
-    alert("Please wait the autoload!");
-    return;
-  }*/
-
   oncehints.hint("loadfromfile");
-  var input = $("filename");
-  if (input.file!=null || input.files[0]!=null)
-  {
-      var reader = new FileReader();
-      reader.onload = function(){
-        var source = reader.result;        
-        //alert(source.substring(0, 200));
-        localStorage.setItem("flowdbeditor",source);
-        Load();
-        input.form.reset();        
-        e.activ=false;
-        console.log(source.substring(0, 200));
-      };          
-      reader.readAsText(input.files[0]);
-  } else {
-    //alert("Please choose a file before click loadfromfile button!")
-    var fil=$("filename");
-    e.activ=true;
-    fil.click();
+  var input = document.getElementById("filename");
+
+  function readFileAsync(file) {
+    return new Promise((resolve, reject) => {
+      let reader = new FileReader();
+
+      reader.onload = function(event) {
+        resolve(event.target.result);
+      };
+
+      reader.onerror = function(err) {
+        reject(err);
+      };
+
+      reader.readAsText(file);
+    });
   }
-  
+
+  function handleFileSelect() {
+    return new Promise((resolve, reject) => {
+      input.onchange = (event) => {
+        if (input.files.length > 0) {
+          resolve(input.files[0]);
+        } else {
+          reject(new Error("No file selected"));
+        }
+      };
+
+      input.click();
+    });
+  }
+
+  handleFileSelect()
+    .then(file => readFileAsync(file))
+    .then(source => {
+      localStorage.setItem("flowdbeditor", source);
+      Load();
+      input.form.reset();
+      e.activ = false;
+      console.log(source.substring(0, 200));
+    })
+    .catch(err => {
+      console.error("File selection or reading failed", err);
+      e.activ = true;
+    });
 }
 
 function FlowDBCopy(e){ 
@@ -4358,6 +4391,225 @@ function AIHelp(lang="en"){
   aiul.appendChild(t);  
 }
 
+const rate = 16000;
+const puffer=256;
+const MIN_SILENCE_DURATION = 0.2; // minimum szünet hossza másodpercben
+const SILENCE_THRESHOLD = 0.072; // szünet küszöbértéke
+function startWhisper(fuggv){
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const input = audioContext.createMediaStreamSource(stream);
+                // Bandpass szűrő
+                const bandpassFilter = audioContext.createBiquadFilter();
+                bandpassFilter.type = 'bandpass';
+                bandpassFilter.frequency.value = 2400; // Közép frekvencia
+                bandpassFilter.Q.value = 0.7; // Minél nagyobb Q, annál keskenyebb a sáv
+
+                input.connect(bandpassFilter);
+
+                // Dynamics Compressor Node (Noise Gate)
+                const dynamicsCompressor = audioContext.createDynamicsCompressor();
+                dynamicsCompressor.threshold.setValueAtTime(-50, audioContext.currentTime); // Threshold
+                dynamicsCompressor.knee.setValueAtTime(40, audioContext.currentTime); // Knee
+                dynamicsCompressor.ratio.setValueAtTime(12, audioContext.currentTime); // Ratio
+                dynamicsCompressor.attack.setValueAtTime(0.005, audioContext.currentTime); // Attack
+                dynamicsCompressor.release.setValueAtTime(0.1, audioContext.currentTime); // Release
+
+                bandpassFilter.connect(dynamicsCompressor);
+
+                // Script Processor Node
+                const bufferSize = puffer; // 0.2 másodpercnyi minta 16,000 Hz-en
+                const processor = audioContext.createScriptProcessor(bufferSize, 1, 1);
+
+
+                let chunks = [];
+                let currentChunk = [];
+                let silenceStart = null;
+                let isCurrentChunkSilent = true;
+
+
+
+                function checkSilence(dataArray) {
+                    let sum = 0;
+                    for (let i = 0; i < dataArray.length; i++) {
+                        sum += Math.abs(dataArray[i]);
+                    }
+                    const average = sum / dataArray.length;
+                    return average < SILENCE_THRESHOLD;
+                }
+
+                function resampleAudio(inputBuffer, fromSampleRate, toSampleRate) {
+                    const sampleRateRatio = fromSampleRate / toSampleRate;
+                    const newLength = Math.round(inputBuffer.length / sampleRateRatio);
+                    const result = new Float32Array(newLength);
+                    let offsetResult = 0;
+                    let offsetBuffer = 0;
+                    while (offsetResult < result.length) {
+                        const nextOffsetBuffer = Math.round((offsetResult + 1) * sampleRateRatio);
+                        let accum = 0, count = 0;
+                        for (let i = offsetBuffer; i < nextOffsetBuffer && i < inputBuffer.length; i++) {
+                            accum += inputBuffer[i];
+                            count++;
+                        }
+                        result[offsetResult] = accum / count;
+                        offsetResult++;
+                        offsetBuffer = nextOffsetBuffer;
+                    }
+                    return result;
+                }
+
+                processor.onaudioprocess = (e) => {
+                    const inputBuffer = e.inputBuffer.getChannelData(0);
+                    const resampledBuffer = resampleAudio(inputBuffer, audioContext.sampleRate, rate);
+                    const isSilent = checkSilence(resampledBuffer);
+
+                    if (isSilent) {
+                        currentChunk.push(...resampledBuffer);
+                        if (silenceStart === null) {
+                            silenceStart = audioContext.currentTime;
+                        } else if (audioContext.currentTime - silenceStart > MIN_SILENCE_DURATION) {
+                            if (currentChunk.length > 0) {
+                                chunks.push({ data: currentChunk, isSilence: isCurrentChunkSilent });
+                                currentChunk = [];
+                            }
+                            silenceStart = audioContext.currentTime;
+                            isCurrentChunkSilent = true;
+                        }
+                    } else {
+                        silenceStart = null;
+                        currentChunk.push(...resampledBuffer);
+                        isCurrentChunkSilent = false;
+                    }
+                };
+
+                lastresult = ""
+                async function recognise(chunks) {
+                    function floatTo16BitPCM(input) {
+                        const output = new Int16Array(input.length);
+                        for (let i = 0; i < input.length; i++) {
+                            const s = Math.max(-1, Math.min(1, input[i]));
+                            output[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+                        }
+                        return output;
+                    }
+
+                    function writeWAVHeader(view, sampleRate, numChannels, numSamples) {
+                        const blockAlign = numChannels * 2;
+                        const byteRate = sampleRate * blockAlign;
+
+                        /* RIFF identifier */
+                        view.setUint32(0, 1380533830, false);
+                        /* file length minus RIFF identifier length and file description length */
+                        view.setUint32(4, 36 + numSamples * 2, true);
+                        /* RIFF type */
+                        view.setUint32(8, 1463899717, false);
+                        /* format chunk identifier */
+                        view.setUint32(12, 1718449184, false);
+                        /* format chunk length */
+                        view.setUint32(16, 16, true);
+                        /* sample format (raw) */
+                        view.setUint16(20, 1, true);
+                        /* channel count */
+                        view.setUint16(22, numChannels, true);
+                        /* sample rate */
+                        view.setUint32(24, sampleRate, true);
+                        /* byte rate (sample rate * block align) */
+                        view.setUint32(28, byteRate, true);
+                        /* block align (channel count * bytes per sample) */
+                        view.setUint16(32, blockAlign, true);
+                        /* bits per sample */
+                        view.setUint16(34, 16, true);
+                        /* data chunk identifier */
+                        view.setUint32(36, 1684108385, false);
+                        /* data chunk length */
+                        view.setUint32(40, numSamples * 2, true);
+                    }
+
+                    const audioBuffers = chunks.map(chunk => new Float32Array(chunk.data));
+                    const flatArray = audioBuffers.reduce((acc, val) => acc.concat(Array.from(val)), []);
+                    const intData = floatTo16BitPCM(flatArray);
+
+                    const buffer = new ArrayBuffer(44 + intData.length * 2);
+                    const view = new DataView(buffer);
+                    
+                    writeWAVHeader(view, rate, 1, intData.length);
+                    
+                    for (let i = 0; i < intData.length; i++) {
+                        view.setInt16(44 + i * 2, intData[i], true);
+                    }
+
+                    const combinedBlob = new Blob([view], { type: 'audio/wav' });
+
+                    Save(combinedBlob);
+
+                    const formData = new FormData();
+                    formData.append('file', combinedBlob, 'audio.wav');
+                    formData.append('model', 'whisper-1');
+                    formData.append('language', 'hu');
+
+                    try {
+                        const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${apiKey}`
+                            },
+                            body: formData
+                        });
+                        const result = await response.json();
+                        if (response.ok) {
+                            if (result.text!=lastresult){
+                                lastresult=result.text
+                                if (fuggv) fuggv(result.text);
+                            }
+                            console.log('Eredmény:', result.text);
+                            
+                        } else {
+                            console.error('Hiba az átiratban:', result);
+                        }
+                    } catch (error) {
+                        console.error('Hiba az audio Whisper API-hoz való küldésekor:', error);
+                    }
+                }
+
+                dynamicsCompressor.connect(processor);
+                processor.connect(audioContext.destination);
+
+                const wordChunks = [];
+
+                let processing = false;
+
+                async function processChunks(chunks) {
+                    chunks.forEach(chunk => {
+                        if (!chunk.isSilence) {
+                            wordChunks.push(chunk);
+                        }
+                    });
+
+                    if (wordChunks.length > 0) {
+                        await recognise(wordChunks);
+                        wordChunks.length = 0;
+                    }
+                }
+
+
+                // Eseményfigyelő a chunk-ok elemzésére
+                setInterval(() => {
+                    if (chunks.length > 0 && !processing) {
+                        processing = true;
+                        processChunks(chunks);
+                        chunks = [];
+                        processing = false;                        
+                    }
+                }, 1000);
+
+            }).catch(err => {
+                console.error('Error accessing microphone: ', err);
+            });
+        };
+
+
+
+
 
 var startedAI=false;
 async function AI(){  
@@ -4365,45 +4617,71 @@ async function AI(){
   if (startedAI) return;
   startedAI=true;
 
-  window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
-  var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
-	const recognition = new SpeechRecognition();
-  /*
-  var grammar = '#JSGF V1.0; grammar flowbrick; public <flowbrick> = table | field | create | 1 | 2 | 3 | 4 | 5 | 7 | 8 | 9 | 10 | link | clear | select | hét ;'  ;
-  var speechRecognitionList = new SpeechGrammarList();
-  speechRecognitionList.addFromString(grammar, 1);
-  recognition.grammars = speechRecognitionList;
-  */
-  //recognition.lang = 'en-US';
-  recognition.lang = 'hu-HU';
-  recognition.interimResults = true;
-  recognition.maxAlternatives = 1;
-
-	recognition.addEventListener('result', async e => {
-		const speechTotext = Array.from(e.results)
-			.map(result => result[0])
-			.map(result => result.transcript)
-			.join('');
-			
-			if (e.results[0].isFinal) {
-        const openai = await queryOpenAI(speechTotext)
-        if (openai=="") {
+  if (apiKey!="")
+  {
+    async function addWhisperEvent(speechTotext)
+    {
+      const openai = await queryOpenAI(speechTotext)
+      if (!openai || openai=="") {
           robot(speechTotext);
-        }else{
+      }else{
           Aopenai=openai.split("|")
-          Aopenai.forEach( e => {
-
+          console.log(openai);
+          Aopenai.forEach( e => {       
+            e=e.trim()     
+            console.log(e);
+            let kod =  e.substring(0,2) 
+            openaicmd.forEach(cmd => {                
+                if (cmd[0] == kod) {                    
+                    console.log(kod)
+                    cmd[3](e);
+                }
+            });            
           })
-        }
-			}
-	});
+      }
+    }  
+    startWhisper(addWhisperEvent);
+  } 
+  else 
+  {
+      window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
+      var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
+      const recognition = new SpeechRecognition();
+      /*
+      var grammar = '#JSGF V1.0; grammar flowbrick; public <flowbrick> = table | field | create | 1 | 2 | 3 | 4 | 5 | 7 | 8 | 9 | 10 | link | clear | select | hét ;'  ;
+      var speechRecognitionList = new SpeechGrammarList();
+      speechRecognitionList.addFromString(grammar, 1);
+      recognition.grammars = speechRecognitionList;
+      */
+      //recognition.lang = 'en-US';
+      recognition.lang = 'hu-HU';
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
+      recognition.continuous = true; 
 
-  recognition.addEventListener('end', () => {
-    if (startedAI) {
+      recognition.addEventListener('result', async e => {
+        const speechTotext = Array.from(e.results)
+          .map(result => result[0])
+          .map(result => result.transcript)
+          .join('');
+          console.log(speechTotext);
+          
+          if (e.results[0].isFinal) {
+            robot(speechTotext);
+            if (startedAI) {
+              recognition.stop(); // Leállítjuk az aktuális felismerést          
+            }
+          }
+      });
+
+      recognition.addEventListener('end', () => {
+        if (startedAI) {
+          recognition.start();
+          console.log('SpeechTick');
+        }
+      });
       recognition.start();
-    }
-  });
-  recognition.start();
+  }
 }
 
 // groupid,voicecommand[,difference(0.1 =10%),HU or EN]
@@ -4528,60 +4806,98 @@ function SpeechToInputbox(command){
   }
 }
 
-var apiKey = "";
 
-function setApiKey() {
-    apiKey = $("api-key").value;
-    $("api-key-panel").style.display="None";
+function clearparam(params){
+  params=params.substring(3,params.length-1).trim()
+  let Ares = params.split("',");
+  for (let i = 0; i < Ares.length; i++) {
+    Ares[i] = Ares[i].replace(/'/g, "").trim();    
+  }
+  return Ares;
 }
 
-const url = "https://api.openai.com/v1/chat/completions";
+let openaicmd = [
+    ["10","","clear all tables",function() { Load('alma'); }],
+    ["11","('%newtablename')","create a new table by name",function(cmd) { 
+            SP_maketables(1); 
+            SP_renametable(1,"",1,clearparam(cmd)); 
+          }],
+    ["12","","Delete the active table",function(cmd) { 
+            SP_deletetable(5,command);
+    }],
+    ["13","('%activetable')","set active table by name",function(cmd) { 
+      t = ATables.SearchTableByName(clearparam(cmd)[0]);
+      if (t!=null)
+        t.Selected(); 
+    }],
+    ["14","('SELECTSYSMOUSE')", "set active table if no name by mouse cursor",function() { console.log("Az aktív tábla az egérmutatóval beállítva."); }],
+    ["15","('%newtablename')","change name of the active table",function() { console.log("Az aktív tábla neve megváltoztatva."); }],
+    
+    ["20","('%fieldname')","add a new field into the active table",function() { console.log("Új mező hozzáadva az aktív táblához."); }],
+    ["21","('%fieldname')","set the active field in the active table",function() { console.log("Az aktív mező beállítva az aktív táblában."); }],
+    ["22","('%newfieldname')","change the name of the active field", function() { console.log("Az aktív mező neve megváltoztatva."); }],
+    ["23","('%fieldlength')","change the length of the active field example: 1000",function() { console.log("Az aktív mező hossza megváltoztatva."); }],
+    ["24","('%newfieldtype')","change the type of the active field: integer/string/etc.",function() { console.log("Az aktív mező típusa megváltoztatva."); }],
+    ["25","('%isshowfield')", "Az adott mező megjelenik a kapcsolatok által vagy sem: 0 vagy 1",function() { console.log("A mező megjelenésének beállítása a kapcsolatok alapján."); }],
+    ["26","", "Delete the active field",function() { console.log("Az aktív mező törölve lett."); }],
+    
+    ["30","('%from','%to')","link two tables",function() { console.log("Két tábla összekapcsolva."); }],
+    ["31","('%from','%to')","delete link between two tables",function() { console.log("Kapcsolat törölve két tábla között."); }],
+    
+    ["40","('%size')", "set active table's width. size=0.5 or 2",function() { console.log("Az aktív tábla szélessége beállítva."); }],
+    ["42","","thank you", function() { console.log("Köszönöm."); }],
+    
+    ["50","","show description of the active table",function() { console.log("Az aktív tábla leírása megjelenítve."); }],
+    ["51","","show description of active field",function() { console.log("Az aktív mező leírása megjelenítve."); }],
+    ["52","","add new record of the active table",function() { console.log("Új rekord hozzáadva az aktív táblához."); }],
+    ["53","","exit",function() { console.log("Kilépés."); }],
+    ["54","","scroll down", function() { console.log("Görgetés lefelé."); }],
+    ["55","","scroll up", function() { console.log("Görgetés felfelé."); }],
+    ["60","(%color)","set color of the active field",function() { console.log("Az aktív mező színe beállítva."); }],
+    ["62","(%color)","set color of the active table",function() { console.log("Az aktív tábla színe beállítva."); }],
+    ["70","", "#irreleváns beszélgetés esetén",function() { console.log("Nem releváns beszélgetés."); }]
+];
 
 
-const initialSystemMessage = {
+let initialSystemMessage = {
     role: "system",
-    content: `A user szövege alapján az alábbi csoportokba sorolod a megkapott szöveget hasonlóság alapján. A listából adsz vissza elemeket, a %s jelet kicseréled egy oda leginkább illeszkedő angol szóra a %i jelet számra. Más szöveget semmiféleképpen. Kérdésekre nem válaszolsz. A listaelemeket egymás után teheted | jellel elválasztva ha több lista elemmel tudod leírni a user kérését. A listában zárójelben fontos megjegyzések vannak az adott listaelemre. A táblák és mezők neveit csak angolul írhatod vagy ékezetek nélkül!
+    content: `Adatbázis struktúra készítő vagy. Speciális utasításnyelvet használsz az alábbi parancslista szerint.
+A user utasításait az parancslistában található parancsoknak próbálod megfeleltetni. Ebben segítség a listában található # jel utáni megjegyzés.
+Kizárólag a listából adsz vissza parancskódot, a % helyőrzőket kicseréled egy oda leginkább illeszkedő angol szóra vagy számra. 
+A visszaadott összetett utasításra példa: 11('company') | 11('people') | 30('company','people') | 11('people') | 20('name') | 21('name') | 60('red)'
+Más szöveget semmiféleképpen nem adsz és kérdésekre sem válaszolsz. 
+A parancsokat  egymás után teheted | jellel elválasztva ha több elemmel tudod leírni a user kérését. 
+A listában # jellel kezdődő rész csak részedre fontos megjegyzés , de nem tartozik a parancshoz azt nem adhatod vissza.
+A táblák és mezők neveit csak angolul írhatod vagy ékezetek nélkül!
 
-clear all tables;
-create a table %s; (%s is the table name in English)
-delete table;
-select new table; (select the last table)
-select table; (make the table under the cursor active)
-add %s field %s; (first %s = integer/string/etc., second %s = field name in English)
-connect from %s to %s;
-double size; (table width)
-half size; (table width)
-thank;
-data entry;
-hide table;
-show table %s;
-show datasheet of %s table;
-show datasheet of %s field;
-new record;
-exit;
-scroll down;
-scroll up;
-tablename;
-width;
-color;
-description;
-readonly;
-writeable;
-fieldname;
-length;
-type;
-display;
-no display;
-delete link;
-delete field;`
-};
+Parancslista:
+`};
+
+openaicmd.forEach(t => {
+    initialSystemMessage.content += t[0]+t[1];
+    if (t[2]) {
+        initialSystemMessage.content += `# ${t[2]}`;
+    }
+    initialSystemMessage.content += "\n";
+});
+
+
 
 let conversationHistory = [initialSystemMessage];
 
 async function queryOpenAI(userText) {
     if (apiKey=="") return ""
-
-    conversationHistory.push({ role: "user", content: userText });
+        
+    let strtable = "no selected table!";
+    if (SelectedTable!=null){
+      strtable = "Selected table is "+SelectedTable.name+"!";
+    }
+    let stredit = "Adatfelviteli módban vagyunk."
+    if (!stateEdit ) {
+      stredit=""
+    }
+    
+    conversationHistory.push({ role: "user", content: strtable+stredit+userText });
 
     const data = {
         model: "gpt-4o",
@@ -4597,31 +4913,24 @@ async function queryOpenAI(userText) {
       "Authorization": `Bearer ${apiKey}`
     };
     try {
+        
         const response = await fetch(url, {
             method: "POST",
             headers: headers,
             body: JSON.stringify(data)
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+        if (response.ok) {
+          const json = await response.json();
+          let assistantReply = json.choices[0].message.content.trim();
+          assistantReply = assistantReply.replace(/%s/g, "Unknown").replace(/%i/g, "integer").replace(";","").trim();
+          conversationHistory.push({ role: "assistant", content: assistantReply });
+          if (conversationHistory.length > 10) {
+              const summary = await summarizeConversation(conversationHistory);
+              conversationHistory = [initialSystemMessage, { role: "assistant", content: summary }];
+          }
+          return assistantReply;
         }
-
-        const json = await response.json();
-        let assistantReply = json.choices[0].message.content.trim();
-        assistantReply = assistantReply.replace(/%s/g, "Unknown").replace(/%i/g, "integer").replace(";","").trim();
-
-        conversationHistory.push({ role: "assistant", content: assistantReply });
-
-        // Összefoglalás készítése
-        if (conversationHistory.length > 10) {
-            const summary = await summarizeConversation(conversationHistory);
-            conversationHistory = [initialSystemMessage, { role: "assistant", content: summary }];
-        }
-
-        
-
-        return assistantReply;
     } catch (error) {
         console.error("Error querying OpenAI API:", error);
         return "";
@@ -4632,13 +4941,17 @@ async function summarizeConversation(conversationHistory) {
     const summaryPrompt = "Summarize the following conversation: " + conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join("\n");
     
     const summaryData = {
-        model: "gpt-4",
+        model: "gpt-4o",
         messages: [{ role: "user", content: summaryPrompt }],
         max_tokens: 100,
         n: 1,
         stop: null,
         temperature: 0.7
     };
+    const headers = {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`
+    };    
 
     try {
         const response = await fetch(url, {
@@ -4647,12 +4960,10 @@ async function summarizeConversation(conversationHistory) {
             body: JSON.stringify(summaryData)
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+        if (response.ok) {
+          const json = await response.json();
+          return json.choices[0].message.content.trim();
         }
-
-        const json = await response.json();
-        return json.choices[0].message.content.trim();
     } catch (error) {
         console.error("Error summarizing conversation:", error);
         return null;
