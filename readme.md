@@ -5,6 +5,9 @@ Lightweight graphical database schema editor. Create database in air & use in ai
 Working copy on Codepen.io (https://codepen.io/hgabor47/pen/XqezrX)
 Voice recognition (voice commands) in Hungarian and English
 
+Latest
+------
+Use the latest version form the src/compact  
 
 Usage
 -----
